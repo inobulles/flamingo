@@ -9,6 +9,7 @@
 #include <regex.h>
 
 typedef enum {
+	FLAMINGO_TOKEN_KIND_NOT_TERMINATED,
 	FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD,
 
 	FLAMINGO_TOKEN_KIND_IDENTIFIER,
@@ -19,7 +20,7 @@ typedef enum {
 
 	FLAMINGO_TOKEN_KIND_LITERAL_DEC,
 	FLAMINGO_TOKEN_KIND_LITERAL_BOOL,
-	FLAMINGO_TOKEN_KIND_LITERAL_STRING,
+	FLAMINGO_TOKEN_KIND_LITERAL_STR,
 
 	// statements
 
@@ -54,7 +55,7 @@ typedef struct {
 
 	// state for lexer
 
-	bool tokens_not_understood;
+	bool tokens_not_understood; // TODO still necessary?
 
 	size_t line;
 	size_t col;

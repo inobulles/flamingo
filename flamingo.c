@@ -136,10 +136,11 @@ static int lex(flamingo_t* flamingo, char* src) {
 
 	bool in_tok = false;
 	bool in_comment = false;
+	bool in_str = false;
 
 	char* tok;
 
-	for (; *src > 0; src++, lexer->col++) {
+	for (char prev = '\0'; *src > 0; prev = *src++, lexer->col++) {
 		// don't wanna deal with any CRLF bullshit
 
 		if (*src == '\r') {
@@ -151,8 +152,9 @@ static int lex(flamingo_t* flamingo, char* src) {
 		bool const is_space = *src == ' ' || *src == '\t' || *src == '\v';
 		bool const is_newline = *src == '\n';
 		bool const is_comment = *src == '#';
+		bool const is_quote = *src == '"' && prev != '\\';
 
-		if (is_space || is_newline || is_comment) {
+		if (!in_str && (is_space || is_newline || is_comment || is_quote)) {
 			*src = '\0';
 
 			if (in_tok) {
@@ -171,6 +173,10 @@ static int lex(flamingo_t* flamingo, char* src) {
 				in_comment = true;
 			}
 
+			if (is_quote) {
+				in_str = !in_str;
+			}
+
 			continue;
 		}
 
@@ -180,41 +186,62 @@ static int lex(flamingo_t* flamingo, char* src) {
 			continue;
 		}
 
-		// check for token
+		// add token if we've just entered a new one
 
-		if (in_tok == true) {
-			continue;
-		}
-
-		if (in_tok == false) {
-			in_tok = true;
-			tok = src;
-		}
-
-		// add token
-
-		lexer->tokens = realloc(lexer->tokens, (lexer->token_count + 1) * sizeof *lexer->tokens);
-		flamingo_token_t* const token = &lexer->tokens[lexer->token_count++];
-		token->str = tok;
-
-		token->line = lexer->line;
-		token->col = lexer->col;
-	}
-
-	// if there were tokens not understood, return an error
-	// TODO can this be done straight in the "understand" function and reduce all this complexity? I did it like this initially because tokens weren't already null-terminated being passed to "understand", but not they are, so I don't know if this is still relevant
-
-	if (lexer->tokens_not_understood) {
-		for (size_t i = 0; i < lexer->token_count; i++) {
-			flamingo_token_t* const tok = &lexer->tokens[i];
-
-			if (tok->kind != FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
-				continue;
+		if (in_tok != true) {
+			if (in_tok == false) {
+				in_tok = true;
+				tok = src;
 			}
 
-			error(flamingo, "unrecognized token: %s", tok->str);
+			// add token
+
+			lexer->tokens = realloc(lexer->tokens, (lexer->token_count + 1) * sizeof *lexer->tokens);
+			flamingo_token_t* const token = &lexer->tokens[lexer->token_count++];
+			token->str = tok;
+
+			token->kind = FLAMINGO_TOKEN_KIND_NOT_TERMINATED;
+			token->line = lexer->line;
+			token->col = lexer->col;
 		}
 
+		// if is quote and we're in a string, terminate the string
+
+		if (is_quote) {
+			*src = '\0';
+			lexer->tokens[lexer->token_count - 1].kind = FLAMINGO_TOKEN_KIND_LITERAL_STR;
+
+			in_str = false;
+			in_tok = false;
+
+			continue;
+		}
+	}
+
+	// check for any issues
+
+	int issues = 0;
+
+	if (in_str) {
+		issues = error(flamingo, "unterminated string");
+	}
+
+	for (size_t i = 0; i < lexer->token_count; i++) {
+		flamingo_token_t* const tok = &lexer->tokens[i];
+
+		lexer->line = tok->line;
+		lexer->col = tok->col;
+
+		if (tok->kind == FLAMINGO_TOKEN_KIND_NOT_TERMINATED) {
+			issues = error(flamingo, "unterminated token");
+		}
+
+		if (tok->kind == FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
+			issues = error(flamingo, "unrecognized token: %s", tok->str);
+		}
+	}
+
+	if (issues < 0) {
 		return -1;
 	}
 
