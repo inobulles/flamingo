@@ -140,6 +140,15 @@ static int lex(flamingo_t* flamingo, char* src) {
 
 	char* tok;
 
+#define ADD(_kind) \
+		lexer->tokens = realloc(lexer->tokens, (lexer->token_count + 1) * sizeof *lexer->tokens); \
+		flamingo_token_t* const token = &lexer->tokens[lexer->token_count++]; \
+		token->str = tok; \
+		\
+		token->kind = (_kind); \
+		token->line = lexer->line; \
+		token->col = lexer->col;
+
 	for (char prev = '\0'; *src > 0; prev = *src++, lexer->col++) {
 		// don't wanna deal with any CRLF bullshit
 
@@ -147,14 +156,41 @@ static int lex(flamingo_t* flamingo, char* src) {
 			return error(flamingo, "CR character not supported");
 		}
 
-		// check for whitespace, newline, or start of comment
+		// check if we're in a string
+
+		bool const is_quote = *src == '"' && prev != '\\';
+
+		if (in_str) {
+			if (is_quote) {
+				*src = '\0';
+				lexer->tokens[lexer->token_count - 1].kind = FLAMINGO_TOKEN_KIND_LITERAL_STR;
+
+				in_str = false;
+				in_tok = false;
+			}
+
+			continue;
+		}
+
+		// check for single-character tokens
+
+		flamingo_token_kind_t single_char_kind = FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD;
+
+		if (*src == '(') {
+			single_char_kind = FLAMINGO_TOKEN_KIND_LPAREN;
+		}
+
+		else if (*src == ')') {
+			single_char_kind = FLAMINGO_TOKEN_KIND_RPAREN;
+		}
+
+		// check for whitespace, newline, start of comment, or start of string
 
 		bool const is_space = *src == ' ' || *src == '\t' || *src == '\v';
 		bool const is_newline = *src == '\n';
 		bool const is_comment = *src == '#';
-		bool const is_quote = *src == '"' && prev != '\\';
 
-		if (!in_str && (is_space || is_newline || is_comment || is_quote)) {
+		if (is_space || is_newline || is_comment || is_quote || single_char_kind != FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
 			*src = '\0';
 
 			if (in_tok) {
@@ -174,7 +210,13 @@ static int lex(flamingo_t* flamingo, char* src) {
 			}
 
 			if (is_quote) {
-				in_str = !in_str;
+				in_str = true;
+				tok = src + 1;
+				ADD(FLAMINGO_TOKEN_KIND_NOT_TERMINATED)
+			}
+
+			if (single_char_kind != FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
+				ADD(single_char_kind);
 			}
 
 			continue;
@@ -188,34 +230,16 @@ static int lex(flamingo_t* flamingo, char* src) {
 
 		// add token if we've just entered a new one
 
-		if (in_tok != true) {
-			if (in_tok == false) {
-				in_tok = true;
-				tok = src;
-			}
-
-			// add token
-
-			lexer->tokens = realloc(lexer->tokens, (lexer->token_count + 1) * sizeof *lexer->tokens);
-			flamingo_token_t* const token = &lexer->tokens[lexer->token_count++];
-			token->str = tok;
-
-			token->kind = FLAMINGO_TOKEN_KIND_NOT_TERMINATED;
-			token->line = lexer->line;
-			token->col = lexer->col;
-		}
-
-		// if is quote and we're in a string, terminate the string
-
-		if (is_quote) {
-			*src = '\0';
-			lexer->tokens[lexer->token_count - 1].kind = FLAMINGO_TOKEN_KIND_LITERAL_STR;
-
-			in_str = false;
-			in_tok = false;
-
+		if (in_tok == true) {
 			continue;
 		}
+
+		if (in_tok == false) {
+			in_tok = true;
+			tok = src;
+		}
+
+		ADD(FLAMINGO_TOKEN_KIND_NOT_TERMINATED);
 	}
 
 	// check for any issues
@@ -307,7 +331,7 @@ int flamingo_run(flamingo_t *flamingo) {
 
 	for (size_t i = 0; i < flamingo->lexer.token_count; i++) {
 		flamingo_token_t* const tok = &flamingo->lexer.tokens[i];
-		printf("%s:%zu:%zu: %s\n", __func__, tok->line, tok->col, tok->str);
+		printf("%s:%zu:%zu: %s %s\n", __func__, tok->line, tok->col, flamingo_token_kind_t_strs[tok->kind], tok->str);
 	}
 
 	fprintf(stderr, "%s: not implemented (actually run shit)\n", __func__);

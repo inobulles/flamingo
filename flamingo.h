@@ -8,24 +8,31 @@
 #include <stdint.h>
 #include <regex.h>
 
-typedef enum {
-	FLAMINGO_TOKEN_KIND_NOT_TERMINATED,
-	FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD,
+#define FLAMINGO_GEN_ENUM(NAME) NAME,
+#define FLAMINGO_GEN_STRS(STR) #STR,
 
-	FLAMINGO_TOKEN_KIND_IDENTIFIER,
-	FLAMINGO_TOKEN_KIND_DELIMITER,
-	FLAMINGO_TOKEN_KIND_OPERATOR,
+#define FLAMINGO_ENUM(T) \
+	typedef enum { T##_ENUM(FLAMINGO_GEN_ENUM) } T; \
+	__attribute__((unused)) static char const* const T##_strs[] = { T##_ENUM(FLAMINGO_GEN_STRS) };
 
-	// literals
+#define flamingo_token_kind_t_ENUM(_) \
+	_(FLAMINGO_TOKEN_KIND_NOT_TERMINATED) \
+	_(FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) \
+	_(FLAMINGO_TOKEN_KIND_IDENTIFIER) \
+	_(FLAMINGO_TOKEN_KIND_DELIMITER) \
+	_(FLAMINGO_TOKEN_KIND_OPERATOR) \
+	/* delimiters */ \
+	_(FLAMINGO_TOKEN_KIND_LPAREN) \
+	_(FLAMINGO_TOKEN_KIND_RPAREN) \
+	/* literals */ \
+	_(FLAMINGO_TOKEN_KIND_LITERAL_DEC) \
+	_(FLAMINGO_TOKEN_KIND_LITERAL_BOOL) \
+	_(FLAMINGO_TOKEN_KIND_LITERAL_STR) \
+	/* statements */ \
+	_(FLAMINGO_TOKEN_KIND_IMPORT) \
+	/* end */
 
-	FLAMINGO_TOKEN_KIND_LITERAL_DEC,
-	FLAMINGO_TOKEN_KIND_LITERAL_BOOL,
-	FLAMINGO_TOKEN_KIND_LITERAL_STR,
-
-	// statements
-
-	FLAMINGO_TOKEN_KIND_IMPORT,
-} flamingo_token_kind_t;
+FLAMINGO_ENUM(flamingo_token_kind_t)
 
 typedef struct {
 	flamingo_token_kind_t kind;
