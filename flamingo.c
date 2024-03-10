@@ -4,6 +4,7 @@
 #include "flamingo.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -54,6 +55,7 @@ static int compile_regexes(flamingo_t* flamingo) {
 	lexer->regexes_compiled = true;
 
 	assert(regcomp(&lexer->re_identifier, "^[_A-z][_A-z0-9]*$", REG_EXTENDED) == 0);
+	assert(regcomp(&lexer->re_dec, "^[_0-9]+$", REG_EXTENDED) == 0);
 
 	return 0;
 }
@@ -66,13 +68,21 @@ static void understand(flamingo_t* flamingo, flamingo_token_t* tok) {
 
 	// exact matches
 
-#define MATCH(_str, _kind) \
+#define MATCH(_str, _kind, val_member, _val) \
 	if (strcmp(str, _str) == 0) { \
 		tok->kind = (_kind); \
+		tok->val.val_member = (_val); \
 		return; \
 	}
 
-	MATCH("import", FLAMINGO_TOKEN_KIND_IMPORT);
+	// literals
+
+	MATCH("true", FLAMINGO_TOKEN_KIND_LITERAL_BOOL, bool_, true);
+	MATCH("false", FLAMINGO_TOKEN_KIND_LITERAL_BOOL, bool_, false);
+
+	// statements
+
+	MATCH("import", FLAMINGO_TOKEN_KIND_IMPORT, none, NULL);
 
 #undef MATCH
 
@@ -85,6 +95,7 @@ static void understand(flamingo_t* flamingo, flamingo_token_t* tok) {
 	}
 
 	MATCH(identifier, FLAMINGO_TOKEN_KIND_IDENTIFIER);
+	MATCH(dec, FLAMINGO_TOKEN_KIND_LITERAL_DEC);
 
 #undef MATCH
 
@@ -179,21 +190,39 @@ static int lex(flamingo_t* flamingo, char* src) {
 	// if there were tokens not understood, return an error
 	// TODO can this be done straight in the "understand" function and reduce all this complexity? I did it like this initially because tokens weren't already null-terminated being passed to "understand", but not they are, so I don't know if this is still relevant
 
-	if (!lexer->tokens_not_understood) {
-		return 0;
+	if (lexer->tokens_not_understood) {
+		for (size_t i = 0; i < lexer->token_count; i++) {
+			flamingo_token_t* const tok = &lexer->tokens[i];
+
+			if (tok->kind != FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
+				continue;
+			}
+
+			error(flamingo, "unrecognized token: %s", tok->str);
+		}
+
+		return -1;
 	}
+
+	// go through literal tokens and parse their values
 
 	for (size_t i = 0; i < lexer->token_count; i++) {
 		flamingo_token_t* const tok = &lexer->tokens[i];
 
-		if (tok->kind != FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD) {
-			continue;
-		}
+		if (tok->kind == FLAMINGO_TOKEN_KIND_LITERAL_DEC) {
+			errno = 0;
+			tok->val.int_ = strtoll(tok->str, NULL, 10);
 
-		error(flamingo, "unrecognized token: %s", tok->str);
+			assert(errno != EINVAL);
+			
+			if (errno == ERANGE) {
+				error(flamingo, "integer literal out of range: %s", tok->str);
+				return -1;
+			}
+		}
 	}
 
-	return -1;
+	return 0;
 }
 
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src) {

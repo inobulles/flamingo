@@ -3,17 +3,23 @@
 
 #pragma once
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <regex.h>
 
 typedef enum {
 	FLAMINGO_TOKEN_KIND_NOT_UNDERSTOOD,
 
 	FLAMINGO_TOKEN_KIND_IDENTIFIER,
-	FLAMINGO_TOKEN_KIND_LITERAL,
 	FLAMINGO_TOKEN_KIND_DELIMITER,
 	FLAMINGO_TOKEN_KIND_OPERATOR,
+
+	// literals
+
+	FLAMINGO_TOKEN_KIND_LITERAL_DEC,
+	FLAMINGO_TOKEN_KIND_LITERAL_BOOL,
+	FLAMINGO_TOKEN_KIND_LITERAL_STRING,
 
 	// statements
 
@@ -24,6 +30,13 @@ typedef struct {
 	flamingo_token_kind_t kind;
 	char* str;
 	size_t line, col;
+
+	union {
+		void* none;
+		int64_t int_;
+		bool bool_;
+		char* str;
+	} val;
 } flamingo_token_t;
 
 typedef struct {
@@ -37,6 +50,7 @@ typedef struct {
 	bool regexes_compiled;
 
 	regex_t re_identifier;
+	regex_t re_dec;
 
 	// state for lexer
 
