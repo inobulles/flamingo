@@ -135,6 +135,8 @@ static int lex(flamingo_t* flamingo, char* src) {
 	size_t const src_len = strlen(src);
 
 	bool in_tok = false;
+	bool in_comment = false;
+
 	char* tok;
 
 	for (; *src > 0; src++, lexer->col++) {
@@ -144,12 +146,13 @@ static int lex(flamingo_t* flamingo, char* src) {
 			return error(flamingo, "CR character not supported");
 		}
 
-		// check for whitespace or newline
+		// check for whitespace, newline, or start of comment
 
 		bool const is_space = *src == ' ' || *src == '\t' || *src == '\v';
 		bool const is_newline = *src == '\n';
+		bool const is_comment = *src == '#';
 
-		if (is_space || is_newline) {
+		if (is_space || is_newline || is_comment) {
 			*src = '\0';
 
 			if (in_tok) {
@@ -159,10 +162,21 @@ static int lex(flamingo_t* flamingo, char* src) {
 			in_tok = false;
 
 			if (is_newline) {
+				in_comment = false;
 				lexer->line++;
 				lexer->col = 0;
 			}
 
+			if (is_comment) {
+				in_comment = true;
+			}
+
+			continue;
+		}
+
+		// ignore if in comment
+
+		if (in_comment) {
 			continue;
 		}
 
