@@ -1,7 +1,7 @@
 // This Source Form is subject to the terms of the AQUA Software License, v. 1.0.
 // Copyright (c) 2024 Aymeric Wibo
 
-#include "flamingo.h"
+#include "flamingo/flamingo.h"
 
 #include <assert.h>
 #include <errno.h>
