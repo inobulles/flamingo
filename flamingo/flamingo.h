@@ -14,13 +14,20 @@ typedef int (*flamingo_cb_call_t) (flamingo_t* flamingo, char* name, void* data)
 struct flamingo_t {
 	char const* progname;
 
+	char* src;
+	size_t src_size;
+
 	char err[256];
 	bool errors_outstanding;
 
 	flamingo_cb_call_t cb_call;
+
+	// tree-sitter stuff
+
+	void* ts_state;
 };
 
-int flamingo_create(flamingo_t* flamingo, char const* progname, char* src);
+int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size);
 void flamingo_destroy(flamingo_t* flamingo);
 
 char* flamingo_err(flamingo_t* flamingo);

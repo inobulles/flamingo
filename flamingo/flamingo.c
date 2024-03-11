@@ -12,6 +12,12 @@
 #include <stdio.h>
 #include <string.h>
 
+typedef struct {
+	TSParser* parser;
+	TSTree* tree;
+	TSNode root;
+} ts_state_t;
+
 extern TSLanguage const* tree_sitter_flamingo(void);
 
 __attribute__((format(printf, 2, 3)))
@@ -47,33 +53,65 @@ static int error(flamingo_t* flamingo, char const* fmt, ...) {
 	return -1;
 }
 
-int flamingo_create(flamingo_t* flamingo, char const* progname, char* src) {
+int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size) {
+	flamingo->progname = progname;
+	flamingo->errors_outstanding = false;
+
+	flamingo->src = src;
+	flamingo->src_size = src_size;
+
+	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
+
+	if (ts_state == NULL) {
+		return error(flamingo, "failed to allocate memory for Tree-sitter state");
+	}
+
 	TSParser* const parser = ts_parser_new();
 
 	if (parser == NULL) {
-		return error(flamingo, "failed to create Tree-sitter parser");
+		error(flamingo, "failed to create Tree-sitter parser");
+		goto err_ts_parser_new;
 	}
+
+	ts_state->parser = parser;
 
 	TSLanguage const* const lang = tree_sitter_flamingo();
 	ts_parser_set_language(parser, lang);
 
-	TSTree* const tree = ts_parser_parse_string(parser, NULL, src, strlen(src));
+	TSTree* const tree = ts_parser_parse_string(parser, NULL, src, src_size);
 
 	if (tree == NULL) {
-		ts_parser_delete(parser);
-		return error(flamingo, "failed to parse source");
+		error(flamingo, "failed to parse source");
+		goto err_ts_parser_parse_string;
 	}
 
-	TSNode const root = ts_tree_root_node(tree);
-	printf("%s\n", ts_node_string(root));
+	ts_state->tree = tree;
+	ts_state->root = ts_tree_root_node(tree);
 
-	ts_parser_delete(parser);
-	ts_tree_delete(tree);
+	flamingo->ts_state = ts_state;
 
 	return 0;
+
+	ts_tree_delete(tree);
+
+err_ts_parser_parse_string:
+
+	ts_parser_delete(parser);
+
+err_ts_parser_new:
+
+	free(ts_state);
+
+	return -1;
 }
 
 void flamingo_destroy(flamingo_t* flamingo) {
+	ts_state_t* const ts_state = flamingo->ts_state;
+	
+	ts_tree_delete(ts_state->tree);
+	ts_parser_delete(ts_state->parser);
+
+	free(ts_state);
 }
 
 char* flamingo_err(flamingo_t* flamingo) {
@@ -89,7 +127,135 @@ void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void
 	fprintf(stderr, "%s: not implemented\n", __func__);
 }
 
-int flamingo_run(flamingo_t *flamingo) {
-	fprintf(stderr, "%s: not implemented (actually run shit)\n", __func__);
+static int parse(flamingo_t* flamingo, TSNode node);
+
+static int parse_list(flamingo_t* flamingo, TSNode node) {
+	size_t const n = ts_node_child_count(node);
+
+	for (size_t i = 0; i < n; i++) {
+		TSNode const child = ts_node_child(node, i);
+		
+		if (parse(flamingo, child) < 0) {
+			return -1;
+		}
+	}
+
 	return 0;
+}
+
+typedef enum {
+	EXPR_KIND_STR,
+} expr_kind_t;
+
+typedef struct {
+	expr_kind_t kind;
+
+	union {
+		struct {
+			char* str;
+			size_t size;
+		} str;
+	};
+} expr_t;
+
+static int parse_literal(flamingo_t* flamingo, TSNode node, expr_t* expr) {
+	assert(strcmp(ts_node_type(node), "literal") == 0);
+	assert(ts_node_child_count(node) == 1);
+
+	TSNode const child = ts_node_child(node, 0);
+	char const* const type = ts_node_type(child);
+
+	if (strcmp(type, "string") == 0) {
+		expr->kind = EXPR_KIND_STR;
+
+		size_t const start = ts_node_start_byte(child);
+		size_t const end = ts_node_end_byte(child);
+
+		// XXX remove one from each side as we don't want the quotes
+
+		expr->str.str = flamingo->src + start + 1;
+		expr->str.size = end - start - 2;
+
+		return 0;
+	}
+
+	if (strcmp(type, "number") == 0) {
+		return error(flamingo, "number literals are not yet supported");
+	}
+
+	return error(flamingo, "unknown literal type: %s", type);
+}
+
+static int parse_expr(flamingo_t* flamingo, TSNode node, expr_t* expr) {
+	assert(strcmp(ts_node_type(node), "expression") == 0);
+	assert(ts_node_child_count(node) == 1);
+
+	TSNode const child = ts_node_child(node, 0);
+	char const* const type = ts_node_type(child);
+
+	if (strcmp(type, "literal") == 0) {
+		return parse_literal(flamingo, child, expr);
+	}
+
+	return error(flamingo, "unknown expression type: %s", type);
+}
+
+static int parse_print(flamingo_t* flamingo, TSNode node) {
+	assert(ts_node_child_count(node) == 2);
+
+	TSNode const msg = ts_node_child_by_field_name(node, "msg", 3);
+	char const* const type = ts_node_type(msg);
+
+	if (strcmp(ts_node_type(msg), "expression") != 0) {
+		return error(flamingo, "expected expression for message, got %s", type);
+	}
+
+	expr_t expr;
+
+	if (parse_expr(flamingo, msg, &expr) < 0) {
+		return -1;
+	}
+
+	if (expr.kind == EXPR_KIND_STR) {
+		printf("%.*s\n", (int) expr.str.size, expr.str.str);
+		return 0;
+	}
+
+	return error(flamingo, "can't print expression kind: %d", expr.kind);
+}
+
+static int parse_statement(flamingo_t* flamingo, TSNode node) {
+	assert(ts_node_child_count(node) == 1);
+
+	TSNode const child = ts_node_child(node, 0);
+	char const* const type = ts_node_type(child);
+
+	if (strcmp(type, "print") == 0) {
+		return parse_print(flamingo, child);
+	}
+
+	return error(flamingo, "unknown statment type: %s", type);
+}
+
+static int parse(flamingo_t* flamingo, TSNode node) {
+	char const* const type = ts_node_type(node);
+
+	if (strcmp(type, "source_file") == 0) {
+		return parse_list(flamingo, node);
+	}
+
+	if (strcmp(type, "statement") == 0) {
+		return parse_statement(flamingo, node);
+	}
+
+	return error(flamingo, "unknown node type: %s", type);
+}
+
+int flamingo_run(flamingo_t* flamingo) {
+	ts_state_t* const ts_state = flamingo->ts_state;
+	assert(strcmp(ts_node_type(ts_state->root), "source_file") == 0);
+
+	printf("%s\n", ts_node_string(ts_state->root));
+
+	return parse(flamingo, ts_state->root);
 }

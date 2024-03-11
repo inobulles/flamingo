@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
 
 	flamingo_t flamingo;
 
-	if (flamingo_create(&flamingo, basename(path), src) < 0) {
+	if (flamingo_create(&flamingo, basename(path), src, src_size) < 0) {
 		fprintf(stderr, "flamingo: %s\n", flamingo_err(&flamingo));
 		goto err_flamingo_create;
 	}
