@@ -95,6 +95,16 @@ int main(int argc, char* argv[]) {
 		goto err_flamingo_run;
 	}
 
+	// print out all top-level scope variables
+
+	flamingo_scope_t* const scope = &flamingo.scope_stack[0];
+
+	for (size_t j = 0; j < scope->vars_size; j++) {
+		flamingo_var_t* const var = &scope->vars[j];
+
+		printf("var: %.*s\n", (int) var->key_size, var->key);
+	}
+
 	// finished everything successfully!
 
 	rv = EXIT_SUCCESS;

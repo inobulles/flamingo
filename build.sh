@@ -5,8 +5,6 @@ mkdir -p bin
 
 cc_flags="-std=c11 -g -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unused-parameter"
 
-cc $cc_flags -c flamingo/runtime/lib.c -o bin/lib.o
-cc $cc_flags -c flamingo/parser.c -o bin/parser.o
 cc $cc_flags -c flamingo/flamingo.c -o bin/flamingo.o
 cc $cc_flags -c main.c -o bin/main.o
 

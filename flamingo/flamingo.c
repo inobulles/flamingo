@@ -1,8 +1,11 @@
 // This Source Form is subject to the terms of the AQUA Software License,
 // v. 1.0. Copyright (c) 2024 Aymeric Wibo
 
+#include "runtime/lib.c"
+#include "parser.c"
+
 #include "flamingo.h"
-#include "tree_sitter/parser.h"
+#include "scope.c"
 #include "runtime/tree_sitter/api.h"
 
 #include <assert.h>
@@ -60,6 +63,8 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	flamingo->src = src;
 	flamingo->src_size = src_size;
 
+	flamingo->scope_stack = NULL;
+
 	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
 
 	if (ts_state == NULL) {
@@ -112,6 +117,14 @@ void flamingo_destroy(flamingo_t* flamingo) {
 	ts_parser_delete(ts_state->parser);
 
 	free(ts_state);
+
+	if (flamingo->scope_stack != NULL) {
+		for (size_t i = 0; i < flamingo->scope_stack_size; i++) {
+			scope_free(&flamingo->scope_stack[i]);
+		}
+
+		free(flamingo->scope_stack);
+	}
 }
 
 char* flamingo_err(flamingo_t* flamingo) {
@@ -143,22 +156,7 @@ static int parse_list(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
-typedef enum {
-	EXPR_KIND_STR,
-} expr_kind_t;
-
-typedef struct {
-	expr_kind_t kind;
-
-	union {
-		struct {
-			char* str;
-			size_t size;
-		} str;
-	};
-} expr_t;
-
-static int parse_literal(flamingo_t* flamingo, TSNode node, expr_t* expr) {
+static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_expr_t* expr) {
 	assert(strcmp(ts_node_type(node), "literal") == 0);
 	assert(ts_node_child_count(node) == 1);
 
@@ -166,7 +164,7 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, expr_t* expr) {
 	char const* const type = ts_node_type(child);
 
 	if (strcmp(type, "string") == 0) {
-		expr->kind = EXPR_KIND_STR;
+		expr->kind = FLAMINGO_EXPR_KIND_STR;
 
 		size_t const start = ts_node_start_byte(child);
 		size_t const end = ts_node_end_byte(child);
@@ -186,7 +184,7 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, expr_t* expr) {
 	return error(flamingo, "unknown literal type: %s", type);
 }
 
-static int parse_expr(flamingo_t* flamingo, TSNode node, expr_t* expr) {
+static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_expr_t* expr) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
 
@@ -210,18 +208,60 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "expected expression for message, got %s", type);
 	}
 
-	expr_t expr;
+	flamingo_expr_t expr;
 
 	if (parse_expr(flamingo, msg, &expr) < 0) {
 		return -1;
 	}
 
-	if (expr.kind == EXPR_KIND_STR) {
+	if (expr.kind == FLAMINGO_EXPR_KIND_STR) {
 		printf("%.*s\n", (int) expr.str.size, expr.str.str);
 		return 0;
 	}
 
 	return error(flamingo, "can't print expression kind: %d", expr.kind);
+}
+
+static int parse_assignment(flamingo_t* flamingo, TSNode node) {
+	assert(ts_node_child_count(node) == 3);
+
+	TSNode const right = ts_node_child_by_field_name(node, "right", 5);
+	char const* const right_type = ts_node_type(right);
+
+	if (strcmp(right_type, "expression") != 0) {
+		return error(flamingo, "expected expression for name, got %s", right_type);
+	}
+
+	// get identifier name
+
+	TSNode const left = ts_node_child_by_field_name(node, "left", 4);
+	char const* const left_type = ts_node_type(left);
+
+	if (strcmp(left_type, "identifier") != 0) {
+		return error(flamingo, "expected identifier for name, got %s", left_type);
+	}
+
+	size_t const start = ts_node_start_byte(left);
+	size_t const end = ts_node_end_byte(left);
+
+	char const* const identifier = flamingo->src + start;
+	size_t const size = end - start;
+
+	// check if identifier is already in scope (or a previous one) and declare it
+
+	flamingo_var_t* var = flamingo_scope_find_var(flamingo, identifier, size);
+
+	if (var == NULL) {
+		var = scope_add_var(&flamingo->scope_stack[flamingo->scope_stack_size - 1], identifier, size);
+	}
+
+	// evaluate expression
+
+	if (parse_expr(flamingo, right, &var->expr) < 0) {
+		return -1;
+	}
+
+	return 0;
 }
 
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
@@ -232,6 +272,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	if (strcmp(type, "print") == 0) {
 		return parse_print(flamingo, child);
+	}
+
+	if (strcmp(type, "assignment") == 0) {
+		return parse_assignment(flamingo, child);
 	}
 
 	return error(flamingo, "unknown statment type: %s", type);
@@ -254,6 +298,15 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 int flamingo_run(flamingo_t* flamingo) {
 	ts_state_t* const ts_state = flamingo->ts_state;
 	assert(strcmp(ts_node_type(ts_state->root), "source_file") == 0);
+
+	if (flamingo->scope_stack != NULL) {
+		free(flamingo->scope_stack);
+	}
+
+	flamingo->scope_stack_size = 0;
+	flamingo->scope_stack = NULL;
+
+	scope_stack_push(flamingo);
 
 	printf("%s\n", ts_node_string(ts_state->root));
 
