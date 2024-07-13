@@ -306,11 +306,16 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	size_t const size = end - start;
 
 	// Check if identifier is already in scope (or a previous one) and declare it if not.
+	// If it's a function, error.
 
 	flamingo_var_t* var = flamingo_scope_find_var(flamingo, identifier, size);
 
 	if (var == NULL) {
 		var = scope_add_var(cur_scope(flamingo), identifier, size);
+	}
+
+	else if (var->val->kind == FLAMINGO_VAL_KIND_FN) {
+		return error(flamingo, "cannot assign to function '%.*s'", (int) size, identifier);
 	}
 
 	// If variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable.
