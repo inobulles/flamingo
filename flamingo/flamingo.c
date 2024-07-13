@@ -231,6 +231,37 @@ static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** 
 	return 0;
 }
 
+static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+	assert(strcmp(ts_node_type(node), "expression") == 0);
+	assert(ts_node_child_count(node) == 2);
+
+	// Get callable expression.
+	// TODO Evaluate this motherfucker.
+
+	TSNode const callable_node = ts_node_child_by_field_name(node, "callable", 8);
+	char const* const callable_type = ts_node_type(callable_node);
+
+	if (strcmp(callable_type, "expression") != 0) {
+		return error(flamingo, "expected identifier for function name, got %s", callable_type);
+	}
+
+	// Get arguments.
+	// TODO Do something with these arguments.
+
+	TSNode const args = ts_node_child_by_field_name(node, "args", 6);
+	bool const has_args = !ts_node_is_null(args);
+
+	if (has_args) {
+		char const* const args_type = ts_node_type(args);
+
+		if (strcmp(args_type, "arg_list") != 0) {
+			return error(flamingo, "expected arg_list for parameters, got %s", args_type);
+		}
+	}
+
+	return 0;
+}
+
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
@@ -247,6 +278,12 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	if (val != NULL && strcmp(type, "identifier") == 0) {
 		return parse_identifier(flamingo, child, val);
+	}
+
+	// These expressions do have side-effects, so we need to parse them anyway.
+
+	if (strcmp(type, "call") == 0) {
+		return parse_call(flamingo, child, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
@@ -369,6 +406,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	size_t const size = end - start;
 
 	// Get function parameters.
+	// TODO Do something with these parameters.
 
 	TSNode const params = ts_node_child_by_field_name(node, "params", 6);
 	bool const has_params = !ts_node_is_null(params);
