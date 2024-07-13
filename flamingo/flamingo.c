@@ -26,7 +26,6 @@ extern TSLanguage const* tree_sitter_flamingo(void);
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static int parse_statement(flamingo_t* flamingo, TSNode node);
-static int parse_statement_child(flamingo_t* flamingo, TSNode node);
 
 __attribute__((format(printf, 2, 3)))
 static int error(flamingo_t* flamingo, char const* fmt, ...) {
@@ -463,21 +462,18 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 
 static int parse_block(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "block") == 0);
-	assert(ts_node_child_count(node) == 3);
 
-	TSNode const body_node = ts_node_child_by_field_name(node, "body", 4);
-	char const* const body_type = ts_node_type(body_node);
-
-	if (strcmp(body_type, "statement") != 0) {
-		return error(flamingo, "expected statement in block's body, got %s", body_type);
-	}
-
-	size_t const n = ts_node_child_count(body_node);
+	size_t const n = ts_node_named_child_count(node);
 
 	for (size_t i = 0; i < n; i++) {
-		TSNode const child = ts_node_child(body_node, i);
+		TSNode const child = ts_node_named_child(node, i);
+		char const* const child_type = ts_node_type(child);
 
-		if (parse_statement_child(flamingo, child) < 0) {
+		if (strcmp(child_type, "statement") != 0) {
+			return error(flamingo, "expected statement in block, got %s", child_type);
+		}
+
+		if (parse_statement(flamingo, child) < 0) {
 			return -1;
 		}
 	}
@@ -485,37 +481,33 @@ static int parse_block(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
-static int parse_statement_child(flamingo_t* flamingo, TSNode node) {
-	char const* const type = ts_node_type(node);
-
-	if (strcmp(type, "block") == 0) {
-		return parse_block(flamingo, node);
-	}
-
-	else if (strcmp(type, "print") == 0) {
-		return parse_print(flamingo, node);
-	}
-
-	else if (strcmp(type, "assignment") == 0) {
-		return parse_assignment(flamingo, node);
-	}
-
-	else if (strcmp(type, "function_declaration") == 0) {
-		return parse_function_declaration(flamingo, node);
-	}
-
-	else if (strcmp(type, "expression") == 0) {
-		return parse_expr(flamingo, node, NULL);
-	}
-
-	return error(flamingo, "unknown statment type: %s", type);
-}
-
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1);
 
 	TSNode const child = ts_node_child(node, 0);
-	return parse_statement_child(flamingo, child);
+	char const* const type = ts_node_type(child);
+
+	if (strcmp(type, "block") == 0) {
+		return parse_block(flamingo, child);
+	}
+
+	else if (strcmp(type, "print") == 0) {
+		return parse_print(flamingo, child);
+	}
+
+	else if (strcmp(type, "assignment") == 0) {
+		return parse_assignment(flamingo, child);
+	}
+
+	else if (strcmp(type, "function_declaration") == 0) {
+		return parse_function_declaration(flamingo, child);
+	}
+
+	else if (strcmp(type, "expression") == 0) {
+		return parse_expr(flamingo, child, NULL);
+	}
+
+	return error(flamingo, "unknown statment type: %s", type);
 }
 
 static int parse(flamingo_t* flamingo, TSNode node) {
