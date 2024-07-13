@@ -1,4 +1,5 @@
-print "Hello world!"
-print "Hello world! (2)"
+fn fun() {
+	print "Inside function"
+}
 
-value = "testing"
+fun()

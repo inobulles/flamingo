@@ -281,6 +281,8 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 3);
 
+	// Get RHS expression.
+
 	TSNode const right = ts_node_child_by_field_name(node, "right", 5);
 	char const* const right_type = ts_node_type(right);
 
@@ -327,6 +329,64 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
+static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
+	assert(ts_node_child_count(node) == 5);
+
+	// Get qualifier list.
+
+	TSNode const qualifiers_node = ts_node_child_by_field_name(node, "qualifiers", 10);
+	bool const has_qualifiers = !ts_node_is_null(qualifiers_node);
+
+	if (has_qualifiers) {
+		char const* const qualifiers_type = ts_node_type(qualifiers_node);
+
+		if (strcmp(qualifiers_type, "qualifier_list") != 0) {
+			return error(flamingo, "expected qualifier_list for qualifiers, got %s", qualifiers_type);
+		}
+	}
+
+	// Get function name.
+
+	TSNode const name_node = ts_node_child_by_field_name(node, "name", 4);
+	char const* const name_type = ts_node_type(name_node);
+
+	if (strcmp(name_type, "identifier") != 0) {
+		return error(flamingo, "expected identifier for function name, got %s", name_type);
+	}
+
+	size_t const start = ts_node_start_byte(name_node);
+	size_t const end = ts_node_end_byte(name_node);
+
+	char const* const name = flamingo->src + start;
+	size_t const size = end - start;
+
+	// Get function parameters.
+
+	TSNode const params = ts_node_child_by_field_name(node, "params", 6);
+	bool const has_params = !ts_node_is_null(params);
+
+	if (has_params) {
+		char const* const params_type = ts_node_type(params);
+
+		if (strcmp(params_type, "param_list") != 0) {
+			return error(flamingo, "expected param_list for parameters, got %s", params_type);
+		}
+	}
+
+	// Get function body.
+
+	TSNode const body = ts_node_child_by_field_name(node, "body", 4);
+	char const* const body_type = ts_node_type(body);
+
+	if (strcmp(body_type, "statement") != 0) {
+		return error(flamingo, "expected statement for body, got %s", body_type);
+	}
+
+	printf("TODO function decl: %.*s\n", (int) size, name);
+
+	return 0;
+}
+
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1);
 
@@ -339,6 +399,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	if (strcmp(type, "assignment") == 0) {
 		return parse_assignment(flamingo, child);
+	}
+
+	if (strcmp(type, "function_declaration") == 0) {
+		return parse_function_declaration(flamingo, child);
 	}
 
 	return error(flamingo, "unknown statment type: %s", type);
