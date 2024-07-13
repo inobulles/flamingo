@@ -24,6 +24,10 @@ typedef struct {
 
 extern TSLanguage const* tree_sitter_flamingo(void);
 
+static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static int parse_statement(flamingo_t* flamingo, TSNode node);
+static int parse_statement_child(flamingo_t* flamingo, TSNode node);
+
 __attribute__((format(printf, 2, 3)))
 static int error(flamingo_t* flamingo, char const* fmt, ...) {
 	va_list args;
@@ -214,9 +218,6 @@ static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** 
 
 	return 0;
 }
-
-static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
-static int parse_statement(flamingo_t* flamingo, TSNode node);
 
 static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "call") == 0);
@@ -459,8 +460,6 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 
 	return 0;
 }
-
-static int parse_statement_child(flamingo_t* flamingo, TSNode node);
 
 static int parse_block(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "block") == 0);
