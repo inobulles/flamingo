@@ -6,6 +6,7 @@
 
 #include "flamingo.h"
 #include "scope.c"
+#include "val.c"
 #include "runtime/tree_sitter/api.h"
 
 #include <assert.h>
@@ -93,6 +94,9 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	ts_state->tree = tree;
 	ts_state->root = ts_tree_root_node(tree);
 
+	// TODO make sure tree is coherent
+	//      I don't know if Tree-sitter has a simple way to check AST-coherency itself but otherwise just go down the tree and look for any MISSING or UNEXPECTED nodes
+
 	flamingo->ts_state = ts_state;
 
 	return 0;
@@ -156,23 +160,66 @@ static int parse_list(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
-static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_expr_t* expr) {
+static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+	assert(strcmp(ts_node_type(node), "identifier") == 0);
+	assert(ts_node_child_count(node) == 0);
+
+	size_t const start = ts_node_start_byte(node);
+	size_t const end = ts_node_end_byte(node);
+
+	char const* const identifier = flamingo->src + start;
+	size_t const size = end - start;
+
+	flamingo_var_t* const var = flamingo_scope_find_var(flamingo, identifier, size);
+
+	if (var == NULL) {
+		return error(flamingo, "could not find identifier: %.*s", (int) size, identifier);
+	}
+
+	*val = var->val;
+	val_incref(*val);
+
+	return 0;
+}
+
+static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "literal") == 0);
 	assert(ts_node_child_count(node) == 1);
+
+	// if value already exists, free it
+	// XXX not sure when this is the case, just doing this for now to be safe!
+
+	if (*val != NULL) {
+		val_free(*val);
+		val_init(*val);
+	}
+
+	// otherwise, allocate it
+
+	else {
+		*val = val_alloc();
+	}
+
+	// in any case, val should not be NULL from this point forth
+
+	assert(*val != NULL);
 
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 
 	if (strcmp(type, "string") == 0) {
-		expr->kind = FLAMINGO_EXPR_KIND_STR;
+		(*val)->kind = FLAMINGO_VAL_KIND_STR;
 
 		size_t const start = ts_node_start_byte(child);
 		size_t const end = ts_node_end_byte(child);
 
 		// XXX remove one from each side as we don't want the quotes
 
-		expr->str.str = flamingo->src + start + 1;
-		expr->str.size = end - start - 2;
+		(*val)->str.size = end - start - 2;
+		(*val)->str.str = malloc((*val)->str.size);
+
+		assert((*val)->str.str != NULL);
+		memcpy((*val)->str.str, flamingo->src + start + 1, (*val)->str.size);
 
 		return 0;
 	}
@@ -184,7 +231,7 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_expr_t* exp
 	return error(flamingo, "unknown literal type: %s", type);
 }
 
-static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_expr_t* expr) {
+static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
 
@@ -192,7 +239,11 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_expr_t* expr) 
 	char const* const type = ts_node_type(child);
 
 	if (strcmp(type, "literal") == 0) {
-		return parse_literal(flamingo, child, expr);
+		return parse_literal(flamingo, child, val);
+	}
+
+	if (strcmp(type, "identifier") == 0) {
+		return parse_identifier(flamingo, child, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
@@ -208,18 +259,23 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "expected expression for message, got %s", type);
 	}
 
-	flamingo_expr_t expr;
+	flamingo_val_t* val = NULL;
 
-	if (parse_expr(flamingo, msg, &expr) < 0) {
+	if (parse_expr(flamingo, msg, &val) < 0) {
 		return -1;
 	}
 
-	if (expr.kind == FLAMINGO_EXPR_KIND_STR) {
-		printf("%.*s\n", (int) expr.str.size, expr.str.str);
+	// XXX don't forget to decrement reference at the end!
+
+	if (val->kind == FLAMINGO_VAL_KIND_STR) {
+		printf("%.*s\n", (int) val->str.size, val->str.str);
+		val_decref(val);
+
 		return 0;
 	}
 
-	return error(flamingo, "can't print expression kind: %d", expr.kind);
+	val_decref(val);
+	return error(flamingo, "can't print expression kind: %d", val->kind);
 }
 
 static int parse_assignment(flamingo_t* flamingo, TSNode node) {
@@ -247,17 +303,24 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	char const* const identifier = flamingo->src + start;
 	size_t const size = end - start;
 
-	// check if identifier is already in scope (or a previous one) and declare it
+	// check if identifier is already in scope (or a previous one) and declare it if not
 
 	flamingo_var_t* var = flamingo_scope_find_var(flamingo, identifier, size);
 
 	if (var == NULL) {
-		var = scope_add_var(&flamingo->scope_stack[flamingo->scope_stack_size - 1], identifier, size);
+		var = scope_add_var(cur_scope(flamingo), identifier, size);
+	}
+
+	// if variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable
+
+	else {
+		val_decref(var->val);
+		var->val = NULL;
 	}
 
 	// evaluate expression
 
-	if (parse_expr(flamingo, right, &var->expr) < 0) {
+	if (parse_expr(flamingo, right, &var->val) < 0) {
 		return -1;
 	}
 

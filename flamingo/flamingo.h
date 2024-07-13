@@ -12,24 +12,30 @@ typedef struct flamingo_t flamingo_t;
 typedef int (*flamingo_cb_call_t) (flamingo_t* flamingo, char* name, void* data);
 
 typedef enum {
-	FLAMINGO_EXPR_KIND_STR,
-} flamingo_expr_kind_t;
+	FLAMINGO_VAL_KIND_NONE,
+	FLAMINGO_VAL_KIND_STR,
+} flamingo_val_kind_t;
 
 typedef struct {
-	flamingo_expr_kind_t kind;
+	flamingo_val_kind_t kind;
+	size_t ref_count;
 
 	union {
 		struct {
 			char* str;
 			size_t size;
 		} str;
+
+		struct {
+			uint64_t integer;
+		} integer;
 	};
-} flamingo_expr_t;
+} flamingo_val_t;
 
 typedef struct {
 	char* key;
 	size_t key_size;
-	flamingo_expr_t expr;
+	flamingo_val_t* val;
 } flamingo_var_t;
 
 typedef struct {
