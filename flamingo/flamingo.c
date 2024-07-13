@@ -463,6 +463,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 static int parse_block(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "block") == 0);
 
+	scope_stack_push(flamingo);
 	size_t const n = ts_node_named_child_count(node);
 
 	for (size_t i = 0; i < n; i++) {
@@ -477,6 +478,8 @@ static int parse_block(flamingo_t* flamingo, TSNode node) {
 			return -1;
 		}
 	}
+
+	scope_pop(flamingo);
 
 	return 0;
 }

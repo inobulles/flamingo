@@ -52,12 +52,10 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 	return var;
 }
 
-/*
 static void scope_pop(flamingo_t* flamingo) {
-	// TODO free containing variables
-	scope_free(flamingo, &flamingo->scope_stack[--flamingo->scope_stack_size]);
+	// TODO Free containing variables.
+	scope_free(&flamingo->scope_stack[--flamingo->scope_stack_size]);
 }
-*/
 
 flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size) {
 	// go backwards down the stack to allow for shadowing
