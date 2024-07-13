@@ -320,7 +320,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		var->val = NULL;
 	}
 
-	// evaluate expression
+	// Evaluate expression.
 
 	if (parse_expr(flamingo, right_node, &var->val) < 0) {
 		return -1;
@@ -382,7 +382,16 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "expected statement for body, got %s", body_type);
 	}
 
-	printf("TODO function decl: %.*s\n", (int) size, name);
+	// Check if identifier is already in scope (or a previous one) and error if it is.
+	// Right now, redeclaring functions is not allowed.
+	// Although this will probably work a bit differently once function prototypes are added.
+
+	flamingo_var_t* const prev_var = flamingo_scope_find_var(flamingo, name, size);
+
+	if (prev_var != NULL) {
+		char const* const thing = prev_var->val->kind == FLAMINGO_VAL_KIND_FN ? "function" : "variable";
+		return error(flamingo, "the %s '%.*s' has already been declared in this scope", thing, (int) size, name);
+	}
 
 	return 0;
 }
