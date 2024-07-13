@@ -144,22 +144,6 @@ void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void
 	fprintf(stderr, "%s: not implemented\n", __func__);
 }
 
-static int parse(flamingo_t* flamingo, TSNode node);
-
-static int parse_list(flamingo_t* flamingo, TSNode node) {
-	size_t const n = ts_node_child_count(node);
-
-	for (size_t i = 0; i < n; i++) {
-		TSNode const child = ts_node_child(node, i);
-		
-		if (parse(flamingo, child) < 0) {
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "literal") == 0);
 	assert(ts_node_child_count(node) == 1);
@@ -476,13 +460,42 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
+static int parse_block(flamingo_t* flamingo, TSNode node) {
+	assert(strcmp(ts_node_type(node), "block") == 0);
+	assert(ts_node_child_count(node) == 3);
+
+	TSNode const body_node = ts_node_child_by_field_name(node, "body", 4);
+	char const* const body_type = ts_node_type(body_node);
+
+	if (strcmp(body_type, "identifier") != 0) {
+		return error(flamingo, "expected identifier for function name, got %s", body_type);
+	}
+
+	size_t const n = ts_node_child_count(body_node);
+
+	for (size_t i = 0; i < n; i++) {
+		TSNode const child = ts_node_child(body_node, i);
+		
+		if (parse_statement(flamingo, child) < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
+	printf("%s\n", ts_node_type(node));
 	assert(ts_node_child_count(node) == 1);
 
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 
-	if (strcmp(type, "print") == 0) {
+	if (strcmp(type, "block") == 0) {
+		return parse_block(flamingo, child);
+	}
+
+	else if (strcmp(type, "print") == 0) {
 		return parse_print(flamingo, child);
 	}
 
@@ -502,17 +515,17 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 }
 
 static int parse(flamingo_t* flamingo, TSNode node) {
-	char const* const type = ts_node_type(node);
+	size_t const n = ts_node_child_count(node);
 
-	if (strcmp(type, "source_file") == 0) {
-		return parse_list(flamingo, node);
+	for (size_t i = 0; i < n; i++) {
+		TSNode const child = ts_node_child(node, i);
+		
+		if (parse_statement(flamingo, child) < 0) {
+			return -1;
+		}
 	}
 
-	if (strcmp(type, "statement") == 0) {
-		return parse_statement(flamingo, node);
-	}
-
-	return error(flamingo, "unknown node type: %s", type);
+	return 0;
 }
 
 int flamingo_run(flamingo_t* flamingo) {
