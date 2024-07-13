@@ -32,6 +32,10 @@ static void val_free(flamingo_val_t* val) {
 		free(val->str.str);
 	}
 
+	if (val->kind == FLAMINGO_VAL_KIND_FN) {
+		free(val->fn.body);
+	}
+
 	// TODO when should the memory pointed to by val itself be freed?
 }
 
