@@ -231,9 +231,12 @@ static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** 
 	return 0;
 }
 
+static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static int parse_statement(flamingo_t* flamingo, TSNode node);
+
 static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
-	assert(strcmp(ts_node_type(node), "expression") == 0);
-	assert(ts_node_child_count(node) == 2);
+	assert(strcmp(ts_node_type(node), "call") == 0);
+	assert(ts_node_child_count(node) == 3);
 
 	// Get callable expression.
 	// TODO Evaluate this motherfucker.
@@ -259,7 +262,23 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		}
 	}
 
-	return 0;
+	// Evaluate callable expression.
+
+	flamingo_val_t* callable = NULL;
+
+	if (parse_expr(flamingo, callable_node, &callable) < 0) {
+		return -1;
+	}
+
+	if (callable->kind != FLAMINGO_VAL_KIND_FN) {
+		return error(flamingo, "callable has a value kind of %d, which is not callable", callable->kind);
+	}
+
+	// Actually call the callable.
+	// TODO Should I really be passing TSNode everywhere instead of TSNode*? It feels like this is prone to me being like "oh, well, the TSNode type is probably hiding a pointer if it's being used as an argument, so I don't have to worry about out-of-scope usage".
+
+	TSNode* const body = callable->fn.body;
+	return parse_statement(flamingo, *body);
 }
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
