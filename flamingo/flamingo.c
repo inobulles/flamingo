@@ -427,12 +427,16 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 		return parse_print(flamingo, child);
 	}
 
-	if (strcmp(type, "assignment") == 0) {
+	else if (strcmp(type, "assignment") == 0) {
 		return parse_assignment(flamingo, child);
 	}
 
-	if (strcmp(type, "function_declaration") == 0) {
+	else if (strcmp(type, "function_declaration") == 0) {
 		return parse_function_declaration(flamingo, child);
+	}
+
+	else if (strcmp(type, "expression") == 0) {
+		return parse_expr(flamingo, child, NULL);
 	}
 
 	return error(flamingo, "unknown statment type: %s", type);
