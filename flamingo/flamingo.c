@@ -461,6 +461,8 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	// Add function to scope.
 
 	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
+
+	var->val = val_alloc();
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
 
 	// Assign body node.
