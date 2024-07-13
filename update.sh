@@ -1,7 +1,7 @@
 #!/bin/sh
 set -xe
 
-# update Tree-sitter runtime
+# Update Tree-sitter runtime.
 
 rm -rf tree-sitter 2>/dev/null || true
 rm -r src/runtime 2>/dev/null || true
@@ -14,4 +14,12 @@ mv tree-sitter/lib/src/* src/runtime
 
 rm -rf tree-sitter
 
-# TODO update tree-sitter-flamingo (i.e. src/parser.c and src/tree_sitter/parser.h)
+# Update tree-sitter-flamingo (i.e. src/parser.c and src/tree_sitter/parser.h).
+
+rm -rf tree-sitter-flamingo 2>/dev/null || true
+git clone https://github.com/inobulles/tree-sitter-flamingo --depth 1 --branch main
+
+mv tree-sitter-flamingo/src/parser.c flamingo/parser.c
+mv tree-sitter-flamingo/src/tree_sitter/parser.h flamingo/tree_sitter/parser.h
+
+rm -rf tree-sitter-flamingo

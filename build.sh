@@ -12,4 +12,4 @@ cc $(find bin -name "*.o") $cc_flags -o bin/flamingo
 
 bin/flamingo hello_world.fl
 
-# TODO run more "serious" tests too
+# TODO Run more "serious" tests too.
