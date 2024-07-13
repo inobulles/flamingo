@@ -252,20 +252,20 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 static int parse_print(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 2);
 
-	TSNode const msg = ts_node_child_by_field_name(node, "msg", 3);
-	char const* const type = ts_node_type(msg);
+	TSNode const msg_node = ts_node_child_by_field_name(node, "msg", 3);
+	char const* const type = ts_node_type(msg_node);
 
-	if (strcmp(ts_node_type(msg), "expression") != 0) {
+	if (strcmp(ts_node_type(msg_node), "expression") != 0) {
 		return error(flamingo, "expected expression for message, got %s", type);
 	}
 
 	flamingo_val_t* val = NULL;
 
-	if (parse_expr(flamingo, msg, &val) < 0) {
+	if (parse_expr(flamingo, msg_node, &val) < 0) {
 		return -1;
 	}
 
-	// XXX don't forget to decrement reference at the end!
+	// XXX Don't forget to decrement reference at the end!
 
 	if (val->kind == FLAMINGO_VAL_KIND_STR) {
 		printf("%.*s\n", (int) val->str.size, val->str.str);
@@ -283,29 +283,29 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 
 	// Get RHS expression.
 
-	TSNode const right = ts_node_child_by_field_name(node, "right", 5);
-	char const* const right_type = ts_node_type(right);
+	TSNode const right_node = ts_node_child_by_field_name(node, "right", 5);
+	char const* const right_type = ts_node_type(right_node);
 
 	if (strcmp(right_type, "expression") != 0) {
 		return error(flamingo, "expected expression for name, got %s", right_type);
 	}
 
-	// get identifier name
+	// Get identifier name.
 
-	TSNode const left = ts_node_child_by_field_name(node, "left", 4);
-	char const* const left_type = ts_node_type(left);
+	TSNode const left_node = ts_node_child_by_field_name(node, "left", 4);
+	char const* const left_type = ts_node_type(left_node);
 
 	if (strcmp(left_type, "identifier") != 0) {
 		return error(flamingo, "expected identifier for name, got %s", left_type);
 	}
 
-	size_t const start = ts_node_start_byte(left);
-	size_t const end = ts_node_end_byte(left);
+	size_t const start = ts_node_start_byte(left_node);
+	size_t const end = ts_node_end_byte(left_node);
 
 	char const* const identifier = flamingo->src + start;
 	size_t const size = end - start;
 
-	// check if identifier is already in scope (or a previous one) and declare it if not
+	// Check if identifier is already in scope (or a previous one) and declare it if not.
 
 	flamingo_var_t* var = flamingo_scope_find_var(flamingo, identifier, size);
 
@@ -313,7 +313,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		var = scope_add_var(cur_scope(flamingo), identifier, size);
 	}
 
-	// if variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable
+	// If variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable.
 
 	else {
 		val_decref(var->val);
@@ -322,7 +322,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 
 	// evaluate expression
 
-	if (parse_expr(flamingo, right, &var->val) < 0) {
+	if (parse_expr(flamingo, right_node, &var->val) < 0) {
 		return -1;
 	}
 
