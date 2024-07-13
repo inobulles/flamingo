@@ -30,6 +30,11 @@ typedef struct {
 		struct {
 			uint64_t integer;
 		} integer;
+
+		struct {
+			void* body;
+			size_t body_size;
+		} fn;
 	};
 } flamingo_val_t;
 

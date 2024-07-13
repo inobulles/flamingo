@@ -393,6 +393,19 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "the %s '%.*s' has already been declared in this scope", thing, (int) size, name);
 	}
 
+	// Add function to scope.
+
+	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
+	var->val->kind = FLAMINGO_VAL_KIND_FN;
+
+	// Assign body node.
+	// Since I want 'flamingo.h' to be usable without importing all of Tree-sitter, 'var->val->fn.body' can't just be a 'TSNode'.
+	// Thus, since only this file knows about the size of 'TSNode', we must dynamically allocate this on the heap.
+
+	var->val->fn.body_size = sizeof body;
+	var->val->fn.body = malloc(var->val->fn.body_size);
+	memcpy(var->val->fn.body, &body, var->val->fn.body_size);
+
 	return 0;
 }
 
