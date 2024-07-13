@@ -238,11 +238,14 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 
-	if (strcmp(type, "literal") == 0) {
+	// 'val == NULL' means that we don't care about the result of the expression and can discard it.
+	// These types of expressions are dead-ends if we're discarding the value and they can't have side-effect either, so just don't parse them.
+
+	if (val != NULL && strcmp(type, "literal") == 0) {
 		return parse_literal(flamingo, child, val);
 	}
 
-	if (strcmp(type, "identifier") == 0) {
+	if (val != NULL && strcmp(type, "identifier") == 0) {
 		return parse_identifier(flamingo, child, val);
 	}
 
