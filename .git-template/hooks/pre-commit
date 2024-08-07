@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+
+# Redirect output to stderr.
+
+exec 1>&2
+
+# Don't allow non-ASCII characters in filenames.
+
+if test $(git diff --cached --name-only --diff-filter=A -z HEAD | LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0; then
+	echo "Tryna add non-ASCII filenames"
+	exit 1
+fi
+
+# If there are terminating whitespaces, print the offending file names and fail.
+
+git diff-index --check --cached HEAD --
+
+# Run `clang-format` and fail if it fails.
+
+exec find . -name "*.[ch]" | xargs clang-format18 -i
