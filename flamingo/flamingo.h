@@ -9,7 +9,7 @@
 
 typedef struct flamingo_t flamingo_t;
 
-typedef int (*flamingo_cb_call_t) (flamingo_t* flamingo, char* name, void* data);
+typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,

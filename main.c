@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 	if (stat(path, &sb) < 0) {
 		fprintf(stderr, "stat(\"%s\"): %s\n", rel_path, strerror(errno));
 		goto err_stat;
-	} 
+	}
 
 	size_t const src_size = sb.st_size;
 

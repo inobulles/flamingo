@@ -1,19 +1,19 @@
 // This Source Form is subject to the terms of the AQUA Software License,
 // v. 1.0. Copyright (c) 2024 Aymeric Wibo
 
-#include "runtime/lib.c"
 #include "parser.c"
+#include "runtime/lib.c"
 
 #include "flamingo.h"
+#include "runtime/tree_sitter/api.h"
 #include "scope.c"
 #include "val.c"
-#include "runtime/tree_sitter/api.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct {
@@ -27,8 +27,7 @@ extern TSLanguage const* tree_sitter_flamingo(void);
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static int parse_statement(flamingo_t* flamingo, TSNode node);
 
-__attribute__((format(printf, 2, 3)))
-static int error(flamingo_t* flamingo, char const* fmt, ...) {
+__attribute__((format(printf, 2, 3))) static int error(flamingo_t* flamingo, char const* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 
@@ -119,7 +118,7 @@ err_ts_parser_new:
 
 void flamingo_destroy(flamingo_t* flamingo) {
 	ts_state_t* const ts_state = flamingo->ts_state;
-	
+
 	ts_tree_delete(ts_state->tree);
 	ts_parser_delete(ts_state->parser);
 
