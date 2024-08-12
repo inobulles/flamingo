@@ -12,6 +12,7 @@
 #include <common.h>
 
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
+	assert(strcmp(ts_node_type(node), "statement") == 0);
 	assert(ts_node_child_count(node) == 1);
 
 	TSNode const child = ts_node_child(node, 0);

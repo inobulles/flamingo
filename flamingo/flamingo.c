@@ -109,6 +109,10 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 	for (size_t i = 0; i < n; i++) {
 		TSNode const child = ts_node_child(node, i);
 
+		if (strcmp(ts_node_type(child), "comment") == 0) {
+			continue;
+		}
+
 		if (parse_statement(flamingo, child) < 0) {
 			return -1;
 		}
