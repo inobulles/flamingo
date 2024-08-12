@@ -5,7 +5,7 @@
 
 #include <common.h>
 
-static int parse_import_path(flamingo_t* flamingo, TSNode node) {
+static int parse_import_path(flamingo_t* flamingo, TSNode node, char** path_ref, size_t* path_len_ref) {
 	assert(strcmp(ts_node_type(node), "import_path") == 0);
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 3);
 
@@ -31,7 +31,7 @@ static int parse_import_path(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
-	// Get the actual path component.
+	// Get the actual path component and add it to our path accumulator.
 
 	size_t const start = ts_node_start_byte(bit_node);
 	size_t const end = ts_node_end_byte(bit_node);
@@ -39,11 +39,20 @@ static int parse_import_path(flamingo_t* flamingo, TSNode node) {
 	char const* const bit = flamingo->src + start;
 	size_t const size = end - start;
 
-	printf("bit: %.*s\n", (int) size, bit);
+	*path_ref = realloc(*path_ref, *path_len_ref + size + 1);
+
+	if (*path_ref == NULL) {
+		free(*path_ref);
+		return error(flamingo, "failed to allocate memory for import path");
+	}
+
+	memcpy(*path_ref + *path_len_ref, bit, size);
+	*path_len_ref += size + 1;
+	(*path_ref)[*path_len_ref - 1] = '/';
 
 	// Recursively parse the rest of the path.
 
-	if (has_rest && parse_import_path(flamingo, rest_node) < 0) {
+	if (has_rest && parse_import_path(flamingo, rest_node, path_ref, path_len_ref) < 0) {
 		return -1;
 	}
 
@@ -73,7 +82,33 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 	// Parse the import path into an actual string path we can use.
 
 	(void) is_relative;
-	parse_import_path(flamingo, path_node);
+
+	char* path = NULL;
+	size_t path_len = 0;
+
+	if (parse_import_path(flamingo, path_node, &path, &path_len) < 0) {
+		free(path);
+		return -1;
+	}
+
+	for (size_t i = 0; i < path_len; i++) {
+		if (path[i] == '\0') {
+			free(path);
+			return error(flamingo, "one of the import path components contains a null byte somehow");
+		}
+	}
+
+	char* import_path = NULL;
+	int const rv = asprintf(&import_path, "%.*s.fl", (int) path_len - 1, path);
+	free(path);
+
+	if (rv < 0 || import_path == NULL) {
+		assert(rv < 0 && import_path == NULL);
+		return error(flamingo, "failed to allocate memory for import path");
+	}
+
+	printf("Import path: %s\n", import_path);
+	free(import_path);
 
 	return error(flamingo, "TODO");
 }
