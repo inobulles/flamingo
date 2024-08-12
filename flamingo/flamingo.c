@@ -7,6 +7,7 @@
 #include "common.h"
 #include "scope.c"
 #include "val.c"
+#include "import.c"
 
 typedef struct {
 	TSParser* parser;
@@ -486,6 +487,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	else if (strcmp(type, "expression") == 0) {
 		return parse_expr(flamingo, child, NULL);
+	}
+
+	else if (strcmp(type, "import") == 0) {
+		return parse_import(flamingo, child);
 	}
 
 	return error(flamingo, "unknown statment type: %s", type);
