@@ -14,6 +14,9 @@ mv tree-sitter/lib/src/* flamingo/runtime
 
 rm -rf tree-sitter
 
+find flamingo/runtime/unicode -name "*.h" -exec sed -i '' 's/"unicode\/\(.*\)\.h"/"\1.h"/g' {} ';'
+sed -i '' 's/cstdint/stdint.h/g' flamingo/runtime/unicode/umachine.h
+
 # Update tree-sitter-flamingo (i.e. src/parser.c and src/tree_sitter/parser.h).
 
 rm -rf tree-sitter-flamingo 2>/dev/null || true
