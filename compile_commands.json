@@ -1,0 +1,41 @@
+[
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-std=c11",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-Iflamingo/runtime",
+            "-Iflamingo",
+            "-Wno-unused-parameter",
+            "-ferror-limit=0",
+            "-o",
+            "bin/flamingo.o",
+            "flamingo/flamingo.c"
+        ],
+        "directory": "/home/obiwac/flamingo/flamingo",
+        "file": "flamingo/flamingo.c"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-std=c11",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-Iflamingo/runtime",
+            "-Iflamingo",
+            "-Wno-unused-parameter",
+            "-o",
+            "bin/main.o",
+            "main.c"
+        ],
+        "directory": "/home/obiwac/flamingo/flamingo",
+        "file": "main.c"
+    }
+]
