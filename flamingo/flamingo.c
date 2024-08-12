@@ -5,9 +5,9 @@
 #include "runtime/lib.c"
 
 #include "common.h"
+#include "import.c"
 #include "scope.c"
 #include "val.c"
-#include "import.c"
 
 typedef struct {
 	TSParser* parser;

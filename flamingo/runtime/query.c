@@ -146,6 +146,7 @@ typedef struct {
   Slice steps;
   Slice predicate_steps;
   uint32_t start_byte;
+  uint32_t end_byte;
   bool is_non_local;
 } QueryPattern;
 
@@ -2715,6 +2716,7 @@ TSQuery *ts_query_new(
     QueryPattern *pattern = array_back(&self->patterns);
     pattern->steps.length = self->steps.size - start_step_index;
     pattern->predicate_steps.length = self->predicate_steps.size - start_predicate_step_index;
+    pattern->end_byte = stream_offset(&stream);
 
     // If any pattern could not be parsed, then report the error information
     // and terminate.
@@ -2740,7 +2742,7 @@ TSQuery *ts_query_new(
       // there is a parent node, and capture it if necessary.
       if (step->symbol == WILDCARD_SYMBOL && step->depth == 0 && !step->field) {
         QueryStep *second_step = &self->steps.contents[start_step_index + 1];
-        if (second_step->symbol != WILDCARD_SYMBOL && second_step->depth == 1) {
+        if (second_step->symbol != WILDCARD_SYMBOL && second_step->depth == 1 && !second_step->is_immediate) {
           wildcard_root_alternative_index = step->alternative_index;
           start_step_index += 1;
           step = second_step;
@@ -2871,6 +2873,13 @@ uint32_t ts_query_start_byte_for_pattern(
   uint32_t pattern_index
 ) {
   return self->patterns.contents[pattern_index].start_byte;
+}
+
+uint32_t ts_query_end_byte_for_pattern(
+  const TSQuery *self,
+  uint32_t pattern_index
+) {
+  return self->patterns.contents[pattern_index].end_byte;
 }
 
 bool ts_query_is_pattern_rooted(

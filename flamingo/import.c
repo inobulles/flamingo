@@ -24,5 +24,7 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 
 	// Parse the import path into an actual string path we can use.
 
+	(void) is_relative;
+
 	return error(flamingo, "TODO");
 }

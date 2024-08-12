@@ -1,8 +1,10 @@
 #ifndef TREE_SITTER_API_H_
 #define TREE_SITTER_API_H_
 
+#ifndef TREE_SITTER_HIDE_SYMBOLS
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC visibility push(default)
+#endif
 #endif
 
 #ifdef __cplusplus
@@ -103,7 +105,7 @@ typedef struct TSNode {
 typedef struct TSTreeCursor {
   const void *tree;
   const void *id;
-  uint32_t context[2];
+  uint32_t context[3];
 } TSTreeCursor;
 
 typedef struct TSQueryCapture {
@@ -546,8 +548,15 @@ TSStateId ts_node_next_parse_state(TSNode self);
 
 /**
  * Get the node's immediate parent.
+ * Prefer [`ts_node_child_containing_descendant`] for
+ * iterating over the node's ancestors.
  */
 TSNode ts_node_parent(TSNode self);
+
+/**
+ * Get the node's child that contains `descendant`.
+ */
+TSNode ts_node_child_containing_descendant(TSNode self, TSNode descendant);
 
 /**
  * Get the node's child at the given index, where zero represents the first
@@ -673,7 +682,8 @@ TSTreeCursor ts_tree_cursor_new(TSNode node);
 void ts_tree_cursor_delete(TSTreeCursor *self);
 
 /**
- * Re-initialize a tree cursor to start at a different node.
+ * Re-initialize a tree cursor to start at the original node that the cursor was
+ * constructed with.
  */
 void ts_tree_cursor_reset(TSTreeCursor *self, TSNode node);
 
@@ -828,6 +838,14 @@ uint32_t ts_query_string_count(const TSQuery *self);
  * code strings.
  */
 uint32_t ts_query_start_byte_for_pattern(const TSQuery *self, uint32_t pattern_index);
+
+/**
+ * Get the byte offset where the given pattern ends in the query's source.
+ *
+ * This can be useful when combining queries by concatenating their source
+ * code strings.
+ */
+uint32_t ts_query_end_byte_for_pattern(const TSQuery *self, uint32_t pattern_index);
 
 /**
  * Get all of the predicates for the given pattern in the query.
@@ -1255,8 +1273,10 @@ void ts_set_allocator(
 }
 #endif
 
+#ifndef TREE_SITTER_HIDE_SYMBOLS
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC visibility pop
+#endif
 #endif
 
 #endif  // TREE_SITTER_API_H_
