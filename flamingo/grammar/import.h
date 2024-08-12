@@ -5,6 +5,83 @@
 
 #include <common.h>
 
+#include <errno.h>
+#include <sys/stat.h>
+
+static int import(flamingo_t* flamingo, char* path) {
+	// TODO This is really relative to the caller, not the current file.
+	// Should it be relative to the current file though?
+	// If we do it like that, then a.b.c wouldn't be able to import a.b for example.
+	// Maybe we should do it relative to the first file that was parsed, and then relative to the import path when importing non-relatively.
+
+	int rv = 0;
+
+	// Read file.
+
+	struct stat sb;
+
+	if (stat(path, &sb) < 0) {
+		rv = error(flamingo, "failed to import '%s': stat: %s\n", path, strerror(errno));
+		goto err_stat;
+	}
+
+	size_t const src_size = sb.st_size;
+
+	FILE* const f = fopen(path, "r");
+
+	if (f == NULL) {
+		rv = error(flamingo, "failed to import '%s': fopen: %s\n", path, strerror(errno));
+		goto err_fopen;
+	}
+
+	char* const src = malloc(src_size);
+	assert(src != NULL);
+
+	if (fread(src, 1, src_size, f) != src_size) {
+		rv = error(flamingo, "failed to import '%s': fread: %s\n", path, strerror(errno));
+		goto err_fread;
+	}
+
+	// Create new flamingo engine.
+	// TODO There should be a way to pass it the current scope, so that it can hook into this one.
+
+	flamingo_t imported_flamingo;
+
+	if (flamingo_create(&imported_flamingo, flamingo->progname, src, src_size) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_create: %s\n", path, strerror(errno));
+		goto err_flamingo_create;
+	}
+
+	flamingo_register_cb_call(&imported_flamingo, flamingo->cb_call, NULL);
+
+	// Run the imported program.
+
+	if (flamingo_run(&imported_flamingo) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, strerror(errno));
+		goto err_flamingo_run;
+	}
+
+	// TODO What about just appending the scope of the imported program to the current one instead of adding the imported program to our current scope?
+	// That would prevent the imported program from accessing stuff in our program, which is desirable.
+	// However I don't know how functions would work exactly in that case.
+	// Maybe when we call a function we'd have to remember which flamingo engine it was part of.
+	// And that actually makes things difficult if that function modifies state in its module's scope, as we'd have to keep track of that too.
+
+err_flamingo_run:
+err_flamingo_create:
+err_fread:
+
+	free(src);
+	fclose(f);
+
+err_fopen:
+err_stat:
+
+	free(path);
+
+	return rv;
+}
+
 static int parse_import_path(flamingo_t* flamingo, TSNode node, char** path_ref, size_t* path_len_ref) {
 	assert(strcmp(ts_node_type(node), "import_path") == 0);
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 3);
@@ -99,7 +176,7 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 	}
 
 	char* import_path = NULL;
-	int const rv = asprintf(&import_path, "%.*s.fl", (int) path_len - 1, path);
+	int rv = asprintf(&import_path, "%.*s.fl", (int) path_len - 1, path);
 	free(path);
 
 	if (rv < 0 || import_path == NULL) {
@@ -107,8 +184,14 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "failed to allocate memory for import path");
 	}
 
-	printf("Import path: %s\n", import_path);
+	// We don't support global imports yet.
+
+	if (!is_relative) {
+		return error(flamingo, "global imports are not supported yet (trying to import '%s')", import_path);
+	}
+
+	rv = import(flamingo, import_path);
 	free(import_path);
 
-	return error(flamingo, "TODO");
+	return rv;
 }
