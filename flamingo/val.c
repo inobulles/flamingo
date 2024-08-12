@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-  static flamingo_val_t* val_incref(flamingo_val_t* val) {
+static flamingo_val_t* val_incref(flamingo_val_t* val) {
 	assert(val->ref_count > 0); // value has already been freed
 	val->ref_count++;
 
