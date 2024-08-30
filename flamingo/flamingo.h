@@ -62,6 +62,7 @@ struct flamingo_t {
 
 	// runtime stuff
 
+	bool inherited_scope_stack;
 	size_t scope_stack_size;
 	flamingo_scope_t* scope_stack;
 
@@ -75,6 +76,7 @@ void flamingo_destroy(flamingo_t* flamingo);
 
 char* flamingo_err(flamingo_t* flamingo);
 void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void* data);
+int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t* stack);
 int flamingo_run(flamingo_t* flamingo);
 
 flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size);

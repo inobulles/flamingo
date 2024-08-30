@@ -23,6 +23,7 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	flamingo->src = src;
 	flamingo->src_size = src_size;
 
+	flamingo->inherited_scope_stack = false;
 	flamingo->scope_stack = NULL;
 
 	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
@@ -81,7 +82,7 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	free(ts_state);
 
-	if (flamingo->scope_stack != NULL) {
+	if (!flamingo->inherited_scope_stack && flamingo->scope_stack != NULL) {
 		for (size_t i = 0; i < flamingo->scope_stack_size; i++) {
 			scope_free(&flamingo->scope_stack[i]);
 		}
@@ -121,20 +122,33 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
+int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t* stack) {
+	if (flamingo->scope_stack != NULL) {
+		assert(flamingo->scope_stack_size == 0);
+		return error(flamingo, "there already is a scope stack on this flamingo instance");
+	}
+
+	flamingo->inherited_scope_stack = true;
+	flamingo->scope_stack_size = stack_size;
+	flamingo->scope_stack = stack;
+
+	return 0;
+}
+
 int flamingo_run(flamingo_t* flamingo) {
 	ts_state_t* const ts_state = flamingo->ts_state;
 	assert(strcmp(ts_node_type(ts_state->root), "source_file") == 0);
 
-	if (flamingo->scope_stack != NULL) {
-		free(flamingo->scope_stack);
+	if (!flamingo->inherited_scope_stack) {
+		if (flamingo->scope_stack != NULL) {
+			free(flamingo->scope_stack);
+		}
+
+		flamingo->scope_stack_size = 0;
+		flamingo->scope_stack = NULL;
+
+		scope_stack_push(flamingo);
 	}
-
-	flamingo->scope_stack_size = 0;
-	flamingo->scope_stack = NULL;
-
-	scope_stack_push(flamingo);
-
-	printf("%s\n", ts_node_string(ts_state->root));
 
 	return parse(flamingo, ts_state->root);
 }

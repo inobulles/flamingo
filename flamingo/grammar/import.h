@@ -54,6 +54,13 @@ static int import(flamingo_t* flamingo, char* path) {
 
 	flamingo_register_cb_call(&imported_flamingo, flamingo->cb_call, NULL);
 
+	// Set the scope stack for the imported flamingo instance to be the same as ours.
+
+	if (flamingo_inherit_scope_stack(&imported_flamingo, flamingo->scope_stack_size, flamingo->scope_stack) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_inherit_scope_stack: %s\n", path, flamingo_err(&imported_flamingo));
+		goto err_flamingo_inherit_scope_stack;
+	}
+
 	// Run the imported program.
 
 	if (flamingo_run(&imported_flamingo) < 0) {
@@ -68,6 +75,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	// And that actually makes things difficult if that function modifies state in its module's scope, as we'd have to keep track of that too.
 
 err_flamingo_run:
+err_flamingo_inherit_scope_stack:
 err_flamingo_create:
 err_fread:
 
