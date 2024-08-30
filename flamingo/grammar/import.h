@@ -57,7 +57,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	// Run the imported program.
 
 	if (flamingo_run(&imported_flamingo) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, strerror(errno));
+		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, flamingo_err(&imported_flamingo));
 		goto err_flamingo_run;
 	}
 
