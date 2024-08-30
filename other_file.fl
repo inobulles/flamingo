@@ -5,8 +5,6 @@ fn function_in_other_file() {
 	print "inside that function"
 	print "inside that function"
 	print "inside that function"
-	print "inside that function"
-	print "inside that function"
 }
 
 function_in_other_file()

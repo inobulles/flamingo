@@ -5,6 +5,7 @@
 
 #include "expr.h"
 #include "statement.h"
+#include <scope.c>
 
 #include <common.h>
 
@@ -70,6 +71,17 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		}
 	*/
 
+	char* const prev_src = flamingo->src;
+	size_t const prev_src_size = flamingo->src_size;
+
+	flamingo->src = callable->fn.src;
+	flamingo->src_size = callable->fn.src_size;
+
 	TSNode* const body = callable->fn.body;
-	return parse_statement(flamingo, *body);
+	int const rv = parse_statement(flamingo, *body);
+
+	flamingo->src = prev_src;
+	flamingo->src_size = prev_src_size;
+
+	return rv;
 }

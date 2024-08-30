@@ -80,7 +80,7 @@ err_flamingo_inherit_scope_stack:
 err_flamingo_create:
 err_fread:
 
-	free(src);
+	// free(src);
 	fclose(f);
 
 err_fopen:
