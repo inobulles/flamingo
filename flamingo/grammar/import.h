@@ -68,12 +68,6 @@ static int import(flamingo_t* flamingo, char* path) {
 		goto err_flamingo_run;
 	}
 
-	// TODO What about just appending the scope of the imported program to the current one instead of adding the imported program to our current scope?
-	// That would prevent the imported program from accessing stuff in our program, which is desirable.
-	// However I don't know how functions would work exactly in that case.
-	// Maybe when we call a function we'd have to remember which flamingo engine it was part of.
-	// And that actually makes things difficult if that function modifies state in its module's scope, as we'd have to keep track of that too.
-
 err_flamingo_run:
 err_flamingo_inherit_scope_stack:
 err_flamingo_create:
