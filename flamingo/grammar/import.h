@@ -68,6 +68,13 @@ static int import(flamingo_t* flamingo, char* path) {
 		goto err_flamingo_run;
 	}
 
+	// Don't forget to copy back the scope stack, as after a few reallocs the pointers might be different!
+
+	flamingo->scope_stack = imported_flamingo.scope_stack;
+	assert(flamingo->scope_stack_size == imported_flamingo.scope_stack_size);
+
+	// TODO We're never freeing imported_flamingo: should we just have like a list of imported flamingo instances on flamingo_t that it loops through when we destroy it?
+
 err_flamingo_run:
 err_flamingo_inherit_scope_stack:
 err_flamingo_create:
