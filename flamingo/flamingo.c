@@ -151,6 +151,10 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 			continue;
 		}
 
+		if (strcmp(ts_node_type(child), "doc_comment") == 0) {
+			continue;
+		}
+
 		if (parse_statement(flamingo, child) < 0) {
 			return -1;
 		}
