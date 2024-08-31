@@ -1,7 +1,14 @@
 # import .std
 
-fn do_nothing(a) {
+fn do_nothing(a, b) {
 	print a
+	print b
 }
 
-do_nothing("test")
+do_nothing("test1", "test2")
+
+fn no_args() {
+	print "no args"
+}
+
+no_args()

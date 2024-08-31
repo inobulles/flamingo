@@ -63,7 +63,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	// Check parameter types.
 
 	if (has_params) {
-		size_t const n = ts_node_child_count(params);
+		size_t const n = ts_node_named_child_count(params);
 
 		for (size_t i = 0; i < n; i++) {
 			TSNode const child = ts_node_named_child(params, i);

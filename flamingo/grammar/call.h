@@ -86,7 +86,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Add our arguments as variables, with the function parameters as names.
 
 	TSNode* const params = callable->fn.params;
-	size_t const param_count = params == NULL ? 0 : ts_node_child_count(*params);
+	size_t const param_count = params == NULL ? 0 : ts_node_named_child_count(*params);
 
 	if (has_args) {
 		size_t const n = ts_node_named_child_count(args);
