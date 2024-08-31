@@ -17,6 +17,8 @@ typedef struct {
 extern TSLanguage const* tree_sitter_flamingo(void);
 
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size) {
+	flamingo->consistent = false;
+
 	flamingo->progname = progname;
 	flamingo->errors_outstanding = false;
 
@@ -25,6 +27,10 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 
 	flamingo->inherited_scope_stack = false;
 	flamingo->scope_stack = NULL;
+
+	flamingo->import_count = 0;
+	flamingo->imported_srcs = NULL;
+	flamingo->imported_flamingos = NULL;
 
 	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
 
@@ -58,6 +64,7 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	//      I don't know if Tree-sitter has a simple way to check AST-coherency itself but otherwise just go down the tree and look for any MISSING or UNEXPECTED nodes
 
 	flamingo->ts_state = ts_state;
+	flamingo->consistent = true;
 
 	return 0;
 
@@ -75,6 +82,12 @@ err_ts_parser_new:
 }
 
 void flamingo_destroy(flamingo_t* flamingo) {
+	if (!flamingo->consistent) {
+		return;
+	}
+
+	// Free all the Tree-sitter-related stuff.
+
 	ts_state_t* const ts_state = flamingo->ts_state;
 
 	ts_tree_delete(ts_state->tree);
@@ -82,13 +95,37 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	free(ts_state);
 
-	if (!flamingo->inherited_scope_stack && flamingo->scope_stack != NULL) {
+	// If we didn't inherit our scope stack, free it and all the scopes on it.
+
+	if (!flamingo->inherited_scope_stack) {
 		for (size_t i = 0; i < flamingo->scope_stack_size; i++) {
 			scope_free(&flamingo->scope_stack[i]);
 		}
 
-		free(flamingo->scope_stack);
+		if (flamingo->scope_stack != NULL) {
+			free(flamingo->scope_stack);
+		}
 	}
+
+	// If we imported anything, free all the created flamingo instances and their sources.
+
+	for (size_t i = 0; i < flamingo->import_count; i++) {
+		flamingo_t* const imported_flamingo = &flamingo->imported_flamingos[i];
+		char* const src = flamingo->imported_srcs[i];
+
+		flamingo_destroy(imported_flamingo);
+		free(src);
+	}
+
+	if (flamingo->imported_flamingos != NULL) {
+		free(flamingo->imported_flamingos);
+	}
+
+	if (flamingo->imported_srcs != NULL) {
+		free(flamingo->imported_srcs);
+	}
+
+	flamingo->consistent = false;
 }
 
 char* flamingo_err(flamingo_t* flamingo) {

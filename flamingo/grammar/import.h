@@ -42,45 +42,52 @@ static int import(flamingo_t* flamingo, char* path) {
 		goto err_fread;
 	}
 
+	// Allocate space for a new flamingo engine and its source on the current instance.
+
+	flamingo->import_count++;
+
+	flamingo->imported_flamingos = realloc(flamingo->imported_flamingos, flamingo->import_count * sizeof *flamingo->imported_flamingos);
+	assert(flamingo->imported_flamingos != NULL);
+
+	flamingo->imported_srcs = realloc(flamingo->imported_srcs, flamingo->import_count * sizeof *flamingo->imported_srcs);
+	assert(flamingo->imported_srcs != NULL);
+
+	flamingo->imported_srcs[flamingo->import_count - 1] = src;
+	flamingo_t* const imported_flamingo = &flamingo->imported_flamingos[flamingo->import_count - 1];
+
 	// Create new flamingo engine.
-	// TODO There should be a way to pass it the current scope, so that it can hook into this one.
 
-	flamingo_t imported_flamingo;
-
-	if (flamingo_create(&imported_flamingo, flamingo->progname, src, src_size) < 0) {
+	if (flamingo_create(imported_flamingo, flamingo->progname, src, src_size) < 0) {
 		rv = error(flamingo, "failed to import '%s': flamingo_create: %s\n", path, strerror(errno));
 		goto err_flamingo_create;
 	}
 
-	flamingo_register_cb_call(&imported_flamingo, flamingo->cb_call, NULL);
+	flamingo_register_cb_call(imported_flamingo, flamingo->cb_call, NULL);
 
 	// Set the scope stack for the imported flamingo instance to be the same as ours.
 
-	if (flamingo_inherit_scope_stack(&imported_flamingo, flamingo->scope_stack_size, flamingo->scope_stack) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_inherit_scope_stack: %s\n", path, flamingo_err(&imported_flamingo));
+	if (flamingo_inherit_scope_stack(imported_flamingo, flamingo->scope_stack_size, flamingo->scope_stack) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_inherit_scope_stack: %s\n", path, flamingo_err(imported_flamingo));
 		goto err_flamingo_inherit_scope_stack;
 	}
 
 	// Run the imported program.
 
-	if (flamingo_run(&imported_flamingo) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, flamingo_err(&imported_flamingo));
+	if (flamingo_run(imported_flamingo) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, flamingo_err(imported_flamingo));
 		goto err_flamingo_run;
 	}
 
 	// Don't forget to copy back the scope stack, as after a few reallocs the pointers might be different!
 
-	flamingo->scope_stack = imported_flamingo.scope_stack;
-	assert(flamingo->scope_stack_size == imported_flamingo.scope_stack_size);
-
-	// TODO We're never freeing imported_flamingo: should we just have like a list of imported flamingo instances on flamingo_t that it loops through when we destroy it?
+	flamingo->scope_stack = imported_flamingo->scope_stack;
+	assert(flamingo->scope_stack_size == imported_flamingo->scope_stack_size);
 
 err_flamingo_run:
 err_flamingo_inherit_scope_stack:
 err_flamingo_create:
 err_fread:
 
-	// free(src);
 	fclose(f);
 
 err_fopen:

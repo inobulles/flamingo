@@ -57,6 +57,7 @@ typedef struct {
 
 struct flamingo_t {
 	char const* progname;
+	bool consistent; // Set if we managed to create the instance, so we know whether or not it still needs freeing.
 
 	char* src;
 	size_t src_size;
@@ -66,15 +67,21 @@ struct flamingo_t {
 
 	flamingo_cb_call_t cb_call;
 
-	// runtime stuff
+	// Runtime stuff.
 
 	bool inherited_scope_stack;
 	size_t scope_stack_size;
 	flamingo_scope_t* scope_stack;
 
-	// tree-sitter stuff
+	// Tree-sitter stuff.
 
 	void* ts_state;
+
+	// Import-related stuff, i.e. stuff we have to free ourselves.
+
+	size_t import_count;
+	flamingo_t* imported_flamingos;
+	char** imported_srcs;
 };
 
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size);
