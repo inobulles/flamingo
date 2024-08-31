@@ -5,6 +5,7 @@
 
 #include "assignment.h"
 #include "block.h"
+#include "class_declaration.h"
 #include "function_declaration.h"
 #include "import.h"
 #include "print.h"
@@ -32,6 +33,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	else if (strcmp(type, "function_declaration") == 0) {
 		return parse_function_declaration(flamingo, child);
+	}
+
+	else if (strcmp(type, "class_declaration") == 0) {
+		return parse_class_declaration(flamingo, child);
 	}
 
 	else if (strcmp(type, "expression") == 0) {

@@ -1,4 +1,4 @@
-import .other_file
+import .std
 
 print a
 

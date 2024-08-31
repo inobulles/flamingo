@@ -22,6 +22,20 @@ static flamingo_val_t* val_init(flamingo_val_t* val) {
 	return val;
 }
 
+static char const* val_kind_str(flamingo_val_t* val) {
+	switch (val->kind) {
+	case FLAMINGO_VAL_KIND_STR:
+		return "variable";
+	case FLAMINGO_VAL_KIND_FN:
+		return "function";
+	case FLAMINGO_VAL_KIND_CLASS:
+		return "class";
+	case FLAMINGO_VAL_KIND_NONE:
+	default:
+		return "unknown";
+	}
+}
+
 static flamingo_val_t* val_alloc(void) {
 	flamingo_val_t* const val = calloc(1, sizeof *val);
 	return val_init(val);

@@ -22,6 +22,7 @@ static inline int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 static inline int parse_assignment(flamingo_t* flamingo, TSNode node);
 static inline int parse_import(flamingo_t* flamingo, TSNode node);
 static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node);
+static inline int parse_class_declaration(flamingo_t* flamingo, TSNode node);
 
 __attribute__((format(printf, 2, 3))) static inline int error(flamingo_t* flamingo, char const* fmt, ...) {
 	va_list args;

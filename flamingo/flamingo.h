@@ -15,6 +15,7 @@ typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_FN,
+	FLAMINGO_VAL_KIND_CLASS,
 } flamingo_val_kind_t;
 
 typedef struct {
@@ -41,6 +42,16 @@ typedef struct {
 			char* src;
 			size_t src_size;
 		} fn;
+
+		struct {
+			void* body;
+			size_t body_size;
+
+			// Ditto as for functions.
+
+			char* src;
+			size_t src_size;
+		} class;
 	};
 } flamingo_val_t;
 
