@@ -19,7 +19,15 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 
-	if (strcmp(type, "block") == 0) {
+	if (strcmp(type, "comment") == 0) {
+		return 0;
+	}
+
+	if (strcmp(type, "doc_comment") == 0) {
+		return 0;
+	}
+
+	else if (strcmp(type, "block") == 0) {
 		return parse_block(flamingo, child);
 	}
 
