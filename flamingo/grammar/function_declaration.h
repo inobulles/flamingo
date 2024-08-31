@@ -8,7 +8,7 @@
 #include <val.c>
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
-	assert(ts_node_child_count(node) == 5);
+	assert(ts_node_child_count(node) == 5 || ts_node_child_count(node) == 6);
 
 	// Get qualifier list.
 
@@ -39,7 +39,6 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	size_t const size = end - start;
 
 	// Get function parameters.
-	// TODO Do something with these parameters.
 
 	TSNode const params = ts_node_child_by_field_name(node, "params", 6);
 	bool const has_params = !ts_node_is_null(params);
@@ -59,6 +58,21 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 
 	if (strcmp(body_type, "statement") != 0) {
 		return error(flamingo, "expected statement for body, got %s", body_type);
+	}
+
+	// Check parameter types.
+
+	if (has_params) {
+		size_t const n = ts_node_child_count(params);
+
+		for (size_t i = 0; i < n; i++) {
+			TSNode const child = ts_node_named_child(params, i);
+			char const* const child_type = ts_node_type(child);
+
+			if (strcmp(child_type, "param") != 0) {
+				return error(flamingo, "expected param in parameter list, got %s", child_type);
+			}
+		}
 	}
 
 	// Check if identifier is already in scope (or a previous one) and error if it is.
@@ -82,9 +96,15 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	// Since I want 'flamingo.h' to be usable without importing all of Tree-sitter, 'var->val->fn.body' can't just be a 'TSNode'.
 	// Thus, since only this file knows about the size of 'TSNode', we must dynamically allocate this on the heap.
 
-	var->val->fn.body_size = sizeof body;
-	var->val->fn.body = malloc(var->val->fn.body_size);
-	memcpy(var->val->fn.body, &body, var->val->fn.body_size);
+	var->val->fn.body = malloc(sizeof body);
+	memcpy(var->val->fn.body, &body, sizeof body);
+
+	var->val->fn.params = NULL;
+
+	if (has_params) {
+		var->val->fn.params = malloc(sizeof params);
+		memcpy(var->val->fn.params, &params, sizeof params);
+	}
 
 	var->val->fn.src = flamingo->src;
 	var->val->fn.src_size = flamingo->src_size;

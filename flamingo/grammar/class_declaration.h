@@ -67,9 +67,8 @@ static int parse_class_declaration(flamingo_t* flamingo, TSNode node) {
 	// Assign body node.
 	// See comment in function declaration.
 
-	var->val->class.body_size = sizeof body;
-	var->val->class.body = malloc(var->val->class.body_size);
-	memcpy(var->val->class.body, &body, var->val->class.body_size);
+	var->val->class.body = malloc(sizeof body);
+	memcpy(var->val->class.body, &body, sizeof body);
 
 	var->val->class.src = flamingo->src;
 	var->val->class.src_size = flamingo->src_size;

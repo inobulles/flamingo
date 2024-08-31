@@ -11,7 +11,7 @@
 
 static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "call") == 0);
-	assert(ts_node_child_count(node) == 3);
+	assert(ts_node_child_count(node) == 3 || ts_node_child_count(node) == 4);
 
 	// Get callable expression.
 	// TODO Evaluate this motherfucker.
@@ -24,9 +24,8 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	}
 
 	// Get arguments.
-	// TODO Do something with these arguments.
 
-	TSNode const args = ts_node_child_by_field_name(node, "args", 6);
+	TSNode const args = ts_node_child_by_field_name(node, "args", 4);
 	bool const has_args = !ts_node_is_null(args);
 
 	if (has_args) {
@@ -71,14 +70,74 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		}
 	*/
 
+	// Switch context's source if the function was created in another.
+
 	char* const prev_src = flamingo->src;
 	size_t const prev_src_size = flamingo->src_size;
 
 	flamingo->src = callable->fn.src;
 	flamingo->src_size = callable->fn.src_size;
 
+	// Create a new scope for the function for the argument assignments.
+
+	scope_stack_push(flamingo);
+
+	// Evaluate argument expressions.
+	// Add our arguments as variables, with the function parameters as names.
+
+	TSNode* const params = callable->fn.params;
+	size_t const param_count = params == NULL ? 0 : ts_node_child_count(*params);
+
+	if (has_args) {
+		size_t const n = ts_node_named_child_count(args);
+
+		if (n != param_count) {
+			return error(flamingo, "callable expected %zu arguments, got %zu instead", param_count, n);
+		}
+
+		for (size_t i = 0; i < n; i++) {
+			// Get argument.
+
+			TSNode const arg = ts_node_named_child(args, i);
+			char const* const arg_type = ts_node_type(arg);
+
+			if (strcmp(arg_type, "expression") != 0) {
+				return error(flamingo, "expected expression in argument list, got %s", arg_type);
+			}
+
+			// Get parameter in same position.
+			// Type should already have been checked when declaring the function.
+
+			TSNode const param = ts_node_named_child(*params, i);
+			char const* const param_type = ts_node_type(param);
+			assert(strcmp(param_type, "param") == 0);
+
+			size_t const start = ts_node_start_byte(param);
+			size_t const end = ts_node_end_byte(param);
+
+			char const* const identifier = flamingo->src + start;
+			size_t const size = end - start;
+
+			// Create parameter variable.
+
+			flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), identifier, size);
+
+			// Parse argument expression into that parameter variable.
+
+			if (parse_expr(flamingo, arg, &var->val) < 0) {
+				return -1;
+			}
+		}
+	}
+
+	// Actually parse the function's body.
+
 	TSNode* const body = callable->fn.body;
 	int const rv = parse_statement(flamingo, *body);
+
+	// Unwind the scope stack and switch back to previous source context.
+
+	scope_pop(flamingo);
 
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;

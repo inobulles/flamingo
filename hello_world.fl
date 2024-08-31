@@ -1,5 +1,7 @@
-import .std
+# import .std
 
-print a
+fn do_nothing(a) {
+	print a
+}
 
-function_in_other_file()
+do_nothing("test")

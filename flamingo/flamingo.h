@@ -34,7 +34,7 @@ typedef struct {
 
 		struct {
 			void* body;
-			size_t body_size;
+			void* params;
 
 			// Functions can be defined in other files entirely.
 			// While the Tree-sitter state is held within the nodes themselves, the source they point to is not, which is why we need to keep track of it here.
@@ -45,7 +45,6 @@ typedef struct {
 
 		struct {
 			void* body;
-			size_t body_size;
 
 			// Ditto as for functions.
 
