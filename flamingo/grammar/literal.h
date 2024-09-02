@@ -10,23 +10,14 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val
 	assert(strcmp(ts_node_type(node), "literal") == 0);
 	assert(ts_node_child_count(node) == 1);
 
-	// if value already exists, free it
-	// XXX not sure when this is the case, just doing this for now to be safe!
+	// Don't need to do anything if we're not going to assign it to a value.
 
-	if (*val != NULL) {
-		val_free(*val);
-		val_init(*val);
+	if (val == NULL) {
+		return 0;
 	}
 
-	// otherwise, allocate it
-
-	else {
-		*val = val_alloc();
-	}
-
-	// in any case, val should not be NULL from this point forth
-
-	assert(*val != NULL);
+	assert(*val == NULL);
+	*val = val_alloc();
 
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
