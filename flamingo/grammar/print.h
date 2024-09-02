@@ -32,6 +32,9 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 	case FLAMINGO_VAL_KIND_NONE:
 		printf("<none>\n");
 		break;
+	case FLAMINGO_VAL_KIND_BOOL:
+		printf("%s\n", val->boolean.val ? "true" : "false");
+		break;
 	case FLAMINGO_VAL_KIND_STR:
 		printf("%.*s\n", (int) val->str.size, val->str.str);
 		break;
