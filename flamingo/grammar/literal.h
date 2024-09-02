@@ -22,6 +22,11 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 
+	if (strcmp(type, "none") == 0) {
+		// 'val_alloc' creates a none value for us by default.
+		return 0;
+	}
+
 	if (strcmp(type, "string") == 0) {
 		(*val)->kind = FLAMINGO_VAL_KIND_STR;
 
