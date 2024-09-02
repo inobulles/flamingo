@@ -18,6 +18,8 @@ typedef enum {
 	FLAMINGO_VAL_KIND_CLASS,
 } flamingo_val_kind_t;
 
+typedef void* flamingo_ts_node_t;
+
 typedef struct {
 	flamingo_val_kind_t kind;
 	size_t ref_count;
@@ -33,8 +35,8 @@ typedef struct {
 		} integer;
 
 		struct {
-			void* body;
-			void* params;
+			flamingo_ts_node_t body;
+			flamingo_ts_node_t params;
 
 			// Functions can be defined in other files entirely.
 			// While the Tree-sitter state is held within the nodes themselves, the source they point to is not, which is why we need to keep track of it here.
@@ -44,7 +46,7 @@ typedef struct {
 		} fn;
 
 		struct {
-			void* body;
+			flamingo_ts_node_t body;
 
 			// Ditto as for functions.
 
