@@ -94,6 +94,11 @@ struct flamingo_t {
 	size_t import_count;
 	flamingo_t* imported_flamingos;
 	char** imported_srcs;
+
+	// Current function stuff.
+
+	flamingo_ts_node_t cur_fn_body;
+	flamingo_val_t* cur_fn_rv;
 };
 
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size);

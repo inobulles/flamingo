@@ -9,12 +9,21 @@
 #include "function_declaration.h"
 #include "import.h"
 #include "print.h"
+#include "return.h"
 
 #include <common.h>
 
 static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "statement") == 0);
 	assert(ts_node_child_count(node) == 1);
+
+	if (
+		flamingo->cur_fn_body != NULL &&                       // In function?
+		flamingo->cur_fn_rv != NULL &&                         // Returning?
+		memcmp(flamingo->cur_fn_body, &node, sizeof node) != 0 // Not the body node?
+	) {
+		return 0;
+	}
 
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
@@ -33,6 +42,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	else if (strcmp(type, "print") == 0) {
 		return parse_print(flamingo, child);
+	}
+
+	else if (strcmp(type, "return") == 0) {
+		return parse_return(flamingo, child);
 	}
 
 	else if (strcmp(type, "assignment") == 0) {

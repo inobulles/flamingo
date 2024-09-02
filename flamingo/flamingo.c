@@ -32,6 +32,9 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	flamingo->imported_srcs = NULL;
 	flamingo->imported_flamingos = NULL;
 
+	flamingo->cur_fn_body = NULL;
+	flamingo->cur_fn_rv = NULL;
+
 	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
 
 	if (ts_state == NULL) {

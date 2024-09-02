@@ -139,6 +139,11 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	flamingo->src = callable->fn.src;
 	flamingo->src_size = callable->fn.src_size;
 
+	// Switch context's current function body, if we were called from another.
+
+	TSNode* const prev_fn_body = flamingo->cur_fn_body;
+	flamingo->cur_fn_body = callable->fn.body;
+
 	// Create a new scope for the function for the argument assignments.
 
 	scope_stack_push(flamingo);
@@ -159,21 +164,35 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	TSNode* const body = callable->fn.body;
 	int const rv = parse_statement(flamingo, *body);
 
-	// Unwind the scope stack and switch back to previous source context.
+	// Unwind the scope stack and switch back to previous source and current function body context.
 
 	scope_pop(flamingo);
 
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;
 
-	// Set the value of this expression to a none value.
-	// XXX Should obviously not do this if return statement in function.
-	// Don't need to do anything if we're not going to assign it to a value.
+	flamingo->cur_fn_body = prev_fn_body;
 
-	if (val != NULL) {
-		assert(*val == NULL);
-		*val = val_alloc();
+	// Set the value of this expression to the return value.
+	// Just discard it if we're not going to set it to anything.
+
+	if (val == NULL) {
+		if (flamingo->cur_fn_rv != NULL) {
+			val_decref(flamingo->cur_fn_rv);
+		}
 	}
 
+	else {
+		// If return value was never set, just create a none value.
+
+		if (flamingo->cur_fn_rv == NULL) {
+			flamingo->cur_fn_rv = val_alloc();
+		}
+
+		assert(*val == NULL);
+		*val = flamingo->cur_fn_rv;
+	}
+
+	flamingo->cur_fn_rv = NULL;
 	return rv;
 }
