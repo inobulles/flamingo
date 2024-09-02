@@ -1,6 +1,6 @@
 # import .std
 
-fn do_nothing(a, b) {
+fn do_nothing(a: str, b: str) {
 	print a
 	print b
 }
