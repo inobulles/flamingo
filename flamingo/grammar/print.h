@@ -26,13 +26,22 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 
 	// XXX Don't forget to decrement reference at the end!
 
-	if (val->kind == FLAMINGO_VAL_KIND_STR) {
-		printf("%.*s\n", (int) val->str.size, val->str.str);
-		val_decref(val);
+	int rv = 0;
 
-		return 0;
+	switch (val->kind) {
+	case FLAMINGO_VAL_KIND_NONE:
+		printf("<none>\n");
+		break;
+	case FLAMINGO_VAL_KIND_STR:
+		printf("%.*s\n", (int) val->str.size, val->str.str);
+		break;
+	case FLAMINGO_VAL_KIND_FN:
+		printf("<fn>\n");
+		break;
+	default:
+		rv = error(flamingo, "can't print expression kind: %d", val->kind);
 	}
 
 	val_decref(val);
-	return error(flamingo, "can't print expression kind: %d", val->kind);
+	return rv;
 }
