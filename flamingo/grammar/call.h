@@ -166,5 +166,14 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;
 
+	// Set the value of this expression to a none value.
+	// XXX Should obviously not do this if return statement in function.
+	// Don't need to do anything if we're not going to assign it to a value.
+
+	if (val != NULL) {
+		assert(*val == NULL);
+		*val = val_alloc();
+	}
+
 	return rv;
 }
