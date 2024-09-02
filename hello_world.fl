@@ -7,11 +7,11 @@ fn do_nothing(a: str, b: str) {
 
 do_nothing("test1", "test2")
 
-fn no_args() {
+fn no_args(x: str) {
 	print "b4"
-	return "no args" # TODO return none
+	return x # TODO return none
 	print "a4"
 }
 
 print no_args
-print no_args()
+print no_args("send")
