@@ -11,4 +11,5 @@ fn no_args() {
 	print "no args"
 }
 
-no_args()
+print no_args
+print no_args()
