@@ -27,6 +27,13 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val
 		return 0;
 	}
 
+	if (strcmp(type, "bool") == 0) {
+		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+		(*val)->boolean.val = *(flamingo->src + ts_node_start_byte(child)) == 't';
+
+		return 0;
+	}
+
 	if (strcmp(type, "string") == 0) {
 		(*val)->kind = FLAMINGO_VAL_KIND_STR;
 

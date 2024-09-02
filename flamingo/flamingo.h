@@ -13,6 +13,7 @@ typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
+	FLAMINGO_VAL_KIND_BOOL,
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_FN,
 	FLAMINGO_VAL_KIND_CLASS,
@@ -25,6 +26,10 @@ typedef struct {
 	size_t ref_count;
 
 	union {
+		struct {
+			bool val;
+		} boolean;
+
 		struct {
 			char* str;
 			size_t size;

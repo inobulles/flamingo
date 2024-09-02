@@ -25,6 +25,7 @@ static flamingo_val_t* val_init(flamingo_val_t* val) {
 static char const* val_kind_str(flamingo_val_t* val) {
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_STR:
+	case FLAMINGO_VAL_KIND_BOOL:
 		return "variable";
 	case FLAMINGO_VAL_KIND_FN:
 		return "function";
