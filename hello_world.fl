@@ -8,8 +8,8 @@ fn do_nothing(a: str, b: str) {
 do_nothing("test1", "test2")
 
 fn no_args(x: str) {
-	print "b4"
-	return x # TODO return none
+	print("b4")
+	return(x) # TODO return none
 	print "a4"
 }
 

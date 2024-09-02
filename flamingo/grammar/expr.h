@@ -27,10 +27,15 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		return parse_identifier(flamingo, child, val);
 	}
 
-	// These expressions do have side-effects, so we need to parse them anyway.
+	// These expressions could have side-effects, so we need to parse them anyway.
 
 	if (strcmp(type, "call") == 0) {
 		return parse_call(flamingo, child, val);
+	}
+
+	if (strcmp(type, "parenthesized_expression") == 0) {
+		TSNode const grandchild = ts_node_child_by_field_name(child, "expression", 10);
+		return parse_expr(flamingo, grandchild, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
