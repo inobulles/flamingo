@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "assert.h"
 #include "assignment.h"
 #include "block.h"
 #include "class_declaration.h"
@@ -46,6 +47,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	else if (strcmp(type, "return") == 0) {
 		return parse_return(flamingo, child);
+	}
+
+	else if (strcmp(type, "assert") == 0) {
+		return parse_assert(flamingo, child);
 	}
 
 	else if (strcmp(type, "assignment") == 0) {

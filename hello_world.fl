@@ -1,20 +1,4 @@
 # import .std
 
-print true
-print false
-
-# TODO Turn this into a test.
-
-to_be_shadowed = "Shadowing failed!"
-
-fn shadow(to_be_shadowed: str) {
-	return to_be_shadowed
-}
-
-shadow("Shadowing succeeded!")
-
-fn ret_none() {
-	return none
-}
-
-print ret_none()
+a = false
+assert a
