@@ -68,18 +68,26 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 	flamingo_val_kind_t const kind = left_val->kind; // Same as 'right_val->kind' by this point.
 
+	// Allocate our value.
+	// We can stop here if we discard the result, as we've already evaluated our operand expressions (which we need to do as they might modify state).
+	// TODO It would be nice to find a way to check the operands are compatible with the operator before this point so we get errors. Though I don't think this is the only place where we're not doing this correctly so this might be a difficult change to make.
+
+	if (val == NULL) {
+		return 0;
+	}
+
+	assert(*val == NULL);
+	*val = val_alloc();
+
 	// Do the math.
 
 	int rv = 0;
 
 	if (kind == FLAMINGO_VAL_KIND_INT) {
+		(*val)->kind = FLAMINGO_VAL_KIND_INT;
+
 		if (strncmp(operator, "+", operator_size) == 0) {
-			assert(*val == NULL);
-			*val = val_alloc();
-
-			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer + right_val->integer.integer;
-
 			goto done;
 		}
 	}
