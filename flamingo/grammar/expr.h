@@ -8,6 +8,7 @@
 #include "literal.h"
 
 #include <common.h>
+#include <math.h>
 
 static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "binary_expression") == 0);
@@ -121,6 +122,12 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer % right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "**", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = pow(left_val->integer.integer, right_val->integer.integer);
 			goto done;
 		}
 
