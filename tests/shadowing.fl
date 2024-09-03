@@ -1,6 +1,8 @@
 FAILURE = "Shadowing failed!"
 SUCCESS = "Shadowding succeeded!"
 
+# Parameter shadowing.
+
 to_be_shadowed = FAILURE
 
 fn shadow(to_be_shadowed: str) {
@@ -8,3 +10,12 @@ fn shadow(to_be_shadowed: str) {
 }
 
 assert shadow(SUCCESS) == SUCCESS
+
+# General block shadowing.
+
+to_be_shadowed = FAILURE
+
+{
+	to_be_shadowed = SUCCESS
+	assert to_be_shadowed == SUCCESS
+}

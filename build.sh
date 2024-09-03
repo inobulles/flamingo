@@ -15,5 +15,4 @@ cc $cc_flags -c main.c -o bin/main.o
 cc $(find bin -name "*.o") -lm $cc_flags -o bin/flamingo
 
 bin/flamingo hello_world.fl
-
-# TODO Run more "serious" tests too.
+sh tests.sh
