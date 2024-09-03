@@ -1,5 +1,4 @@
 # import .std
 
-a = 50
+a = 420 + 69
 print a
-assert a

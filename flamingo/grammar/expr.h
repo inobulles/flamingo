@@ -9,6 +9,91 @@
 
 #include <common.h>
 
+static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+	assert(strcmp(ts_node_type(node), "binary_expression") == 0);
+	assert(ts_node_named_child_count(node) == 3);
+
+	// Get left operand.
+
+	TSNode const left = ts_node_child_by_field_name(node, "left", 4);
+	char const* const left_type = ts_node_type(left);
+
+	if (strcmp(left_type, "expression") != 0) {
+		return error(flamingo, "expected expression for left operand, got %s", left_type);
+	}
+
+	// Get right operand.
+
+	TSNode const right = ts_node_child_by_field_name(node, "right", 5);
+	char const* const right_type = ts_node_type(right);
+
+	if (strcmp(right_type, "expression") != 0) {
+		return error(flamingo, "expected expression for right operand, got %s", right_type);
+	}
+
+	// Get operator.
+
+	TSNode const operator_node = ts_node_child_by_field_name(node, "operator", 8);
+	char const* const operator_type = ts_node_type(operator_node);
+
+	if (strcmp(operator_type, "operator") != 0) {
+		return error(flamingo, "expected operator, got %s", operator_type);
+	}
+
+	size_t const start = ts_node_start_byte(operator_node);
+	size_t const end = ts_node_end_byte(operator_node);
+
+	char const* const operator= flamingo->src + start;
+	size_t const operator_size = end - start;
+
+	// Parse operands.
+
+	flamingo_val_t* left_val = NULL;
+
+	if (parse_expr(flamingo, left, &left_val) != 0) {
+		return -1;
+	}
+
+	flamingo_val_t* right_val = NULL;
+
+	if (parse_expr(flamingo, right, &right_val) != 0) {
+		return -1;
+	}
+
+	// Check if the operands are compatible.
+
+	if (left_val->kind != right_val->kind) {
+		return error(flamingo, "operands have incompatible types: %s and %s", val_type_str(left_val), val_type_str(right_val));
+	}
+
+	flamingo_val_kind_t const kind = left_val->kind; // Same as 'right_val->kind' by this point.
+
+	// Do the math.
+
+	int rv = 0;
+
+	if (kind == FLAMINGO_VAL_KIND_INT) {
+		if (strncmp(operator, "+", operator_size) == 0) {
+			assert(*val == NULL);
+			*val = val_alloc();
+
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = left_val->integer.integer + right_val->integer.integer;
+
+			goto done;
+		}
+	}
+
+	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
+
+done:
+
+	val_decref(left_val);
+	val_decref(right_val);
+
+	return rv;
+}
+
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
@@ -36,6 +121,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	if (strcmp(type, "parenthesized_expression") == 0) {
 		TSNode const grandchild = ts_node_child_by_field_name(child, "expression", 10);
 		return parse_expr(flamingo, grandchild, val);
+	}
+
+	if (strcmp(type, "binary_expression") == 0) {
+		return parse_binary_expr(flamingo, child, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
