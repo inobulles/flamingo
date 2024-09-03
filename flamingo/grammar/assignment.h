@@ -44,7 +44,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	}
 
 	else if (var->val->kind == FLAMINGO_VAL_KIND_FN || var->val->kind == FLAMINGO_VAL_KIND_CLASS) {
-		return error(flamingo, "cannot assign to %s '%.*s'", val_kind_str(var->val), (int) size, identifier);
+		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(var->val), (int) size, identifier);
 	}
 
 	// If variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable.

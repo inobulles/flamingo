@@ -34,6 +34,45 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val
 		return 0;
 	}
 
+	// XXX For now, just ints.
+	// Maybe in the future floats will be supported to, in which case there won't be a single "number" node type.
+
+	if (strcmp(type, "number") == 0) {
+		size_t const start = ts_node_start_byte(child);
+		size_t const end = ts_node_end_byte(child);
+
+		char const* const number = flamingo->src + start;
+		size_t const size = end - start;
+		assert(size > 0);
+
+		bool negative = false;
+
+		if (number[0] == '-') {
+			assert(size > 1); // Can't be just a minus sign.
+			negative = true;
+		}
+
+		int64_t integer = 0;
+
+		for (size_t i = 0; i < size; i++) {
+			if (number[i] == '_') {
+				continue;
+			}
+
+			if (number[i] < '0' || number[i] > '9') {
+				return error(flamingo, "number literals can only contain decimal digits (got '%c')", number[i]);
+			}
+
+			integer *= 10;
+			integer += number[i] - '0';
+		}
+
+		(*val)->kind = FLAMINGO_VAL_KIND_INT;
+		(*val)->integer.integer = negative ? -integer : integer;
+
+		return 0;
+	}
+
 	if (strcmp(type, "string") == 0) {
 		(*val)->kind = FLAMINGO_VAL_KIND_STR;
 

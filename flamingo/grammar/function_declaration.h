@@ -82,7 +82,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	flamingo_var_t* const prev_var = flamingo_scope_find_var(flamingo, name, size);
 
 	if (prev_var != NULL) {
-		return error(flamingo, "the %s '%.*s' has already been declared in this scope", val_kind_str(prev_var->val), (int) size, name);
+		return error(flamingo, "the %s '%.*s' has already been declared in this scope", val_role_str(prev_var->val), (int) size, name);
 	}
 
 	// Add function to scope.

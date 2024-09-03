@@ -1,4 +1,5 @@
 # import .std
 
-a = false
+a = 50
+print a
 assert a

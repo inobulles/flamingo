@@ -14,6 +14,7 @@ typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
 	FLAMINGO_VAL_KIND_BOOL,
+	FLAMINGO_VAL_KIND_INT,
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_FN,
 	FLAMINGO_VAL_KIND_CLASS,
@@ -36,7 +37,7 @@ typedef struct {
 		} str;
 
 		struct {
-			uint64_t integer;
+			int64_t integer;
 		} integer;
 
 		struct {
