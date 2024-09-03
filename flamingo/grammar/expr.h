@@ -222,6 +222,20 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 			goto done;
 		}
+
+		// Comparisons.
+
+		if (strncmp(operator, "==", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->str.size == right_val->str.size && memcmp(left_val->str.str, right_val->str.str, left_val->str.size) == 0;
+			goto done;
+		}
+
+		if (strncmp(operator, "!=", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->str.size != right_val->str.size || memcmp(left_val->str.str, right_val->str.str, left_val->str.size) != 0;
+			goto done;
+		}
 	}
 
 	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
