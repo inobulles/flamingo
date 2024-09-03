@@ -84,12 +84,87 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	int rv = 0;
 
 	if (kind == FLAMINGO_VAL_KIND_INT) {
-		(*val)->kind = FLAMINGO_VAL_KIND_INT;
+		// Integer arithmetic.
 
 		if (strncmp(operator, "+", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer + right_val->integer.integer;
 			goto done;
 		}
+
+		if (strncmp(operator, "-", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = left_val->integer.integer - right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "*", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = left_val->integer.integer * right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "/", operator_size) == 0) {
+			if (right_val->integer.integer == 0) {
+				return error(flamingo, "division by zero");
+			}
+
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = left_val->integer.integer / right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "%", operator_size) == 0) {
+			if (right_val->integer.integer == 0) {
+				return error(flamingo, "modulo by zero");
+			}
+
+			(*val)->kind = FLAMINGO_VAL_KIND_INT;
+			(*val)->integer.integer = left_val->integer.integer % right_val->integer.integer;
+			goto done;
+		}
+
+		// Comparisons.
+
+		if (strncmp(operator, "==", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer == right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "!=", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer != right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "<", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer < right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, "<=", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer <= right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, ">", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer > right_val->integer.integer;
+			goto done;
+		}
+
+		if (strncmp(operator, ">=", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->integer.integer >= right_val->integer.integer;
+			goto done;
+		}
+	}
+
+	if (kind == FLAMINGO_VAL_KIND_BOOL) {
+		// TODO Logical comparisons.
 	}
 
 	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
