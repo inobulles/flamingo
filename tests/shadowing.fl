@@ -1,0 +1,10 @@
+FAILURE = "Shadowing failed!"
+SUCCESS = "Shadowding succeeded!"
+
+to_be_shadowed = FAILURE
+
+fn shadow(to_be_shadowed: str) {
+	return to_be_shadowed
+}
+
+assert shadow(SUCCESS) == SUCCESS
