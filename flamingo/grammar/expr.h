@@ -206,6 +206,24 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 		}
 	}
 
+	if (kind == FLAMINGO_VAL_KIND_STR) {
+		// String concatenation.
+		// TODO Multiplication (but then I need to rethink the whole operands having to have the same type thing).
+
+		if (strncmp(operator, "+", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_STR;
+
+			(*val)->str.size = left_val->str.size + right_val->str.size;
+			(*val)->str.str = malloc((*val)->str.size);
+			assert((*val)->str.str != NULL);
+
+			memcpy((*val)->str.str, left_val->str.str, left_val->str.size);
+			memcpy((*val)->str.str + left_val->str.size, right_val->str.str, right_val->str.size);
+
+			goto done;
+		}
+	}
+
 	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
 
 done:
