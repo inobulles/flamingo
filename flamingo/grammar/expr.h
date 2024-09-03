@@ -164,7 +164,19 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	}
 
 	if (kind == FLAMINGO_VAL_KIND_BOOL) {
-		// TODO Logical comparisons.
+		// Comparisons.
+
+		if (strncmp(operator, "==", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->boolean.val == right_val->boolean.val;
+			goto done;
+		}
+
+		if (strncmp(operator, "!=", operator_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+			(*val)->boolean.val = left_val->boolean.val != right_val->boolean.val;
+			goto done;
+		}
 	}
 
 	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
