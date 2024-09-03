@@ -1,5 +1,5 @@
 FAILURE = "Shadowing failed!"
-SUCCESS = "Shadowding succeeded!"
+SUCCESS = "Shadowing succeeded!"
 
 # Parameter shadowing.
 

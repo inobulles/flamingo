@@ -10,6 +10,8 @@
 #include <common.h>
 #include <math.h>
 
+// TODO Move to own file.
+
 static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "binary_expression") == 0);
 	assert(ts_node_named_child_count(node) == 3);
