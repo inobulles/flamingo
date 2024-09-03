@@ -1,0 +1,65 @@
+# Basic arithmetic.
+
+assert 420 + 69 == 489
+assert 420 - 69 == 351
+assert 420 * 69 == 28980
+assert 420 / 69 == 6
+assert 420 % 69 == 6
+assert 420 ** 2 == 176400
+
+# Numerical comparisons.
+
+assert (420 == 69) == false
+assert (420 != 69) == true
+assert (420 == 420) == true
+assert (420 != 420) == false
+
+assert (420 > 69) == true
+assert (420 < 69) == false
+assert (420 >= 69) == true
+assert (420 <= 69) == false
+
+assert (420 > 420) == false
+assert (420 < 420) == false
+assert (420 >= 420) == true
+assert (420 <= 420) == true
+
+assert (69 > 420) == false
+assert (69 < 420) == true
+assert (69 >= 420) == false
+assert (69 <= 420) == true
+
+# Boolean comparisons.
+
+assert (true == true) == true
+assert (true == false) == false
+assert (true != true) == false
+assert (true != false) == true
+
+# Boolean logic truth tables.
+
+assert (false && false) == false
+assert (false && true) == false
+assert (true && false) == false
+assert (true && true) == true
+
+assert (false || false) == false
+assert (false || true) == true
+assert (true || false) == true
+assert (true || true) == true
+
+assert (false ^^ false) == false
+assert (false ^^ true) == true
+assert (true ^^ false) == true
+assert (true ^^ true) == false
+
+# String operations.
+
+assert "zonnebloem" + "granen" == "zonnebloemgranen"
+
+# String comparisons.
+
+assert ("zonnebloemgranen" == "zonnebloemgranen") == true
+assert ("zonnebloemgranen" != "zonnebloemgranen") == false
+assert ("zonnebloem" == "granen") == false
+assert ("zonnebloem" != "granen") == true

@@ -141,7 +141,7 @@ char* flamingo_err(flamingo_t* flamingo) {
 }
 
 void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void* data) {
-	fprintf(stderr, "%s: not implemented\n", __func__);
+	// fprintf(stderr, "%s: not implemented\n", __func__);
 }
 
 static int parse(flamingo_t* flamingo, TSNode node) {
