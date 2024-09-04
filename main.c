@@ -11,10 +11,12 @@
 #include <string.h>
 #include <sys/stat.h>
 
+static char const* init_name = "flamingo";
+
 static void usage(void) {
 #if defined(__FreeBSD__)
 	char const* const progname = getprogname();
-#elif defined(__Linux__)
+#elif defined(__linux__)
 	char progname[16] = init_name;
 
 	if (prctl(PR_GET_NAME, progname, NULL, NULL, NULL) < 0) {
@@ -35,6 +37,8 @@ static int call_cb(flamingo_t* flamingo, char* name, void* data) {
 }
 
 int main(int argc, char* argv[]) {
+	init_name = *argv;
+
 	// parse arguments
 
 	if (argc != 2) {
