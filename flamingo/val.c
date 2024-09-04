@@ -25,11 +25,13 @@ static flamingo_val_t* val_init(flamingo_val_t* val) {
 static char const* val_role_str(flamingo_val_t* val) {
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_STR:
+	case FLAMINGO_VAL_KIND_INT:
 	case FLAMINGO_VAL_KIND_BOOL:
+	case FLAMINGO_VAL_KIND_NONE:
+	case FLAMINGO_VAL_KIND_INST:
 		return "variable";
 	case FLAMINGO_VAL_KIND_FN:
 		return val->fn.is_class ? "class" : "function";
-	case FLAMINGO_VAL_KIND_NONE:
 	default:
 		return "unknown";
 	}
@@ -47,6 +49,8 @@ static char const* val_type_str(flamingo_val_t* val) {
 		return val->fn.is_class ? "class" : "function";
 	case FLAMINGO_VAL_KIND_NONE:
 		return "none";
+	case FLAMINGO_VAL_KIND_INST:
+		return "instance";
 	default:
 		return "unknown";
 	}
@@ -57,6 +61,8 @@ static flamingo_val_t* val_alloc(void) {
 	return val_init(val);
 }
 
+static void scope_free(flamingo_scope_t* scope);
+
 static void val_free(flamingo_val_t* val) {
 	if (val->kind == FLAMINGO_VAL_KIND_STR) {
 		free(val->str.str);
@@ -64,6 +70,14 @@ static void val_free(flamingo_val_t* val) {
 
 	if (val->kind == FLAMINGO_VAL_KIND_FN) {
 		free(val->fn.body);
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_INST) {
+		scope_free(val->inst.scope);
+
+		if (val->inst.free_data != NULL) {
+			val->inst.free_data(val, val->inst.data);
+		}
 	}
 
 	// TODO when should the memory pointed to by val itself be freed?

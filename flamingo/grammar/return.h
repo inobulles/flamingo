@@ -18,13 +18,15 @@ static int parse_return(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "Return can't be used in top-level scope");
 	}
 
+	bool const in_class = cur_scope(flamingo)->class_scope;
+
 	// Get return value.
 
 	TSNode const rv_node = ts_node_child_by_field_name(node, "rv", 2);
 	bool const has_rv = !ts_node_is_null(rv_node);
 
 	if (has_rv) {
-		if (cur_scope(flamingo)->class_scope) {
+		if (in_class) {
 			return error(flamingo, "return statement can't take a return value when inside a class scope");
 		}
 
@@ -39,6 +41,11 @@ static int parse_return(flamingo_t* flamingo, TSNode node) {
 	// State of the current function return value should always be clean before this.
 
 	assert(flamingo->cur_fn_rv == NULL);
+
+	if (in_class) {
+		flamingo->cur_fn_rv = (void*) (intptr_t) 0xC1A55EE; // XXX Yeaaaah this is a bit ugly but hey.
+		return 0;
+	}
 
 	if (has_rv) {
 		if (parse_expr(flamingo, rv_node, &flamingo->cur_fn_rv) < 0) {

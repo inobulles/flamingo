@@ -28,7 +28,7 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 		}
 
 		// Get parameter in same position.
-		// assert: Type should already have been checked when declaring the function.
+		// assert: Type should already have been checked when declaring the function/class.
 
 		TSNode const param = ts_node_named_child(*params, i);
 		char const* const param_type = ts_node_type(param);
@@ -81,7 +81,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	char const* const callable_type = ts_node_type(callable_node);
 
 	if (strcmp(callable_type, "expression") != 0) {
-		return error(flamingo, "expected identifier for function name, got %s", callable_type);
+		return error(flamingo, "expected identifier for callable name, got %s", callable_type);
 	}
 
 	// Get arguments.
@@ -131,7 +131,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		}
 	*/
 
-	// Switch context's source if the function was created in another.
+	// Switch context's source if the callable was created in another.
 
 	char* const prev_src = flamingo->src;
 	size_t const prev_src_size = flamingo->src_size;
@@ -139,7 +139,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	flamingo->src = callable->fn.src;
 	flamingo->src_size = callable->fn.src_size;
 
-	// Switch context's current function body, if we were called from another.
+	// Switch context's current callable body if we were called from another.
 
 	TSNode* const prev_fn_body = flamingo->cur_fn_body;
 	flamingo->cur_fn_body = callable->fn.body;
@@ -147,7 +147,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Create a new scope for the function for the argument assignments.
 	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
 
-	flamingo_scope_t* const scope = scope_stack_push(flamingo);
+	flamingo_scope_t* scope = scope_stack_push(flamingo);
 	scope->class_scope = callable->fn.is_class;
 
 	// Evaluate argument expressions.
@@ -164,20 +164,48 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Actually parse the function's body.
 
 	TSNode* const body = callable->fn.body;
-	int const rv = parse_statement(flamingo, *body);
+
+	if (parse_statement(flamingo, *body) < 0) {
+		return -1;
+	}
 
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
 	if (callable->fn.is_class) {
-		// TODO Don't destroy the scope, create an instance and preserve it!
+		scope = scope_gently_detach(flamingo);
 	}
 
-	scope_pop(flamingo);
+	else {
+		scope_pop(flamingo);
+	}
 
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;
 
 	flamingo->cur_fn_body = prev_fn_body;
+
+	// If class, create an instance.
+
+	if (callable->fn.is_class) {
+		if (val == NULL) {
+			goto done;
+		}
+
+		assert(*val == NULL);
+		*val = val_alloc();
+		(*val)->kind = FLAMINGO_VAL_KIND_INST;
+
+		// TODO There's a big issue here.
+		//      Since the scope stack is realloc'd the scope pointer is not guaranteed to be the same throughout the instance.
+		//      A point of scope pointers for the scope stack is the solution here.
+
+		(*val)->inst.class = callable;
+		(*val)->inst.scope = scope;
+		(*val)->inst.data = NULL;
+		(*val)->inst.free_data = NULL;
+
+		goto done;
+	}
 
 	// Set the value of this expression to the return value.
 	// Just discard it if we're not going to set it to anything.
@@ -199,6 +227,8 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		*val = flamingo->cur_fn_rv;
 	}
 
+done:
+
 	flamingo->cur_fn_rv = NULL;
-	return rv;
+	return 0;
 }

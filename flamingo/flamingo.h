@@ -59,9 +59,12 @@ struct flamingo_val_t {
 
 		struct {
 			flamingo_val_t* class;
-
 			flamingo_scope_t* scope;
-			void* data; // Data managed by the user.
+
+			// Data managed by the user.
+
+			void* data;
+			void (*free_data)(flamingo_val_t* val, void* data);
 		} inst;
 	};
 };

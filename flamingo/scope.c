@@ -64,9 +64,13 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 	return var;
 }
 
+static flamingo_scope_t* scope_gently_detach(flamingo_t* flamingo) {
+	return &flamingo->scope_stack[--flamingo->scope_stack_size];
+}
+
 static void scope_pop(flamingo_t* flamingo) {
 	// TODO Free containing variables.
-	scope_free(&flamingo->scope_stack[--flamingo->scope_stack_size]);
+	scope_free(scope_gently_detach(flamingo));
 }
 
 flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size) {
