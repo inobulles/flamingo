@@ -35,19 +35,20 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	}
 
 	// Get operator.
+	// XXX Calling this all 'op_*' because clang-format thinks 'operator' is the C++ keyword and so is annoying with it.
 
-	TSNode const operator_node = ts_node_child_by_field_name(node, "operator", 8);
-	char const* const operator_type = ts_node_type(operator_node);
+	TSNode const op_node = ts_node_child_by_field_name(node, "operator", 8);
+	char const* const op_type = ts_node_type(op_node);
 
-	if (strcmp(operator_type, "operator") != 0) {
-		return error(flamingo, "expected operator, got %s", operator_type);
+	if (strstr("operator", op_type) != 0) { // XXX Yes, I'm being lazy.
+		return error(flamingo, "expected operator, got %s", op_type);
 	}
 
-	size_t const start = ts_node_start_byte(operator_node);
-	size_t const end = ts_node_end_byte(operator_node);
+	size_t const start = ts_node_start_byte(op_node);
+	size_t const end = ts_node_end_byte(op_node);
 
-	char const* const operator= flamingo->src + start;
-	size_t const operator_size = end - start;
+	char const* const op = flamingo->src + start;
+	size_t const op_size = end - start;
 
 	// Parse operands.
 
@@ -89,25 +90,25 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	if (kind == FLAMINGO_VAL_KIND_INT) {
 		// Integer arithmetic.
 
-		if (strncmp(operator, "+", operator_size) == 0) {
+		if (strncmp(op, "+", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer + right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "-", operator_size) == 0) {
+		if (strncmp(op, "-", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer - right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "*", operator_size) == 0) {
+		if (strncmp(op, "*", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = left_val->integer.integer * right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "/", operator_size) == 0) {
+		if (strncmp(op, "/", op_size) == 0) {
 			if (right_val->integer.integer == 0) {
 				return error(flamingo, "division by zero");
 			}
@@ -117,7 +118,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 			goto done;
 		}
 
-		if (strncmp(operator, "%", operator_size) == 0) {
+		if (strncmp(op, "%", op_size) == 0) {
 			if (right_val->integer.integer == 0) {
 				return error(flamingo, "modulo by zero");
 			}
@@ -127,7 +128,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 			goto done;
 		}
 
-		if (strncmp(operator, "**", operator_size) == 0) {
+		if (strncmp(op, "**", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_INT;
 			(*val)->integer.integer = pow(left_val->integer.integer, right_val->integer.integer);
 			goto done;
@@ -135,37 +136,37 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		// Comparisons.
 
-		if (strncmp(operator, "==", operator_size) == 0) {
+		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer == right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "!=", operator_size) == 0) {
+		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer != right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "<", operator_size) == 0) {
+		if (strncmp(op, "<", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer < right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, "<=", operator_size) == 0) {
+		if (strncmp(op, "<=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer <= right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, ">", operator_size) == 0) {
+		if (strncmp(op, ">", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer > right_val->integer.integer;
 			goto done;
 		}
 
-		if (strncmp(operator, ">=", operator_size) == 0) {
+		if (strncmp(op, ">=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->integer.integer >= right_val->integer.integer;
 			goto done;
@@ -175,19 +176,19 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	if (kind == FLAMINGO_VAL_KIND_BOOL) {
 		// Logical operators.
 
-		if (strncmp(operator, "&&", operator_size) == 0) {
+		if (strncmp(op, "&&", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->boolean.val && right_val->boolean.val;
 			goto done;
 		}
 
-		if (strncmp(operator, "||", operator_size) == 0) {
+		if (strncmp(op, "||", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->boolean.val || right_val->boolean.val;
 			goto done;
 		}
 
-		if (strncmp(operator, "^^", operator_size) == 0) {
+		if (strncmp(op, "^^", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = (!!left_val->boolean.val) ^ (!!right_val->boolean.val);
 			goto done;
@@ -195,13 +196,13 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		// Comparisons.
 
-		if (strncmp(operator, "==", operator_size) == 0) {
+		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->boolean.val == right_val->boolean.val;
 			goto done;
 		}
 
-		if (strncmp(operator, "!=", operator_size) == 0) {
+		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->boolean.val != right_val->boolean.val;
 			goto done;
@@ -212,7 +213,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 		// String concatenation.
 		// TODO Multiplication (but then I need to rethink the whole operands having to have the same type thing).
 
-		if (strncmp(operator, "+", operator_size) == 0) {
+		if (strncmp(op, "+", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_STR;
 
 			(*val)->str.size = left_val->str.size + right_val->str.size;
@@ -227,20 +228,20 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		// Comparisons.
 
-		if (strncmp(operator, "==", operator_size) == 0) {
+		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->str.size == right_val->str.size && memcmp(left_val->str.str, right_val->str.str, left_val->str.size) == 0;
 			goto done;
 		}
 
-		if (strncmp(operator, "!=", operator_size) == 0) {
+		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 			(*val)->boolean.val = left_val->str.size != right_val->str.size || memcmp(left_val->str.str, right_val->str.str, left_val->str.size) != 0;
 			goto done;
 		}
 	}
 
-	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) operator_size, operator, val_type_str(left_val));
+	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) op_size, op, val_type_str(left_val));
 
 done:
 
