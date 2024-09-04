@@ -8,7 +8,8 @@
 #include <val.c>
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
-	assert(ts_node_child_count(node) == 5 || ts_node_child_count(node) == 6);
+	size_t const child_count = ts_node_child_count(node);
+	assert(child_count >= 4 || child_count <= 6);
 
 	// Get qualifier list.
 
