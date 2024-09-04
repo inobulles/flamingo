@@ -63,3 +63,21 @@ assert ("zonnebloemgranen" == "zonnebloemgranen") == true
 assert ("zonnebloemgranen" != "zonnebloemgranen") == false
 assert ("zonnebloem" == "granen") == false
 assert ("zonnebloem" != "granen") == true
+
+# None comparisons.
+
+fn dummy {
+}
+
+assert (420 == none) == false
+assert ("glbisanidiot" == none) == false
+assert (true == none) == false
+assert (dummy == none) == false
+
+assert (420 != none) == true
+assert ("glbisanidiot" != none) == true
+assert (true != none) == true
+assert (dummy != none) == true
+
+assert (none == none) == true
+assert (none != none) == false
