@@ -66,7 +66,10 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 	// Check if the operands are compatible.
 
-	if (left_val->kind != right_val->kind) {
+	bool const same_types = left_val->kind == right_val->kind;
+	bool const none_comparison = left_val->kind == FLAMINGO_VAL_KIND_NONE && right_val->kind == FLAMINGO_VAL_KIND_NONE;
+
+	if (!same_types && !none_comparison) {
 		return error(flamingo, "operands have incompatible types: %s and %s", val_type_str(left_val), val_type_str(right_val));
 	}
 
@@ -86,6 +89,12 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	// Do the math.
 
 	int rv = 0;
+
+	if (none_comparison) {
+		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+		(*val)->boolean.val = same_types;
+		goto done;
+	}
 
 	if (kind == FLAMINGO_VAL_KIND_INT) {
 		// Integer arithmetic.
