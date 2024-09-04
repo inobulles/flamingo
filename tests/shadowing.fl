@@ -19,3 +19,15 @@ to_be_shadowed = FAILURE
 	to_be_shadowed = SUCCESS
 	assert to_be_shadowed == SUCCESS
 }
+
+# XXX Unforunately, we can't keep out-of-scope stuff intact because, since function bodies are also scopes, this would preclude us from modifying global state.
+# I could make an exception for function bodies, but I think that would make things complicated because then blocks inside of functions would have to know they can modify things outside of function bodies, but not within.
+# I don't know.
+
+to_be_shadowed = FAILURE
+
+{
+	to_be_shadowed = SUCCESS
+}
+
+assert to_be_shadowed == SUCCESS
