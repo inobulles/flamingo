@@ -1,0 +1,28 @@
+fn no_args {
+}
+
+print "no_args"
+assert no_args() == none
+
+fn no_args2() {
+	return 69
+}
+
+print "no_args2"
+assert no_args2() == 69
+
+fn add(a: int, b: int) -> int {
+	return a + b
+}
+
+print "add"
+assert add(1, 2) == 3
+
+fn add2(a, b) {
+	return a + b
+}
+
+print "add2"
+assert add2(6, 9) == 15
+
+print "done"
