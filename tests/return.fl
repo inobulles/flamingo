@@ -27,3 +27,13 @@ fn ret_break_control_flow {
 }
 
 assert ret_break_control_flow() == 69
+
+fn ret_inside_block {
+	{
+		return 69
+	}
+
+	return 420
+}
+
+assert ret_inside_block() == 69
