@@ -1,0 +1,7 @@
+# XXX This is pretty inexaustive, but it's fine for now.
+# I'll add more asserts here when regressions happen.
+
+assert 1 + 2 * 3 == 7
+assert (1 + 2) * 3 == 9
+assert 1 * 2 + 3 == 5
+assert 1 + 2 + 3 == 6
