@@ -11,6 +11,10 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#if defined(__linux__)
+# include <prctl.h>
+#endif
+
 static char const* init_name = "flamingo";
 
 static void usage(void) {
@@ -20,7 +24,7 @@ static void usage(void) {
 	char progname[16] = init_name;
 
 	if (prctl(PR_GET_NAME, progname, NULL, NULL, NULL) < 0) {
-		fprintf(stderr, "prctl(PR_GET_NAME): %s", strerror(errno))
+		fprintf(stderr, "prctl(PR_GET_NAME): %s", strerror(errno));
 	}
 #else
 	char const* const progname = init_name;
