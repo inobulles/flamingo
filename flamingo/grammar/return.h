@@ -11,6 +11,13 @@
 static int parse_return(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 2);
 
+	// Don't allow returns in top level scopes.
+	// Maybe in the future this could serve as an exit kind of thing, but I think I want an explicit 'exit' statement.
+
+	if (parent_scope(flamingo) == NULL) {
+		return error(flamingo, "Return can't be used in top-level scope");
+	}
+
 	// Get return value.
 
 	TSNode const rv_node = ts_node_child_by_field_name(node, "rv", 2);
