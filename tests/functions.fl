@@ -1,28 +1,38 @@
-fn no_args {
-}
+# Function with no arguments, returning int.
 
-print "no_args"
-assert no_args() == none
-
-fn no_args2() {
+fn no_args() {
 	return 69
 }
 
-print "no_args2"
-assert no_args2() == 69
+assert no_args() == 69
+
+# Alternative syntax for no args.
+
+fn no_args2 {
+}
+
+assert no_args2() == none
+
+# Same but with a return type.
+
+fn no_args3 -> int {
+	return 420
+}
+
+assert no_args3() == 420
+
+# Function with parameters and parameter/return types.
 
 fn add(a: int, b: int) -> int {
 	return a + b
 }
 
-print "add"
 assert add(1, 2) == 3
+
+# Function with parameters but no parameter/return types.
 
 fn add2(a, b) {
 	return a + b
 }
 
-print "add2"
 assert add2(6, 9) == 15
-
-print "done"
