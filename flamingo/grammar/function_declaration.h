@@ -7,9 +7,11 @@
 #include <scope.c>
 #include <val.c>
 
-static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
+static int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is_class) {
 	size_t const child_count = ts_node_child_count(node);
 	assert(child_count >= 4 || child_count <= 6);
+
+	char const* const thing = is_class ? "class" : "function";
 
 	// Get qualifier list.
 
@@ -24,13 +26,13 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
-	// Get function name.
+	// Get function/class name.
 
 	TSNode const name_node = ts_node_child_by_field_name(node, "name", 4);
 	char const* const name_type = ts_node_type(name_node);
 
 	if (strcmp(name_type, "identifier") != 0) {
-		return error(flamingo, "expected identifier for function name, got %s", name_type);
+		return error(flamingo, "expected identifier for %s name, got %s", thing, name_type);
 	}
 
 	size_t const start = ts_node_start_byte(name_node);
@@ -39,7 +41,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	char const* const name = flamingo->src + start;
 	size_t const size = end - start;
 
-	// Get function parameters.
+	// Get function/class parameters.
 
 	TSNode const params = ts_node_child_by_field_name(node, "params", 6);
 	bool const has_params = !ts_node_is_null(params);
@@ -52,7 +54,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
-	// Get function body.
+	// Get function/class body.
 
 	TSNode const body = ts_node_child_by_field_name(node, "body", 4);
 	char const* const body_type = ts_node_type(body);
@@ -77,8 +79,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 	}
 
 	// Check if identifier is already in scope (or a previous one) and error if it is.
-	// Right now, redeclaring functions is not allowed.
-	// Although this will probably work a bit differently once function prototypes are added.
+	// Redeclaring functions/classes is not allowed (I have decided against prototypes).
 
 	flamingo_var_t* const prev_var = flamingo_scope_find_var(flamingo, name, size);
 
@@ -86,12 +87,13 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "the %s '%.*s' has already been declared in this scope", val_role_str(prev_var->val), (int) size, name);
 	}
 
-	// Add function to scope.
+	// Add function/class to scope.
 
 	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
 
 	var->val = val_alloc();
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
+	var->val->fn.is_class = is_class;
 
 	// Assign body node.
 	// Since I want 'flamingo.h' to be usable without importing all of Tree-sitter, 'var->val->fn.body' can't just be a 'TSNode'.

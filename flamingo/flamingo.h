@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 typedef struct flamingo_t flamingo_t;
+typedef struct flamingo_scope_t flamingo_scope_t;
 
 typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
 
@@ -17,10 +18,9 @@ typedef enum {
 	FLAMINGO_VAL_KIND_INT,
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_FN,
-	FLAMINGO_VAL_KIND_CLASS,
 } flamingo_val_kind_t;
 
-typedef void* flamingo_ts_node_t;
+typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).
 
 typedef struct {
 	flamingo_val_kind_t kind;
@@ -49,16 +49,13 @@ typedef struct {
 
 			char* src;
 			size_t src_size;
+
+			// Classes are just functions with state (scope and misc data).
+
+			bool is_class;
+			flamingo_scope_t* class_scope;
+			void* class_data;
 		} fn;
-
-		struct {
-			flamingo_ts_node_t body;
-
-			// Ditto as for functions.
-
-			char* src;
-			size_t src_size;
-		} class;
 	};
 } flamingo_val_t;
 
@@ -68,10 +65,10 @@ typedef struct {
 	flamingo_val_t* val;
 } flamingo_var_t;
 
-typedef struct {
+struct flamingo_scope_t {
 	size_t vars_size;
 	flamingo_var_t* vars;
-} flamingo_scope_t;
+};
 
 struct flamingo_t {
 	char const* progname;

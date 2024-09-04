@@ -43,7 +43,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		var = scope_add_var(cur_scope(flamingo), identifier, size);
 	}
 
-	else if (var->val->kind == FLAMINGO_VAL_KIND_FN || var->val->kind == FLAMINGO_VAL_KIND_CLASS) {
+	else if (var->val->kind == FLAMINGO_VAL_KIND_FN) {
 		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(var->val), (int) size, identifier);
 	}
 

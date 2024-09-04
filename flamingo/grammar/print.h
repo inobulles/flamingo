@@ -42,7 +42,8 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		printf("%.*s\n", (int) val->str.size, val->str.str);
 		break;
 	case FLAMINGO_VAL_KIND_FN:
-		printf("<fn>\n");
+		// TODO Find a way to print the val's key (i.e. function/class name) too?
+		printf("<%s>\n", val->fn.is_class ? "class" : "fn");
 		break;
 	default:
 		rv = error(flamingo, "can't print expression kind: %d", val->kind);

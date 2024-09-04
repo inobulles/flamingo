@@ -28,9 +28,7 @@ static char const* val_role_str(flamingo_val_t* val) {
 	case FLAMINGO_VAL_KIND_BOOL:
 		return "variable";
 	case FLAMINGO_VAL_KIND_FN:
-		return "function";
-	case FLAMINGO_VAL_KIND_CLASS:
-		return "class";
+		return val->fn.is_class ? "class" : "function";
 	case FLAMINGO_VAL_KIND_NONE:
 	default:
 		return "unknown";
@@ -46,9 +44,7 @@ static char const* val_type_str(flamingo_val_t* val) {
 	case FLAMINGO_VAL_KIND_STR:
 		return "string";
 	case FLAMINGO_VAL_KIND_FN:
-		return "function";
-	case FLAMINGO_VAL_KIND_CLASS:
-		return "class";
+		return val->fn.is_class ? "class" : "function";
 	case FLAMINGO_VAL_KIND_NONE:
 		return "none";
 	default:

@@ -1,3 +1,8 @@
-# import .std
+class Test {
+	member = 5
+	print "inside class"
+}
 
-print "Hello, World!"
+t = Test()
+print t
+print Test
