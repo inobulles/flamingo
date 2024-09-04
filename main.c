@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 #if defined(__linux__)
-# include <prctl.h>
+# include <sys/prctl.h>
 #endif
 
 static char const* init_name = "flamingo";
