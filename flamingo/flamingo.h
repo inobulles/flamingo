@@ -75,6 +75,10 @@ typedef struct {
 struct flamingo_scope_t {
 	size_t vars_size;
 	flamingo_var_t* vars;
+
+	// Used for return to know what it can and can't return.
+
+	bool class_scope;
 };
 
 struct flamingo_t {

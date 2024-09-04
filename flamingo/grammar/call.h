@@ -145,8 +145,10 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	flamingo->cur_fn_body = callable->fn.body;
 
 	// Create a new scope for the function for the argument assignments.
+	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
 
-	scope_stack_push(flamingo);
+	flamingo_scope_t* const scope = scope_stack_push(flamingo);
+	scope->class_scope = callable->fn.is_class;
 
 	// Evaluate argument expressions.
 	// Add our arguments as variables, with the function parameters as names.

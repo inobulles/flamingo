@@ -11,10 +11,16 @@
 static int parse_return(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 2);
 
+	// Get return value.
+
 	TSNode const rv_node = ts_node_child_by_field_name(node, "rv", 2);
 	bool const has_rv = !ts_node_is_null(rv_node);
 
 	if (has_rv) {
+		if (cur_scope(flamingo)->class_scope) {
+			return error(flamingo, "return statement can't take a return value when inside a class scope");
+		}
+
 		char const* const type = ts_node_type(rv_node);
 
 		if (strcmp(ts_node_type(rv_node), "expression") != 0) {

@@ -10,7 +10,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+static flamingo_scope_t* parent_scope(flamingo_t* flamingo) {
+	if (flamingo->scope_stack_size < 2) {
+		return NULL;
+	}
+
+	return &flamingo->scope_stack[flamingo->scope_stack_size - 2];
+}
+
 static flamingo_scope_t* cur_scope(flamingo_t* flamingo) {
+	assert(flamingo->scope_stack_size >= 1);
 	return &flamingo->scope_stack[flamingo->scope_stack_size - 1];
 }
 
@@ -33,6 +42,9 @@ static flamingo_scope_t* scope_stack_push(flamingo_t* flamingo) {
 
 	scope->vars_size = 0;
 	scope->vars = NULL;
+
+	flamingo_scope_t* const parent = parent_scope(flamingo);
+	scope->class_scope = parent != NULL ? parent->class_scope : false;
 
 	return scope;
 }
