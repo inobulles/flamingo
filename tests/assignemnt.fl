@@ -1,0 +1,6 @@
+# TODO Would like to be able to test errors too (e.g. identifier reassignment), but need a different testing setup or perhaps a new language construct (try? "attempt" to not induce confusion with try in other languages?) to do this.
+
+a = 69
+b = 420
+
+assert a + b == 489
