@@ -166,6 +166,10 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
+	if (callable->fn.is_class) {
+		// TODO Don't destroy the scope, create an instance and preserve it!
+	}
+
 	scope_pop(flamingo);
 
 	flamingo->src = prev_src;
