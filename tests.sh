@@ -2,7 +2,7 @@
 
 all_passed=1
 
-for test in $(ls tests); do
+for test in $(ls -p tests | grep -v /); do
 	echo -n "Running test $test... "
 	bin/flamingo tests/$test > /dev/null
 

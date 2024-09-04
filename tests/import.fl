@@ -1,0 +1,15 @@
+# Regular imports.
+
+super_secret_value = none
+
+import .tests.import_helper
+
+assert super_secret_value == 69
+
+# Nested imports.
+
+super_secret_value2 = none
+
+import .tests.import_helper.nested
+
+assert super_secret_value2 == 420
