@@ -48,7 +48,7 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 		// Get parameter type if it has one.
 
 		TSNode const type = ts_node_child_by_field_name(param, "type", 4);
-		bool has_type = !ts_node_is_null(args);
+		bool const has_type = !ts_node_is_null(type);
 
 		if (has_type) {
 			assert(strcmp(ts_node_type(type), "type") == 0);
