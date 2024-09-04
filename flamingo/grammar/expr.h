@@ -67,7 +67,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	// Check if the operands are compatible.
 
 	bool const same_types = left_val->kind == right_val->kind;
-	bool const none_comparison = left_val->kind == FLAMINGO_VAL_KIND_NONE && right_val->kind == FLAMINGO_VAL_KIND_NONE;
+	bool const none_comparison = left_val->kind == FLAMINGO_VAL_KIND_NONE || right_val->kind == FLAMINGO_VAL_KIND_NONE;
 
 	if (!same_types && !none_comparison) {
 		return error(flamingo, "operands have incompatible types: %s and %s", val_type_str(left_val), val_type_str(right_val));
@@ -88,12 +88,20 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 	// Do the math.
 
-	int rv = 0;
-
 	if (none_comparison) {
 		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-		(*val)->boolean.val = same_types;
-		goto done;
+
+		if (strncmp(op, "==", op_size) == 0) {
+			(*val)->boolean.val = same_types;
+			goto done;
+		}
+
+		if (strncmp(op, "!=", op_size) == 0) {
+			(*val)->boolean.val = !same_types;
+			goto done;
+		}
+
+		return error(flamingo, "can only check for equality to none value");
 	}
 
 	if (kind == FLAMINGO_VAL_KIND_INT) {
@@ -250,14 +258,17 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 		}
 	}
 
-	rv = error(flamingo, "unknown operator '%.*s' for type %s", (int) op_size, op, val_type_str(left_val));
+	// XXX We don't actually need to decref if there's an error, as the flamingo engine will anyway be entirely freed.
+	//     This is robust w.r.t. failures in imported flamingo engines, since we fail if the imported program fails (so the scope is freed instantly).
+
+	return error(flamingo, "unknown operator '%.*s' for type %s", (int) op_size, op, val_type_str(left_val));
 
 done:
 
 	val_decref(left_val);
 	val_decref(right_val);
 
-	return rv;
+	return 0;
 }
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
