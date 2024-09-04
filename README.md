@@ -10,6 +10,12 @@ Run:
 sh build.sh
 ```
 
+Then, to run the tests:
+
+```console
+sh test.sh
+```
+
 ## Update the grammar
 
 Flamingo uses Tree-sitter to parse source code. This is all defined in the [`tree-sitter-flamingo`](https://github.com/inobulles/tree-sitter-flamingo) repo. The readme there contains instructions on how to generate the parser from the grammar.

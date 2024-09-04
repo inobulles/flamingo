@@ -13,6 +13,3 @@ cc $cc_flags -ferror-limit=0 -c flamingo/flamingo.c -o bin/flamingo.o
 cc $cc_flags -c main.c -o bin/main.o
 
 cc $(find bin -name "*.o") -lm $cc_flags -o bin/flamingo
-
-bin/flamingo hello_world.fl
-sh tests.sh
