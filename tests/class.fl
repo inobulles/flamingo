@@ -1,0 +1,26 @@
+# TODO SEE grammar/call.h COMMENT BEFORE DOING ANYTHING MORE W.R.T. CLASSES!!!!!!
+
+class Illegal {
+	return none
+}
+
+class Illegal2 {
+	{
+		return none
+	}
+}
+
+class Illegal3 {
+	{
+		return 69
+	}
+}
+
+class Legal {
+	fn member {
+		return none
+	}
+}
+
+a = Legal()
+print a
