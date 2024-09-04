@@ -1,0 +1,29 @@
+# Some of these are already covered by the functions test.
+
+fn ret_none {
+	return
+}
+
+assert ret_none() == none
+
+fn explicit_ret_none {
+	return none
+}
+
+assert explicit_ret_none() == none
+
+fn ret_math {
+	return 69 + 420
+}
+
+assert ret_math() == 489
+
+fn ret_break_control_flow {
+	x = 69
+	return x
+
+	x = 420
+	return x
+}
+
+assert ret_break_control_flow() == 69
