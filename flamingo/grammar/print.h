@@ -27,6 +27,7 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 	// XXX Don't forget to decrement reference at the end!
 
 	int rv = 0;
+	flamingo_val_t* class;
 
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_NONE:
@@ -42,12 +43,13 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		printf("%.*s\n", (int) val->str.size, val->str.str);
 		break;
 	case FLAMINGO_VAL_KIND_FN:
-		// TODO Find a way to print the val's key (i.e. function/class name) too?
-		printf("<%s>\n", val->fn.is_class ? "class" : "fn");
+		printf("<%s %.*s>\n", val->fn.is_class ? "class" : "fn", (int) val->name_size, val->name);
 		break;
 	case FLAMINGO_VAL_KIND_INST:
-		// TODO Ditto.
-		printf("<class instance>\n");
+		class = val->inst.class;
+		assert(class != NULL);
+
+		printf("<instance of %.*s>\n", (int) class->name_size, class->name);
 		break;
 	default:
 		rv = error(flamingo, "can't print expression kind: %d", val->kind);

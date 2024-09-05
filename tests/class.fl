@@ -27,3 +27,4 @@ a = Legal()
 }
 
 print a
+print Legal

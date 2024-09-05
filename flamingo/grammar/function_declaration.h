@@ -91,7 +91,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is
 
 	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
 
-	var->val = val_alloc();
+	var_set_val(var, val_alloc());
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
 	var->val->fn.is_class = is_class;
 

@@ -16,6 +16,9 @@ static flamingo_val_t* val_incref(flamingo_val_t* val) {
 }
 
 static flamingo_val_t* val_init(flamingo_val_t* val) {
+	val->name = NULL;
+	val->name_size = 0;
+
 	val->kind = FLAMINGO_VAL_KIND_NONE;
 	val->ref_count = 1;
 

@@ -67,6 +67,20 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 	return var;
 }
 
+static void var_set_val(flamingo_var_t* var, flamingo_val_t* val) {
+	if (var->val != NULL) {
+		val->name = NULL;
+		val->name_size = 0;
+	}
+
+	var->val = val;
+
+	if (val != NULL) {
+		val->name = var->key;
+		val->name_size = var->key_size;
+	}
+}
+
 static flamingo_scope_t* scope_gently_detach(flamingo_t* flamingo) {
 	return flamingo->scope_stack[--flamingo->scope_stack_size];
 }

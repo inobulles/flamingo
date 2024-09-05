@@ -51,7 +51,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 
 	else {
 		val_decref(var->val);
-		var->val = NULL;
+		var_set_val(var, NULL);
 	}
 
 	// Evaluate expression.

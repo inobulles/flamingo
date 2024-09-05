@@ -9,6 +9,7 @@
 
 typedef struct flamingo_t flamingo_t;
 typedef struct flamingo_val_t flamingo_val_t;
+typedef struct flamingo_var_t flamingo_var_t;
 typedef struct flamingo_scope_t flamingo_scope_t;
 
 typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
@@ -25,6 +26,9 @@ typedef enum {
 typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).
 
 struct flamingo_val_t {
+	char* name;
+	size_t name_size;
+
 	flamingo_val_kind_t kind;
 	size_t ref_count;
 
@@ -69,11 +73,11 @@ struct flamingo_val_t {
 	};
 };
 
-typedef struct {
+struct flamingo_var_t {
 	char* key;
 	size_t key_size;
 	flamingo_val_t* val;
-} flamingo_var_t;
+};
 
 struct flamingo_scope_t {
 	size_t vars_size;
