@@ -90,18 +90,27 @@ static void scope_pop(flamingo_t* flamingo) {
 	scope_free(scope_gently_detach(flamingo));
 }
 
+flamingo_var_t* scope_shallow_find_var(flamingo_scope_t* scope, char const* key, size_t key_size) {
+	for (size_t i = 0; i < scope->vars_size; i++) {
+		flamingo_var_t* const var = &scope->vars[i];
+
+		if (var->key_size == key_size && memcmp(var->key, key, key_size) == 0) {
+			return var;
+		}
+	}
+
+	return NULL;
+}
+
 flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size) {
 	// go backwards down the stack to allow for shadowing
 
 	for (ssize_t i = flamingo->scope_stack_size - 1; i >= 0; i--) {
 		flamingo_scope_t* const scope = flamingo->scope_stack[i];
+		flamingo_var_t* const var = scope_shallow_find_var(scope, key, key_size);
 
-		for (size_t j = 0; j < scope->vars_size; j++) {
-			flamingo_var_t* const var = &scope->vars[j];
-
-			if (var->key_size == key_size && memcmp(var->key, key, key_size) == 0) {
-				return var;
-			}
+		if (var != NULL) {
+			return var;
 		}
 	}
 

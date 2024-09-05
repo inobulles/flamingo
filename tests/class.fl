@@ -18,6 +18,8 @@ class Legal {
 	fn member {
 		return none
 	}
+
+	print member
 }
 
 a = Legal()
@@ -26,5 +28,5 @@ a = Legal()
 	print "Force scope stack realloc"
 }
 
-print a
+print a.member
 print Legal

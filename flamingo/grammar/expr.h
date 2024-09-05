@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "access.h"
 #include "binary_expr.h"
 #include "call.h"
 #include "identifier.h"
@@ -39,6 +40,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	if (strcmp(type, "binary_expression") == 0) {
 		return parse_binary_expr(flamingo, child, val);
+	}
+
+	if (strcmp(type, "access") == 0) {
+		return parse_access(flamingo, child, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
