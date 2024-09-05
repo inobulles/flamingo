@@ -4,7 +4,7 @@
 #pragma once
 
 #include "flamingo.h"
-#include "val.c"
+#include <val.c>
 
 #include <assert.h>
 #include <stdlib.h>

@@ -13,6 +13,7 @@
 #include <string.h>
 
 static inline int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_statement(flamingo_t* flamingo, TSNode node);
 static inline int parse_block(flamingo_t* flamingo, TSNode node);
 static inline int parse_print(flamingo_t* flamingo, TSNode node);
