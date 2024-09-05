@@ -172,7 +172,9 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
 	if (callable->fn.is_class) {
-		scope = scope_gently_detach(flamingo);
+		flamingo_scope_t* const detached_scope = scope_gently_detach(flamingo);
+		assert(detached_scope == scope);
+		scope = detached_scope;
 	}
 
 	else {
@@ -194,10 +196,6 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		assert(*val == NULL);
 		*val = val_alloc();
 		(*val)->kind = FLAMINGO_VAL_KIND_INST;
-
-		// TODO There's a big issue here.
-		//      Since the scope stack is realloc'd the scope pointer is not guaranteed to be the same throughout the instance.
-		//      A point of scope pointers for the scope stack is the solution here.
 
 		(*val)->inst.class = callable;
 		(*val)->inst.scope = scope;
