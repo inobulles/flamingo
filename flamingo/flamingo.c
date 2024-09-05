@@ -108,7 +108,7 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	if (!flamingo->inherited_scope_stack) {
 		for (size_t i = 0; i < flamingo->scope_stack_size; i++) {
-			scope_free(&flamingo->scope_stack[i]);
+			scope_free(flamingo->scope_stack[i]);
 		}
 
 		if (flamingo->scope_stack != NULL) {
@@ -172,7 +172,7 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
-int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t* stack) {
+int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t** stack) {
 	if (flamingo->scope_stack != NULL) {
 		assert(flamingo->scope_stack_size == 0);
 		return error(flamingo, "there already is a scope stack on this flamingo instance");

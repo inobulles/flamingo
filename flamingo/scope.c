@@ -15,12 +15,12 @@ static flamingo_scope_t* parent_scope(flamingo_t* flamingo) {
 		return NULL;
 	}
 
-	return &flamingo->scope_stack[flamingo->scope_stack_size - 2];
+	return flamingo->scope_stack[flamingo->scope_stack_size - 2];
 }
 
 static flamingo_scope_t* cur_scope(flamingo_t* flamingo) {
 	assert(flamingo->scope_stack_size >= 1);
-	return &flamingo->scope_stack[flamingo->scope_stack_size - 1];
+	return flamingo->scope_stack[flamingo->scope_stack_size - 1];
 }
 
 static void scope_free(flamingo_scope_t* scope) {
@@ -32,13 +32,16 @@ static void scope_free(flamingo_scope_t* scope) {
 	}
 
 	free(scope->vars);
+	free(scope);
 }
 
 static flamingo_scope_t* scope_stack_push(flamingo_t* flamingo) {
-	flamingo->scope_stack = (/* XXX no clue why I need to explicitly cast here */ flamingo_scope_t*) realloc(flamingo->scope_stack, ++flamingo->scope_stack_size * sizeof *flamingo->scope_stack);
+	flamingo->scope_stack = realloc(flamingo->scope_stack, ++flamingo->scope_stack_size * sizeof *flamingo->scope_stack);
 	assert(flamingo->scope_stack != NULL);
 
-	flamingo_scope_t* const scope = &flamingo->scope_stack[flamingo->scope_stack_size - 1];
+	flamingo_scope_t* const scope = malloc(sizeof *scope);
+	assert(scope != NULL);
+	flamingo->scope_stack[flamingo->scope_stack_size - 1] = scope;
 
 	scope->vars_size = 0;
 	scope->vars = NULL;
@@ -65,7 +68,7 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 }
 
 static flamingo_scope_t* scope_gently_detach(flamingo_t* flamingo) {
-	return &flamingo->scope_stack[--flamingo->scope_stack_size];
+	return flamingo->scope_stack[--flamingo->scope_stack_size];
 }
 
 static void scope_pop(flamingo_t* flamingo) {
@@ -77,7 +80,7 @@ flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, s
 	// go backwards down the stack to allow for shadowing
 
 	for (ssize_t i = flamingo->scope_stack_size - 1; i >= 0; i--) {
-		flamingo_scope_t* const scope = &flamingo->scope_stack[i];
+		flamingo_scope_t* const scope = flamingo->scope_stack[i];
 
 		for (size_t j = 0; j < scope->vars_size; j++) {
 			flamingo_var_t* const var = &scope->vars[j];
