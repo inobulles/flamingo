@@ -1,5 +1,5 @@
 # Tests related to when we can and can't return from classes.
-# Again, similar to assignemnt
+# Again, similar to the assignment tests, I want to be able to test errors.
 
 class Illegal {
 	return none

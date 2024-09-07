@@ -1,8 +1,1 @@
-class Test {
-	member = 5
-	print "inside class"
-}
-
-t = Test()
-print t
-print Test
+print "Hello, world!"
