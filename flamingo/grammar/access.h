@@ -5,8 +5,8 @@
 
 #include "expr.h"
 
-#include <scope.c>
 #include <common.h>
+#include <scope.c>
 
 static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "access") == 0);
