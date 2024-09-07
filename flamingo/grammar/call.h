@@ -109,6 +109,8 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		return error(flamingo, "callable has a value kind of %d, which is not callable", callable->kind);
 	}
 
+	bool const is_class = callable->fn.is_class;
+
 	// Actually call the callable.
 
 	/* TODO
@@ -148,7 +150,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
 
 	flamingo_scope_t* scope = scope_stack_push(flamingo);
-	scope->class_scope = callable->fn.is_class;
+	scope->class_scope = is_class;
 
 	// Evaluate argument expressions.
 	// Add our arguments as variables, with the function parameters as names.
@@ -164,22 +166,15 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Actually parse the function's body.
 
 	TSNode* const body = callable->fn.body;
+	flamingo_scope_t* inner_scope;
 
-	if (parse_block(flamingo, *body) < 0) {
+	if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
 		return -1;
 	}
 
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
-	if (callable->fn.is_class) {
-		flamingo_scope_t* const detached_scope = scope_gently_detach(flamingo);
-		assert(detached_scope == scope);
-		scope = detached_scope;
-	}
-
-	else {
-		scope_pop(flamingo);
-	}
+	scope_pop(flamingo);
 
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;
@@ -198,7 +193,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		(*val)->kind = FLAMINGO_VAL_KIND_INST;
 
 		(*val)->inst.class = callable;
-		(*val)->inst.scope = scope;
+		(*val)->inst.scope = inner_scope;
 		(*val)->inst.data = NULL;
 		(*val)->inst.free_data = NULL;
 

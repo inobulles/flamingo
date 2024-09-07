@@ -37,7 +37,7 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	}
 
 	else if (strcmp(type, "block") == 0) {
-		return parse_block(flamingo, child);
+		return parse_block(flamingo, child, NULL);
 	}
 
 	else if (strcmp(type, "print") == 0) {

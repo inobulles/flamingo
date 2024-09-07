@@ -8,7 +8,7 @@
 #include <common.h>
 #include <scope.c>
 
-static int parse_block(flamingo_t* flamingo, TSNode node) {
+static int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inner_scope) {
 	assert(strcmp(ts_node_type(node), "block") == 0);
 
 	scope_stack_push(flamingo);
@@ -27,7 +27,13 @@ static int parse_block(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
-	scope_pop(flamingo);
+	if (inner_scope == NULL) {
+		scope_pop(flamingo);
+	}
+
+	else {
+		*inner_scope = scope_gently_detach(flamingo);
+	}
 
 	return 0;
 }
