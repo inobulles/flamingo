@@ -68,7 +68,7 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 }
 
 static void var_set_val(flamingo_var_t* var, flamingo_val_t* val) {
-	if (var->val != NULL) {
+	if (var->val != NULL && val != NULL) {
 		val->name = NULL;
 		val->name_size = 0;
 	}
