@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "expr.h"
+
 #include <common.h>
 #include <scope.c>
 #include <val.c>
