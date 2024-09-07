@@ -165,7 +165,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	TSNode* const body = callable->fn.body;
 
-	if (parse_statement(flamingo, *body) < 0) {
+	if (parse_block(flamingo, *body) < 0) {
 		return -1;
 	}
 

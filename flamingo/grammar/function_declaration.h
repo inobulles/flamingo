@@ -59,8 +59,8 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is
 	TSNode const body = ts_node_child_by_field_name(node, "body", 4);
 	char const* const body_type = ts_node_type(body);
 
-	if (strcmp(body_type, "statement") != 0) {
-		return error(flamingo, "expected statement for body, got %s", body_type);
+	if (strcmp(body_type, "block") != 0) {
+		return error(flamingo, "expected block for body, got %s", body_type);
 	}
 
 	// Check parameter types.
