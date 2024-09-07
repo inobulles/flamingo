@@ -1,0 +1,45 @@
+# Tests related to when we can and can't return from classes.
+# Again, similar to assignemnt
+
+class Illegal {
+	return none
+}
+
+class Illegal2 {
+	{
+		return none
+	}
+}
+
+class Illegal3 {
+	{
+		return 69
+	}
+}
+
+class Legal {
+}
+
+assert Legal() != none
+
+class LegalExplicitReturn {
+	a = 69
+	a = 420
+	return
+}
+
+# TODO There's currently a pretty sizable issue with shadowing and class members which means I can't name this 'a' too.
+#      A proper solution would be to introduce a 'let' keyword but eeeeh...
+#      Although if the plan is anyway to use Bob for config files and the variables are already declared in an import, this might even be a good thing.
+
+b = LegalExplicitReturn()
+assert b.a == 420
+
+class LegalControlFlowInterruption {
+	a = 69
+	return
+	a = 420
+}
+
+b = LegalControlFlowInterruption()
+assert b.a == 69
