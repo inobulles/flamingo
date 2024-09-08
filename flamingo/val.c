@@ -87,6 +87,10 @@ static void val_free(flamingo_val_t* val) {
 }
 
 static flamingo_val_t* val_decref(flamingo_val_t* val) {
+	if (val == NULL) {
+		return NULL;
+	}
+
 	val->ref_count--;
 
 	if (val->ref_count > 0) {
