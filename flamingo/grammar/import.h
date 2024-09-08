@@ -93,8 +93,6 @@ err_fread:
 err_fopen:
 err_stat:
 
-	free(path);
-
 	return rv;
 }
 
