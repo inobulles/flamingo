@@ -8,3 +8,5 @@ I'm keeping track of these so I don't forget why I did something a certain way a
 *A:* Yes. Tree-sitter passes them as values, so be consistent with that.
 
 *Q:* Do gently detached scopes need to be freed or are they already?
+
+*Q:* Not a question. Fix memory leaks.
