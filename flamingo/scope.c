@@ -58,9 +58,11 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 
 	flamingo_var_t* const var = &scope->vars[scope->vars_size - 1];
 
-	var->key = strdup(key);
+	var->key = malloc(key_size);
 	assert(var->key != NULL);
+
 	var->key_size = key_size;
+	memcpy(var->key, key, key_size);
 
 	var->val = NULL;
 
