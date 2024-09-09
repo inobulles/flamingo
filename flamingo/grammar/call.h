@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include "block.h"
 #include "expr.h"
-#include "statement.h"
 #include <scope.c>
 
 #include <common.h>
