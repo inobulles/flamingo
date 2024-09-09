@@ -1,0 +1,13 @@
+fn to_be_shadowed() {
+	return 69
+}
+
+{
+	fn to_be_shadowed() {
+		return 420
+	}
+
+	assert to_be_shadowed() == 420
+}
+
+assert to_be_shadowed() == 69
