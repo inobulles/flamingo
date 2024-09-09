@@ -1,0 +1,27 @@
+# Using classes purely for data (getting and setting, i.e. access expression assignment).
+
+class Dataclass(a: int, b: int) {
+	let x = a
+	let y = b
+}
+
+let first = Dataclass(6, 9)
+let second = Dataclass(420, 69)
+
+assert first.x == 6
+assert first.y == 9
+
+assert second.x == 420
+assert second.y == 69
+
+first.x = 69
+first.y = 420
+
+second.x = 9
+second.y = 6
+
+assert second.x == 9
+assert second.y == 6
+
+assert first.x == 69
+assert first.y == 420
