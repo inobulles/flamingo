@@ -3,4 +3,7 @@
 let a = 69
 let b = 420
 
-assert a + b == 489
+a = 420
+b = 69
+
+assert a - b == 351
