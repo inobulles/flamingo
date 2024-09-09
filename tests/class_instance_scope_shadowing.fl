@@ -1,0 +1,11 @@
+# Do arguments shadow instance scopes correctly?
+
+class Test2 {
+	let x = 69
+
+	fn return_x(x: int) {
+		return x
+	}
+}
+
+assert Test2().return_x(420) == 420
