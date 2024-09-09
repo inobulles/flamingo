@@ -65,7 +65,7 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 
 static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	flamingo_var_t* var;
-	flamingo_val_t* accessed_val;
+	flamingo_val_t* accessed_val = NULL;
 
 	if (access_find_var(flamingo, node, &var, &accessed_val) < 0) {
 		return -1;

@@ -27,7 +27,7 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 		return parse_identifier(flamingo, child, val);
 	}
 
-	// These expressions could have side-effects, so we need to parse them anyway.
+	// These expressions could have side-effects, so we need to parse them anyway, even if 'val != NULL'.
 
 	if (strcmp(type, "call") == 0) {
 		return parse_call(flamingo, child, val);
