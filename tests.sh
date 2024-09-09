@@ -3,7 +3,7 @@
 all_passed=1
 
 for test in $(ls -p tests | grep -v /); do
-	if [ $test == "import_helper.fl" ]; then
+	if [ $test = "import_helper.fl" ]; then
 		continue
 	fi
 
