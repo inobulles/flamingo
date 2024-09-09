@@ -10,6 +10,7 @@
 #include "import.h"
 #include "print.h"
 #include "return.h"
+#include "var_decl.h"
 
 #include <common.h>
 
@@ -50,6 +51,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 
 	else if (strcmp(type, "assert") == 0) {
 		return parse_assert(flamingo, child);
+	}
+
+	else if (strcmp(type, "var_decl") == 0) {
+		return parse_var_decl(flamingo, child);
 	}
 
 	else if (strcmp(type, "assignment") == 0) {

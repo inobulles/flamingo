@@ -36,30 +36,35 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	char const* const identifier = flamingo->src + start;
 	size_t const size = end - start;
 
-	// Check if identifier is already in scope (or a previous one) and declare it if not.
-	// If it's a function, error.
+	// Make sure identifier is already in scope (or a previous one).
 
-	flamingo_var_t* var = flamingo_scope_find_var(flamingo, identifier, size);
+	flamingo_var_t* const var = flamingo_scope_find_var(flamingo, identifier, size);
 
 	if (var == NULL) {
-		var = scope_add_var(cur_scope(flamingo), identifier, size);
+		return error(flamingo, "'%.*s' was never declared", (int) size, identifier);
 	}
 
-	else if (var->val->kind == FLAMINGO_VAL_KIND_FN) {
+	// Parse RHS expression (don't forget to decrement the reference counter of the previous value!) and primitive type checking:
+	// - A function or a class can never be reassigned.
+	// - A variable can't be assigned a value of a different type except if it was none.
+	// - TODO This is also where the const qualifier will be checked too (but this feature is to be defined).
+
+	flamingo_val_kind_t const prev_type = var->val->kind;
+	char const* const prev_type_str = val_type_str(var->val);
+
+	if (prev_type == FLAMINGO_VAL_KIND_FN) {
 		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(var->val), (int) size, identifier);
 	}
 
-	// If variable is already in current or previous scope, since we're assigning a new value to it, we must decrement the reference counter of the previous value which was in the variable.
-
-	else {
-		val_decref(var->val);
-		var_set_val(var, NULL);
-	}
-
-	// Evaluate expression.
+	val_decref(var->val);
+	var_set_val(var, NULL);
 
 	if (parse_expr(flamingo, right_node, &var->val) < 0) {
 		return -1;
+	}
+
+	if (var->val->kind != prev_type && (prev_type != FLAMINGO_VAL_KIND_NONE && var->val->kind != FLAMINGO_VAL_KIND_NONE)) {
+		return error(flamingo, "cannot assign %s to '%.*s' (%s)", val_type_str(var->val), (int) size, identifier, prev_type_str);
 	}
 
 	return 0;

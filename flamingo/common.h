@@ -23,6 +23,7 @@ static inline int parse_assert(flamingo_t* flamingo, TSNode node);
 static inline int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static inline int parse_var_decl(flamingo_t* flamingo, TSNode node);
 static inline int parse_assignment(flamingo_t* flamingo, TSNode node);
 static inline int parse_import(flamingo_t* flamingo, TSNode node);
 static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is_class);
