@@ -1,0 +1,15 @@
+# Simple functions on classes.
+
+class Test(b: int) {
+	let a = b
+
+	fn add(x: int) {
+		return a + x
+	}
+}
+
+let first = Test(1)
+let second = Test(2)
+
+assert first.add(3) == 4
+assert second.add(3) == 5
