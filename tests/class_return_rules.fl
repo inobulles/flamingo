@@ -23,7 +23,7 @@ class Legal {
 assert Legal() != none
 
 class LegalExplicitReturn {
-	a = 69
+	let a = 69
 	a = 420
 	return
 }
@@ -32,11 +32,11 @@ class LegalExplicitReturn {
 #      A proper solution would be to introduce a 'let' keyword but eeeeh...
 #      Although if the plan is anyway to use Bob for config files and the variables are already declared in an import, this might even be a good thing.
 
-b = LegalExplicitReturn()
+let b = LegalExplicitReturn()
 assert b.a == 420
 
 class LegalControlFlowInterruption {
-	a = 69
+	let a = 69
 	return
 	a = 420
 }

@@ -19,7 +19,7 @@ fn ret_math {
 assert ret_math() == 489
 
 fn ret_break_control_flow {
-	x = 69
+	let x = 69
 	return x
 
 	x = 420
