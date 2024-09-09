@@ -8,7 +8,9 @@
 #include <common.h>
 #include <scope.c>
 
-static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val) {
+	assert(var != NULL);
+	assert(accessed_val != NULL);
 	assert(strcmp(ts_node_type(node), "access") == 0);
 	assert(ts_node_named_child_count(node) == 2);
 
@@ -38,26 +40,35 @@ static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val)
 
 	// Parse accessed expression.
 
-	flamingo_val_t* accessed_val = NULL;
-
-	if (parse_expr(flamingo, accessed, &accessed_val) != 0) {
+	if (parse_expr(flamingo, accessed, accessed_val) != 0) {
 		return -1;
 	}
 
 	// Check if accessed value is accessible.
 	// XXX For now this is only instances, but in the future I'm going to want to be able to access static members on classes directly too.
 
-	if (accessed_val->kind != FLAMINGO_VAL_KIND_INST) {
-		return error(flamingo, "accessed expression is not accessible (must be instance, is %s)", val_type_str(accessed_val));
+	if ((*accessed_val)->kind != FLAMINGO_VAL_KIND_INST) {
+		return error(flamingo, "accessed expression is not accessible (must be instance, is %s)", val_type_str(*accessed_val));
 	}
 
 	// Actually access.
 
-	flamingo_scope_t* const scope = accessed_val->inst.scope;
-	flamingo_var_t* const var = scope_shallow_find_var(scope, accessor, size);
+	flamingo_scope_t* const scope = (*accessed_val)->inst.scope;
+	*var = scope_shallow_find_var(scope, accessor, size);
 
-	if (var == NULL) {
-		return error(flamingo, "could not access member '%.*s' in access expression", (int) size, accessor);
+	if (*var == NULL) {
+		return error(flamingo, "member '%.*s' was never in declared", (int) size, accessor);
+	}
+
+	return 0;
+}
+
+static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+	flamingo_var_t* var;
+	flamingo_val_t* accessed_val;
+
+	if (access_find_var(flamingo, node, &var, &accessed_val) < 0) {
+		return -1;
 	}
 
 	// Set value.
