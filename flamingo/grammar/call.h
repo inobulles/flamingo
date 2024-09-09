@@ -62,7 +62,7 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 
 		// Parse argument expression into that parameter variable.
 
-		if (parse_expr(flamingo, arg, &var->val) < 0) {
+		if (parse_expr(flamingo, arg, &var->val, NULL) < 0) {
 			return -1;
 		}
 	}
@@ -100,8 +100,9 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Evaluate callable expression.
 
 	flamingo_val_t* callable = NULL;
+	flamingo_val_t* accessed_val = NULL;
 
-	if (parse_expr(flamingo, callable_node, &callable) < 0) {
+	if (parse_expr(flamingo, callable_node, &callable, &accessed_val) < 0) {
 		return -1;
 	}
 
@@ -110,6 +111,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	}
 
 	bool const is_class = callable->fn.is_class;
+	bool const on_inst = accessed_val != NULL && accessed_val->kind == FLAMINGO_VAL_KIND_INST;
 
 	// Actually call the callable.
 
@@ -146,6 +148,13 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	TSNode* const prev_fn_body = flamingo->cur_fn_body;
 	flamingo->cur_fn_body = callable->fn.body;
 
+	// If calling on an instance, add that instance's scope to the scope stack.
+	// We do this before the arguments scope because we want parameters to shadow stuff in the instance's scope.
+
+	if (on_inst) {
+		scope_gently_attach(flamingo, accessed_val->inst.scope);
+	}
+
 	// Create a new scope for the function for the argument assignments.
 	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
 
@@ -175,6 +184,10 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
 	scope_pop(flamingo);
+
+	if (on_inst) {
+		scope_gently_detach(flamingo);
+	}
 
 	flamingo->src = prev_src;
 	flamingo->src_size = prev_src_size;

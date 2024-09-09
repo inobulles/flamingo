@@ -9,7 +9,7 @@
 #include "identifier.h"
 #include "literal.h"
 
-static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
 
@@ -35,7 +35,7 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	if (strcmp(type, "parenthesized_expression") == 0) {
 		TSNode const grandchild = ts_node_child_by_field_name(child, "expression", 10);
-		return parse_expr(flamingo, grandchild, val);
+		return parse_expr(flamingo, grandchild, val, accessed_val_ref);
 	}
 
 	if (strcmp(type, "binary_expression") == 0) {
@@ -43,7 +43,7 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	}
 
 	if (strcmp(type, "access") == 0) {
-		return parse_access(flamingo, child, val);
+		return parse_access(flamingo, child, val, accessed_val_ref);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);

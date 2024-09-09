@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static inline int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref);
 static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val);
-static inline int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
+static inline int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val);
 static inline int parse_statement(flamingo_t* flamingo, TSNode node);
 static inline int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inner_scope);
 static inline int parse_print(flamingo_t* flamingo, TSNode node);

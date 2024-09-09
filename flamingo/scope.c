@@ -23,6 +23,16 @@ static flamingo_scope_t* cur_scope(flamingo_t* flamingo) {
 	return flamingo->scope_stack[flamingo->scope_stack_size - 1];
 }
 
+static flamingo_scope_t* scope_alloc(void) {
+	flamingo_scope_t* const scope = malloc(sizeof *scope);
+	assert(scope != NULL);
+
+	scope->vars_size = 0;
+	scope->vars = NULL;
+
+	return scope;
+}
+
 static void scope_free(flamingo_scope_t* scope) {
 	for (size_t i = 0; i < scope->vars_size; i++) {
 		flamingo_var_t* const var = &scope->vars[i];
@@ -35,16 +45,16 @@ static void scope_free(flamingo_scope_t* scope) {
 	free(scope);
 }
 
-static flamingo_scope_t* scope_stack_push(flamingo_t* flamingo) {
+static void scope_gently_attach(flamingo_t* flamingo, flamingo_scope_t* scope) {
 	flamingo->scope_stack = realloc(flamingo->scope_stack, ++flamingo->scope_stack_size * sizeof *flamingo->scope_stack);
 	assert(flamingo->scope_stack != NULL);
 
-	flamingo_scope_t* const scope = malloc(sizeof *scope);
-	assert(scope != NULL);
 	flamingo->scope_stack[flamingo->scope_stack_size - 1] = scope;
+}
 
-	scope->vars_size = 0;
-	scope->vars = NULL;
+static flamingo_scope_t* scope_stack_push(flamingo_t* flamingo) {
+	flamingo_scope_t* const scope = scope_alloc();
+	scope_gently_attach(flamingo, scope);
 
 	flamingo_scope_t* const parent = parent_scope(flamingo);
 	scope->class_scope = parent != NULL ? parent->class_scope : false;

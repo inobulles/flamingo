@@ -73,7 +73,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	val_decref(var->val);
 	var_set_val(var, NULL);
 
-	if (parse_expr(flamingo, right_node, &var->val) < 0) {
+	if (parse_expr(flamingo, right_node, &var->val, NULL) < 0) {
 		return -1;
 	}
 

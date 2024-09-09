@@ -52,13 +52,13 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 	flamingo_val_t* left_val = NULL;
 
-	if (parse_expr(flamingo, left, &left_val) != 0) {
+	if (parse_expr(flamingo, left, &left_val, NULL) != 0) {
 		return -1;
 	}
 
 	flamingo_val_t* right_val = NULL;
 
-	if (parse_expr(flamingo, right, &right_val) != 0) {
+	if (parse_expr(flamingo, right, &right_val, NULL) != 0) {
 		return -1;
 	}
 

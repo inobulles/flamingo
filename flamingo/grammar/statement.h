@@ -70,7 +70,7 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	}
 
 	else if (strcmp(type, "expression") == 0) {
-		return parse_expr(flamingo, child, NULL);
+		return parse_expr(flamingo, child, NULL, NULL);
 	}
 
 	else if (strcmp(type, "import") == 0) {

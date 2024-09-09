@@ -69,7 +69,7 @@ static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 	// And parse the initial expression if there is one to the variable's value.
 
 	if (has_initial) {
-		if (parse_expr(flamingo, initial_node, &var->val) < 0) {
+		if (parse_expr(flamingo, initial_node, &var->val, NULL) < 0) {
 			return -1;
 		}
 	}

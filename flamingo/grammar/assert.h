@@ -20,7 +20,7 @@ static int parse_assert(flamingo_t* flamingo, TSNode node) {
 
 	flamingo_val_t* val = NULL;
 
-	if (parse_expr(flamingo, test_node, &val) < 0) {
+	if (parse_expr(flamingo, test_node, &val, NULL) < 0) {
 		return -1;
 	}
 

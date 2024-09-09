@@ -40,7 +40,7 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 
 	// Parse accessed expression.
 
-	if (parse_expr(flamingo, accessed, accessed_val) != 0) {
+	if (parse_expr(flamingo, accessed, accessed_val, NULL) != 0) {
 		return -1;
 	}
 
@@ -63,12 +63,16 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 	return 0;
 }
 
-static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
+static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	flamingo_var_t* var;
 	flamingo_val_t* accessed_val;
 
 	if (access_find_var(flamingo, node, &var, &accessed_val) < 0) {
 		return -1;
+	}
+
+	if (accessed_val_ref != NULL) {
+		*accessed_val_ref = accessed_val;
 	}
 
 	// Set value.

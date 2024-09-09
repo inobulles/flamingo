@@ -48,7 +48,7 @@ static int parse_return(flamingo_t* flamingo, TSNode node) {
 	}
 
 	if (has_rv) {
-		if (parse_expr(flamingo, rv_node, &flamingo->cur_fn_rv) < 0) {
+		if (parse_expr(flamingo, rv_node, &flamingo->cur_fn_rv, NULL) < 0) {
 			return -1;
 		}
 	}
