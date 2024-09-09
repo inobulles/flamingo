@@ -53,7 +53,7 @@ static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
-	// Check if identifier is already in current scope (shallow search).
+	// Check if identifier is already in current scope (shallow search) and error if it is.
 	// If its in a previous one, that's alright, we'll just shadow it.
 
 	flamingo_var_t* const prev_var = scope_shallow_find_var(cur_scope(flamingo), name, name_size);
