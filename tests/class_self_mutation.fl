@@ -1,0 +1,27 @@
+# Self-mutation.
+
+class Incrementor(initial: int) {
+	let x = initial
+
+	fn inc {
+		x = x + 1
+	}
+
+	fn dec {
+		x = x - 1
+	}
+
+	fn cur {
+		return x
+	}
+}
+
+let inc = Incrementor(0)
+
+inc.inc()
+inc.inc()
+inc.dec()
+inc.inc()
+inc.inc()
+
+assert inc.cur() == 3
