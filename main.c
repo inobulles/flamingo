@@ -36,8 +36,8 @@ static void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static int call_cb(flamingo_t* flamingo, char* name, void* data) {
-	printf("function call: %s\n", name);
+static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data) {
+	printf("function call: %.*s\n", (int) name_size, name);
 	return 0;
 }
 
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 		goto err_flamingo_create;
 	}
 
-	flamingo_register_cb_call(&flamingo, call_cb, NULL);
+	flamingo_register_external_fn_cb(&flamingo, external_fn_cb, NULL);
 
 	// run program
 

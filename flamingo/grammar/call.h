@@ -172,12 +172,23 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		}
 	}
 
-	// Actually parse the function's body.
+	// If external function: call the external function callback.
+	// If function or class: actually parse the function's body.
 
 	TSNode* const body = callable->fn.body;
 	flamingo_scope_t* inner_scope;
 
-	if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
+	if (callable->fn.kind == FLAMINGO_FN_KIND_PROTO) {
+		if (flamingo->external_fn_cb == NULL) {
+			return error(flamingo, "cannot call external function without a external function callback being set");
+		}
+
+		flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data);
+
+		// TODO Rest.
+	}
+
+	else if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
 		return -1;
 	}
 

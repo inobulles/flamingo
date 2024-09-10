@@ -12,7 +12,7 @@ typedef struct flamingo_val_t flamingo_val_t;
 typedef struct flamingo_var_t flamingo_var_t;
 typedef struct flamingo_scope_t flamingo_scope_t;
 
-typedef int (*flamingo_cb_call_t)(flamingo_t* flamingo, char* name, void* data);
+typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
@@ -26,7 +26,7 @@ typedef enum {
 typedef enum {
 	FLAMINGO_FN_KIND_FUNCTION,
 	FLAMINGO_FN_KIND_CLASS,
-	FLAMINGO_FN_KIND_PROTO,
+	FLAMINGO_FN_KIND_PROTO, // XXX Maybe a better name for this is '*_EXTERN'?
 } flamingo_fn_kind_t;
 
 typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).
@@ -104,7 +104,8 @@ struct flamingo_t {
 	char err[256];
 	bool errors_outstanding;
 
-	flamingo_cb_call_t cb_call;
+	flamingo_external_fn_cb_t external_fn_cb;
+	void* external_fn_cb_data;
 
 	// Runtime stuff.
 
@@ -132,7 +133,7 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 void flamingo_destroy(flamingo_t* flamingo);
 
 char* flamingo_err(flamingo_t* flamingo);
-void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void* data);
+void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn_cb_t cb, void* data);
 int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t** stack);
 int flamingo_run(flamingo_t* flamingo);
 

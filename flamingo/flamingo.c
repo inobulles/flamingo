@@ -146,8 +146,9 @@ char* flamingo_err(flamingo_t* flamingo) {
 	return flamingo->err;
 }
 
-void flamingo_register_cb_call(flamingo_t* flamingo, flamingo_cb_call_t cb, void* data) {
-	// fprintf(stderr, "%s: not implemented\n", __func__);
+void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn_cb_t cb, void* data) { // TODO Better name for this.
+	flamingo->external_fn_cb = cb;
+	flamingo->external_fn_cb_data = data;
 }
 
 static int parse(flamingo_t* flamingo, TSNode node) {

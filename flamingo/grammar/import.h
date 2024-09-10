@@ -62,7 +62,7 @@ static int import(flamingo_t* flamingo, char* path) {
 		goto err_flamingo_create;
 	}
 
-	flamingo_register_cb_call(imported_flamingo, flamingo->cb_call, NULL);
+	flamingo_register_external_fn_cb(imported_flamingo, flamingo->external_fn_cb, flamingo->external_fn_cb_data);
 
 	// Set the scope stack for the imported flamingo instance to be the same as ours.
 
