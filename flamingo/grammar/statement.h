@@ -62,15 +62,15 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	}
 
 	else if (strcmp(type, "function_declaration") == 0) {
-		return parse_function_declaration(flamingo, child, false);
+		return parse_function_declaration(flamingo, child, FLAMINGO_FN_KIND_FUNCTION);
 	}
 
 	else if (strcmp(type, "class_declaration") == 0) {
-		return parse_function_declaration(flamingo, child, true);
+		return parse_function_declaration(flamingo, child, FLAMINGO_FN_KIND_CLASS);
 	}
 
 	else if (strcmp(type, "proto") == 0) {
-		return parse_function_declaration(flamingo, child, false);
+		return parse_function_declaration(flamingo, child, FLAMINGO_FN_KIND_PROTO);
 	}
 
 	else if (strcmp(type, "expression") == 0) {
