@@ -7,11 +7,25 @@
 #include <scope.c>
 #include <val.c>
 
-static int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is_class) {
+static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind) {
 	size_t const child_count = ts_node_child_count(node);
 	assert(child_count >= 4 || child_count <= 6);
 
-	char const* const thing = is_class ? "class" : "function";
+	char const* thing = "unknown";
+
+	switch (kind) {
+	case FLAMINGO_FN_KIND_FUNCTION:
+		thing = "function";
+		break;
+	case FLAMINGO_FN_KIND_CLASS:
+		thing = "class";
+		break;
+	case FLAMINGO_FN_KIND_PROTO:
+		thing = "external prototype";
+		break;
+	default:
+		assert(false);
+	}
 
 	// Get qualifier list.
 
@@ -94,7 +108,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, bool is
 
 	var_set_val(var, val_alloc());
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
-	var->val->fn.is_class = is_class;
+	var->val->fn.kind = kind;
 
 	// Assign body node.
 	// Since I want 'flamingo.h' to be usable without importing all of Tree-sitter, 'var->val->fn.body' can't just be a 'TSNode'.

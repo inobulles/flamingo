@@ -69,6 +69,10 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 		return parse_function_declaration(flamingo, child, true);
 	}
 
+	else if (strcmp(type, "proto") == 0) {
+		return parse_function_declaration(flamingo, child, false);
+	}
+
 	else if (strcmp(type, "expression") == 0) {
 		return parse_expr(flamingo, child, NULL, NULL);
 	}

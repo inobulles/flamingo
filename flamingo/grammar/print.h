@@ -43,7 +43,7 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		printf("%.*s\n", (int) val->str.size, val->str.str);
 		break;
 	case FLAMINGO_VAL_KIND_FN:
-		printf("<%s %.*s>\n", val->fn.is_class ? "class" : "fn", (int) val->name_size, val->name);
+		printf("<%s %.*s>\n", val_type_str(val), (int) val->name_size, val->name);
 		break;
 	case FLAMINGO_VAL_KIND_INST:
 		class = val->inst.class;

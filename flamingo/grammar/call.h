@@ -110,7 +110,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		return error(flamingo, "callable has a value kind of %d, which is not callable", callable->kind);
 	}
 
-	bool const is_class = callable->fn.is_class;
+	bool const is_class = callable->fn.kind == FLAMINGO_FN_KIND_CLASS;
 	bool const on_inst = accessed_val != NULL && accessed_val->kind == FLAMINGO_VAL_KIND_INST;
 
 	// Actually call the callable.
@@ -196,7 +196,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	// If class, create an instance.
 
-	if (callable->fn.is_class) {
+	if (callable->fn.kind == FLAMINGO_FN_KIND_CLASS) {
 		if (val == NULL) {
 			goto done;
 		}

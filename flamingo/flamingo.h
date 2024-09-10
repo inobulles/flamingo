@@ -23,6 +23,12 @@ typedef enum {
 	FLAMINGO_VAL_KIND_INST,
 } flamingo_val_kind_t;
 
+typedef enum {
+	FLAMINGO_FN_KIND_FUNCTION,
+	FLAMINGO_FN_KIND_CLASS,
+	FLAMINGO_FN_KIND_PROTO,
+} flamingo_fn_kind_t;
+
 typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).
 
 struct flamingo_val_t {
@@ -56,9 +62,9 @@ struct flamingo_val_t {
 			char* src;
 			size_t src_size;
 
-			// Classes are just functions which return instances.
+			// Classes are just functions which can only return instances.
 
-			bool is_class;
+			flamingo_fn_kind_t kind;
 		} fn;
 
 		struct {

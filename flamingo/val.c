@@ -25,21 +25,6 @@ static flamingo_val_t* val_init(flamingo_val_t* val) {
 	return val;
 }
 
-static char const* val_role_str(flamingo_val_t* val) {
-	switch (val->kind) {
-	case FLAMINGO_VAL_KIND_STR:
-	case FLAMINGO_VAL_KIND_INT:
-	case FLAMINGO_VAL_KIND_BOOL:
-	case FLAMINGO_VAL_KIND_NONE:
-	case FLAMINGO_VAL_KIND_INST:
-		return "variable";
-	case FLAMINGO_VAL_KIND_FN:
-		return val->fn.is_class ? "class" : "function";
-	default:
-		return "unknown";
-	}
-}
-
 static char const* val_type_str(flamingo_val_t* val) {
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_BOOL:
@@ -49,11 +34,35 @@ static char const* val_type_str(flamingo_val_t* val) {
 	case FLAMINGO_VAL_KIND_STR:
 		return "string";
 	case FLAMINGO_VAL_KIND_FN:
-		return val->fn.is_class ? "class" : "function";
+		switch (val->fn.kind) {
+		case FLAMINGO_FN_KIND_PROTO:
+			return "external function";
+		case FLAMINGO_FN_KIND_FUNCTION:
+			return "function";
+		case FLAMINGO_FN_KIND_CLASS:
+			return "class";
+		default:
+			assert(false);
+		}
 	case FLAMINGO_VAL_KIND_NONE:
 		return "none";
 	case FLAMINGO_VAL_KIND_INST:
 		return "instance";
+	default:
+		return "unknown";
+	}
+}
+
+static char const* val_role_str(flamingo_val_t* val) {
+	switch (val->kind) {
+	case FLAMINGO_VAL_KIND_STR:
+	case FLAMINGO_VAL_KIND_INT:
+	case FLAMINGO_VAL_KIND_BOOL:
+	case FLAMINGO_VAL_KIND_NONE:
+	case FLAMINGO_VAL_KIND_INST:
+		return "variable";
+	case FLAMINGO_VAL_KIND_FN:
+		return val_type_str(val);
 	default:
 		return "unknown";
 	}
