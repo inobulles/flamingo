@@ -183,9 +183,11 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 			return error(flamingo, "cannot call external function without a external function callback being set");
 		}
 
-		flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data);
+		// TODO Arguments, return value.
 
-		// TODO Rest.
+		if (flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data) < 0) {
+			return -1;
+		}
 	}
 
 	else if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
