@@ -70,12 +70,14 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(var->val), (int) lhs_size, lhs);
 	}
 
-	val_decref(var->val);
-	var_set_val(var, NULL);
+	flamingo_val_t* val = NULL;
 
-	if (parse_expr(flamingo, right_node, &var->val, NULL) < 0) {
+	if (parse_expr(flamingo, right_node, &val, NULL) < 0) {
 		return -1;
 	}
+
+	val_decref(var->val);
+	var_set_val(var, val);
 
 	if (var->val->kind != prev_type && (prev_type != FLAMINGO_VAL_KIND_NONE && var->val->kind != FLAMINGO_VAL_KIND_NONE)) {
 		return error(flamingo, "cannot assign %s to '%.*s' (%s)", val_type_str(var->val), (int) lhs_size, lhs, prev_type_str);
