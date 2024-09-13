@@ -183,13 +183,37 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 			return error(flamingo, "cannot call external function without a external function callback being set");
 		}
 
-		size_t arg_count = 0;
-		flamingo_val_t** args = NULL;
+		// Create arg list.
+
+		flamingo_scope_t* const arg_scope = flamingo->scope_stack[flamingo->scope_stack_size - 1];
+
+		size_t const arg_count = arg_scope->vars_size;
+		flamingo_val_t** const args = malloc(arg_count * sizeof *args);
+		assert(args != NULL);
+
+		for (size_t i = 0; i < arg_count; i++) {
+			args[i] = arg_scope->vars[i].val;
+
+			// TODO Should I have to do this?
+
+			args[i]->name_size = arg_scope->vars[i].key_size;
+			args[i]->name = arg_scope->vars[i].key;
+		}
+
+		flamingo_arg_list_t arg_list = {
+			.count = arg_count,
+			.args = args,
+		};
+
+		// Actually call the external function callback.
+
 		assert(flamingo->cur_fn_rv == NULL);
 
-		if (flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data, arg_count, args, &flamingo->cur_fn_rv) < 0) {
+		if (flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data, &arg_list, &flamingo->cur_fn_rv) < 0) {
 			return -1;
 		}
+
+		free(args);
 	}
 
 	else if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {

@@ -1,14 +1,21 @@
-proto test_do_literally_nothing
+# Test external function returns.
+
+proto test_do_literally_nothing -> none
 assert test_do_literally_nothing() == none
 
-proto test_return_number
+proto test_return_number -> int
 assert test_return_number() == 420
 
-proto test_return_bool
+proto test_return_bool -> bool
 assert test_return_bool() == true
 
-proto test_return_str
+proto test_return_str -> str
 assert test_return_str() == "zonnebloemgranen"
 
-proto test_return_none
+proto test_return_none -> none
 assert test_return_none() == none
+
+# Test external function arguments.
+
+proto test_sub(a: int, b: int) -> int
+assert test_sub(420, 69) == 420 - 69

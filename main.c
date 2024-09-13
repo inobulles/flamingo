@@ -36,29 +36,55 @@ static void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data, size_t arg_count, flamingo_val_t** args, flamingo_val_t** rv) {
-	if (memcmp(name, "test_return_number", name_size) == 0) {
+static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+	if (flamingo_cstrcmp(name, "test_return_number", name_size) == 0) {
 		*rv = flamingo_val_make_int(420);
 	}
 
-	else if (memcmp(name, "test_return_bool", name_size) == 0) {
+	else if (flamingo_cstrcmp(name, "test_return_bool", name_size) == 0) {
 		*rv = flamingo_val_make_bool(true);
 	}
 
-	else if (memcmp(name, "test_return_str", name_size) == 0) {
+	else if (flamingo_cstrcmp(name, "test_return_str", name_size) == 0) {
 		*rv = flamingo_val_make_cstr("zonnebloemgranen");
 	}
 
-	else if (memcmp(name, "test_return_none", name_size) == 0) {
+	else if (flamingo_cstrcmp(name, "test_return_none", name_size) == 0) {
 		*rv = flamingo_val_make_none();
 	}
 
-	else if (memcmp(name, "test_do_literally_nothing", name_size) == 0) {
+	else if (flamingo_cstrcmp(name, "test_do_literally_nothing", name_size) == 0) {
+	}
+
+	else if (flamingo_cstrcmp(name, "test_sub", name_size) == 0) {
+		if (args->count != 2) {
+			return flamingo_raise_error(flamingo, "test_sub: expected 2 arguments, got %zu", args->count);
+		}
+
+		flamingo_val_t* const a = flamingo_val_find_arg(args, "a");
+		flamingo_val_t* const b = flamingo_val_find_arg(args, "b");
+
+		if (a == NULL) {
+			return flamingo_raise_error(flamingo, "test_sub: argument 'a' doesn't exist");
+		}
+
+		if (b == NULL) {
+			return flamingo_raise_error(flamingo, "test_sub: argument 'b' doesn't exist");
+		}
+
+		if (a->kind != FLAMINGO_VAL_KIND_INT) {
+			return flamingo_raise_error(flamingo, "test_sub: expected 'a' to be an integer");
+		}
+
+		if (b->kind != FLAMINGO_VAL_KIND_INT) {
+			return flamingo_raise_error(flamingo, "test_sub: expected 'b' to be an integer");
+		}
+
+		*rv = flamingo_val_make_int(a->integer.integer - b->integer.integer);
 	}
 
 	else {
-		printf("Runtime does not support the '%.*s' external function call (%zu args)\n", (int) name_size, name, arg_count);
-		return -1;
+		return flamingo_raise_error(flamingo, "runtime does not support the '%.*s' external function call (%zu arguments passed)", (int) name_size, name, args->count);
 	}
 
 	return 0;

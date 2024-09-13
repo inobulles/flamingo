@@ -6,13 +6,15 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 typedef struct flamingo_t flamingo_t;
 typedef struct flamingo_val_t flamingo_val_t;
 typedef struct flamingo_var_t flamingo_var_t;
 typedef struct flamingo_scope_t flamingo_scope_t;
+typedef struct flamingo_arg_list_t flamingo_arg_list_t;
 
-typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, size_t arg_count, flamingo_val_t** args, flamingo_val_t** rv);
+typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
@@ -94,6 +96,11 @@ struct flamingo_scope_t {
 	bool class_scope;
 };
 
+struct flamingo_arg_list_t {
+	size_t count;
+	flamingo_val_t** args;
+};
+
 struct flamingo_t {
 	char const* progname;
 	bool consistent; // Set if we managed to create the instance, so we know whether or not it still needs freeing.
@@ -129,6 +136,8 @@ struct flamingo_t {
 	flamingo_val_t* cur_fn_rv;
 };
 
+__attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flamingo, char const* fmt, ...);
+
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size);
 void flamingo_destroy(flamingo_t* flamingo);
 
@@ -144,3 +153,17 @@ flamingo_val_t* flamingo_val_make_int(int64_t integer);
 flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
 flamingo_val_t* flamingo_val_make_cstr(char* str);
 flamingo_val_t* flamingo_val_make_bool(bool boolean);
+
+flamingo_val_t* flamingo_val_find_arg(flamingo_arg_list_t* args, char const* name);
+
+static inline int flamingo_strcmp(char* a, char* b, size_t a_size, size_t b_size) {
+	if (a_size != b_size) {
+		return -1; // XXX Not right but whatever.
+	}
+
+	return memcmp(a, b, a_size);
+}
+
+static inline int flamingo_cstrcmp(char* str, char* cstr, size_t str_size) {
+	return flamingo_strcmp(str, cstr, str_size, strlen(cstr));
+}
