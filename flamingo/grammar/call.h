@@ -193,11 +193,6 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 		for (size_t i = 0; i < arg_count; i++) {
 			args[i] = arg_scope->vars[i].val;
-
-			// TODO Should I have to do this?
-
-			args[i]->name_size = arg_scope->vars[i].key_size;
-			args[i]->name = arg_scope->vars[i].key;
 		}
 
 		flamingo_arg_list_t arg_list = {
