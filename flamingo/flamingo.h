@@ -40,7 +40,7 @@ struct flamingo_val_t {
 
 	union {
 		struct {
-			bool val;
+			bool boolean;
 		} boolean;
 
 		struct {

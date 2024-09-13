@@ -90,12 +90,12 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
 
 		if (strncmp(op, "==", op_size) == 0) {
-			(*val)->boolean.val = same_types;
+			(*val)->boolean.boolean = same_types;
 			goto done;
 		}
 
 		if (strncmp(op, "!=", op_size) == 0) {
-			(*val)->boolean.val = !same_types;
+			(*val)->boolean.boolean = !same_types;
 			goto done;
 		}
 
@@ -153,37 +153,37 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer == right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer == right_val->integer.integer;
 			goto done;
 		}
 
 		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer != right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer != right_val->integer.integer;
 			goto done;
 		}
 
 		if (strncmp(op, "<", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer < right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer < right_val->integer.integer;
 			goto done;
 		}
 
 		if (strncmp(op, "<=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer <= right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer <= right_val->integer.integer;
 			goto done;
 		}
 
 		if (strncmp(op, ">", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer > right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer > right_val->integer.integer;
 			goto done;
 		}
 
 		if (strncmp(op, ">=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->integer.integer >= right_val->integer.integer;
+			(*val)->boolean.boolean = left_val->integer.integer >= right_val->integer.integer;
 			goto done;
 		}
 	}
@@ -193,19 +193,19 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		if (strncmp(op, "&&", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->boolean.val && right_val->boolean.val;
+			(*val)->boolean.boolean = left_val->boolean.boolean && right_val->boolean.boolean;
 			goto done;
 		}
 
 		if (strncmp(op, "||", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->boolean.val || right_val->boolean.val;
+			(*val)->boolean.boolean = left_val->boolean.boolean || right_val->boolean.boolean;
 			goto done;
 		}
 
 		if (strncmp(op, "^^", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = (!!left_val->boolean.val) ^ (!!right_val->boolean.val);
+			(*val)->boolean.boolean = (!!left_val->boolean.boolean) ^ (!!right_val->boolean.boolean);
 			goto done;
 		}
 
@@ -213,13 +213,13 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->boolean.val == right_val->boolean.val;
+			(*val)->boolean.boolean = left_val->boolean.boolean == right_val->boolean.boolean;
 			goto done;
 		}
 
 		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->boolean.val != right_val->boolean.val;
+			(*val)->boolean.boolean = left_val->boolean.boolean != right_val->boolean.boolean;
 			goto done;
 		}
 	}
@@ -245,13 +245,13 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		if (strncmp(op, "==", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->str.size == right_val->str.size && memcmp(left_val->str.str, right_val->str.str, left_val->str.size) == 0;
+			(*val)->boolean.boolean = left_val->str.size == right_val->str.size && memcmp(left_val->str.str, right_val->str.str, left_val->str.size) == 0;
 			goto done;
 		}
 
 		if (strncmp(op, "!=", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.val = left_val->str.size != right_val->str.size || memcmp(left_val->str.str, right_val->str.str, left_val->str.size) != 0;
+			(*val)->boolean.boolean = left_val->str.size != right_val->str.size || memcmp(left_val->str.str, right_val->str.str, left_val->str.size) != 0;
 			goto done;
 		}
 	}

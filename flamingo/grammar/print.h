@@ -34,7 +34,7 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		printf("<none>\n");
 		break;
 	case FLAMINGO_VAL_KIND_BOOL:
-		printf("%s\n", val->boolean.val ? "true" : "false");
+		printf("%s\n", val->boolean.boolean ? "true" : "false");
 		break;
 	case FLAMINGO_VAL_KIND_INT:
 		printf("%ld\n", val->integer.integer);

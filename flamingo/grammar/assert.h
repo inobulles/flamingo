@@ -34,7 +34,7 @@ static int parse_assert(flamingo_t* flamingo, TSNode node) {
 	char const* const test_str = flamingo->src + start;
 	size_t const test_size = end - start;
 
-	if (!val->boolean.val) {
+	if (!val->boolean.boolean) {
 		return error(flamingo, "assertion test '%.*s' failed", (int) test_size, test_str);
 	}
 
