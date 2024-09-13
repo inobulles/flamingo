@@ -1,3 +1,14 @@
-proto i_am_a_prototype
+proto test_do_literally_nothing
+assert test_do_literally_nothing() == none
 
-i_am_a_prototype()
+proto test_return_number
+assert test_return_number() == 420
+
+proto test_return_bool
+assert test_return_bool() == true
+
+proto test_return_str
+assert test_return_str() == "zonnebloemgranen"
+
+proto test_return_none
+assert test_return_none() == none

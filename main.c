@@ -36,8 +36,31 @@ static void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data) {
-	printf("function call: %.*s\n", (int) name_size, name);
+static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data, size_t arg_count, flamingo_val_t** args, flamingo_val_t** rv) {
+	if (memcmp(name, "test_return_number", name_size) == 0) {
+		*rv = flamingo_val_make_int(420);
+	}
+
+	else if (memcmp(name, "test_return_bool", name_size) == 0) {
+		*rv = flamingo_val_make_bool(true);
+	}
+
+	else if (memcmp(name, "test_return_str", name_size) == 0) {
+		*rv = flamingo_val_make_cstr("zonnebloemgranen");
+	}
+
+	else if (memcmp(name, "test_return_none", name_size) == 0) {
+		*rv = flamingo_val_make_none();
+	}
+
+	else if (memcmp(name, "test_do_literally_nothing", name_size) == 0) {
+	}
+
+	else {
+		printf("Runtime does not support the '%.*s' external function call (%zu args)\n", (int) name_size, name, arg_count);
+		return -1;
+	}
+
 	return 0;
 }
 

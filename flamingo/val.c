@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 static flamingo_val_t* val_incref(flamingo_val_t* val) {
 	assert(val->ref_count > 0); // value has already been freed
@@ -16,8 +17,12 @@ static flamingo_val_t* val_incref(flamingo_val_t* val) {
 }
 
 static flamingo_val_t* val_init(flamingo_val_t* val) {
+	// By default, values are anonymous.
+
 	val->name = NULL;
 	val->name_size = 0;
+
+	// By default, values are nones.
 
 	val->kind = FLAMINGO_VAL_KIND_NONE;
 	val->ref_count = 1;
@@ -70,6 +75,8 @@ static char const* val_role_str(flamingo_val_t* val) {
 
 static flamingo_val_t* val_alloc(void) {
 	flamingo_val_t* const val = calloc(1, sizeof *val);
+	assert(val != NULL);
+
 	return val_init(val);
 }
 
@@ -110,4 +117,43 @@ static flamingo_val_t* val_decref(flamingo_val_t* val) {
 
 	val_free(val);
 	return NULL;
+}
+
+flamingo_val_t* flamingo_val_make_none(void) {
+	return val_alloc();
+}
+
+flamingo_val_t* flamingo_val_make_int(int64_t integer) {
+	flamingo_val_t* const val = val_alloc();
+
+	val->kind = FLAMINGO_VAL_KIND_INT;
+	val->integer.integer = integer;
+
+	return val;
+}
+
+flamingo_val_t* flamingo_val_make_str(size_t size, char* str) {
+	flamingo_val_t* const val = val_alloc();
+
+	val->kind = FLAMINGO_VAL_KIND_STR;
+
+	val->str.size = size;
+	val->str.str = malloc(size);
+	assert(val->str.str != NULL);
+	memcpy(val->str.str, str, size);
+
+	return val;
+}
+
+flamingo_val_t* flamingo_val_make_cstr(char* str) {
+	return flamingo_val_make_str(strlen(str), str);
+}
+
+flamingo_val_t* flamingo_val_make_bool(bool boolean) {
+	flamingo_val_t* const val = val_alloc();
+
+	val->kind = FLAMINGO_VAL_KIND_BOOL;
+	val->boolean.boolean = boolean;
+
+	return val;
 }

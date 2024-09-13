@@ -12,7 +12,7 @@ typedef struct flamingo_val_t flamingo_val_t;
 typedef struct flamingo_var_t flamingo_var_t;
 typedef struct flamingo_scope_t flamingo_scope_t;
 
-typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data);
+typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, size_t arg_count, flamingo_val_t** args, flamingo_val_t** rv);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
@@ -138,3 +138,9 @@ int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamin
 int flamingo_run(flamingo_t* flamingo);
 
 flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size);
+
+flamingo_val_t* flamingo_val_make_none(void);
+flamingo_val_t* flamingo_val_make_int(int64_t integer);
+flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
+flamingo_val_t* flamingo_val_make_cstr(char* str);
+flamingo_val_t* flamingo_val_make_bool(bool boolean);
