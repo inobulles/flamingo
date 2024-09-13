@@ -157,15 +157,3 @@ flamingo_val_t* flamingo_val_make_bool(bool boolean) {
 
 	return val;
 }
-
-flamingo_val_t* flamingo_val_find_arg(flamingo_arg_list_t* args, char const* name) {
-	for (size_t i = 0; i < args->count; i++) {
-		flamingo_val_t* const arg = args->args[i];
-
-		if (flamingo_cstrcmp(arg->name, (char*) name, arg->name_size) == 0) {
-			return arg;
-		}
-	}
-
-	return NULL;
-}

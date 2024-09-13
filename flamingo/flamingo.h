@@ -154,8 +154,6 @@ flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
 flamingo_val_t* flamingo_val_make_cstr(char* str);
 flamingo_val_t* flamingo_val_make_bool(bool boolean);
 
-flamingo_val_t* flamingo_val_find_arg(flamingo_arg_list_t* args, char const* name);
-
 static inline int flamingo_strcmp(char* a, char* b, size_t a_size, size_t b_size) {
 	if (a_size != b_size) {
 		return -1; // XXX Not right but whatever.

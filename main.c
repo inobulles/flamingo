@@ -61,16 +61,8 @@ static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, vo
 			return flamingo_raise_error(flamingo, "test_sub: expected 2 arguments, got %zu", args->count);
 		}
 
-		flamingo_val_t* const a = flamingo_val_find_arg(args, "a");
-		flamingo_val_t* const b = flamingo_val_find_arg(args, "b");
-
-		if (a == NULL) {
-			return flamingo_raise_error(flamingo, "test_sub: argument 'a' doesn't exist");
-		}
-
-		if (b == NULL) {
-			return flamingo_raise_error(flamingo, "test_sub: argument 'b' doesn't exist");
-		}
+		flamingo_val_t* const a = args->args[0];
+		flamingo_val_t* const b = args->args[1];
 
 		if (a->kind != FLAMINGO_VAL_KIND_INT) {
 			return flamingo_raise_error(flamingo, "test_sub: expected 'a' to be an integer");
