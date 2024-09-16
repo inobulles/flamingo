@@ -20,7 +20,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 	case FLAMINGO_FN_KIND_CLASS:
 		thing = "class";
 		break;
-	case FLAMINGO_FN_KIND_PROTO:
+	case FLAMINGO_FN_KIND_EXTERN:
 		thing = "external prototype";
 		break;
 	default:
@@ -72,7 +72,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 	TSNode body;
 
-	if (kind != FLAMINGO_FN_KIND_PROTO) {
+	if (kind != FLAMINGO_FN_KIND_EXTERN) {
 		body = ts_node_child_by_field_name(node, "body", 4);
 		char const* const body_type = ts_node_type(body);
 
@@ -124,7 +124,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 	// Assign body node.
 	// Prototypes by definition don't have bodies.
 
-	if (kind != FLAMINGO_FN_KIND_PROTO) {
+	if (kind != FLAMINGO_FN_KIND_EXTERN) {
 		var->val->fn.body = malloc(sizeof body);
 		memcpy(var->val->fn.body, &body, sizeof body);
 	}

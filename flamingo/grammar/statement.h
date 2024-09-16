@@ -70,7 +70,7 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 	}
 
 	else if (strcmp(type, "proto") == 0) {
-		return parse_function_declaration(flamingo, child, FLAMINGO_FN_KIND_PROTO);
+		return parse_function_declaration(flamingo, child, FLAMINGO_FN_KIND_EXTERN);
 	}
 
 	else if (strcmp(type, "expression") == 0) {

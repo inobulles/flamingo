@@ -28,7 +28,7 @@ typedef enum {
 typedef enum {
 	FLAMINGO_FN_KIND_FUNCTION,
 	FLAMINGO_FN_KIND_CLASS,
-	FLAMINGO_FN_KIND_PROTO, // XXX Maybe a better name for this is '*_EXTERN'?
+	FLAMINGO_FN_KIND_EXTERN,
 } flamingo_fn_kind_t;
 
 typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).

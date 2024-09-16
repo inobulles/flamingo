@@ -40,7 +40,7 @@ static char const* val_type_str(flamingo_val_t* val) {
 		return "string";
 	case FLAMINGO_VAL_KIND_FN:
 		switch (val->fn.kind) {
-		case FLAMINGO_FN_KIND_PROTO:
+		case FLAMINGO_FN_KIND_EXTERN:
 			return "external function";
 		case FLAMINGO_FN_KIND_FUNCTION:
 			return "function";
