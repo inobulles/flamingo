@@ -8,6 +8,8 @@
 #include <common.h>
 #include <val.c>
 
+#include <inttypes.h>
+
 static int parse_print(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 2);
 
@@ -37,7 +39,7 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 		printf("%s\n", val->boolean.boolean ? "true" : "false");
 		break;
 	case FLAMINGO_VAL_KIND_INT:
-		printf("%ld\n", val->integer.integer);
+		printf("%" PRId64 "\n", val->integer.integer);
 		break;
 	case FLAMINGO_VAL_KIND_STR:
 		printf("%.*s\n", (int) val->str.size, val->str.str);
