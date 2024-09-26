@@ -44,12 +44,12 @@ For the first version of Flamingo, to be integrated into Bob the Builder, this i
 - [ ] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. no recursion).
 - [ ] Anonymous functions.
+- [ ] Sort out function scope weirdness by making all functions closures.
 
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
 
 - [ ] `pure` qualifier and pure function checking (pure checking is just are we assigning variable or calling impure function in a pure one, relatively easy).
 - [ ] Type checking.
-- [ ] Sort out function scope weirdness.
 - [ ] The LSP itself!
 - [ ] Comprehensive docs.
 
