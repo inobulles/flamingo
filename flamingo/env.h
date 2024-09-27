@@ -19,6 +19,23 @@ static flamingo_env_t* env_alloc(void) {
 	return env;
 }
 
+static flamingo_env_t* env_close_over(flamingo_env_t* env) {
+	flamingo_env_t* const closed_env = env_alloc();
+
+	closed_env->scope_stack_size = env->scope_stack_size;
+	closed_env->scope_stack = malloc(closed_env->scope_stack_size * sizeof *closed_env->scope_stack);
+	assert(closed_env->scope_stack != NULL);
+
+	for (size_t i = 0; i < closed_env->scope_stack_size; i++) {
+		flamingo_scope_t* const scope = env->scope_stack[i];
+
+		scope->ref_count++; // TODO Prolly wanna use a 'scope_incref' function or something.
+		closed_env->scope_stack[i] = scope;
+	}
+
+	return closed_env;
+}
+
 static flamingo_scope_t* env_parent_scope(flamingo_env_t* env) {
 	if (env->scope_stack_size < 2) {
 		return NULL;

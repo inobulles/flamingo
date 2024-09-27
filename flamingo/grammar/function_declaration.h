@@ -7,6 +7,7 @@
 #include <env.h>
 #include <scope.h>
 #include <val.h>
+#include <var.h>
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind) {
 	size_t const child_count = ts_node_child_count(node);
@@ -111,11 +112,11 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 	// Add function/class to scope.
 
 	flamingo_var_t* const var = scope_add_var(cur_scope, name, size);
-
 	var_set_val(var, val_alloc());
+
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
 	var->val->fn.kind = kind;
-
+	var->val->fn.env = env_close_over(flamingo->env);
 	var->val->fn.params = NULL;
 
 	if (has_params) {

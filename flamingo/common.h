@@ -34,6 +34,7 @@ static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node, 
 // Environment prototypes.
 
 static inline flamingo_env_t* env_alloc(void);
+static inline flamingo_env_t* env_close_over(flamingo_env_t* env);
 static inline flamingo_scope_t* env_parent_scope(flamingo_env_t* env);
 static inline flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
 static inline void env_gently_attach_scope(flamingo_env_t* env, flamingo_scope_t* scope);

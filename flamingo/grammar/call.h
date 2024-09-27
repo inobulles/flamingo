@@ -149,6 +149,11 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	TSNode* const prev_fn_body = flamingo->cur_fn_body;
 	flamingo->cur_fn_body = callable->fn.body;
 
+	// Switch context's current environment to the one closed over by the function.
+
+	flamingo_env_t* const prev_env = flamingo->env;
+	flamingo->env = callable->fn.env;
+
 	// If calling on an instance, add that instance's scope to the scope stack.
 	// We do this before the arguments scope because we want parameters to shadow stuff in the instance's scope.
 
@@ -216,7 +221,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		return -1;
 	}
 
-	// Unwind the scope stack and switch back to previous source and current function body context.
+	// Unwind the scope stack and switch back to previous source, current function body context, and environment..
 
 	env_pop_scope(flamingo->env);
 
@@ -228,6 +233,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	flamingo->src_size = prev_src_size;
 
 	flamingo->cur_fn_body = prev_fn_body;
+	flamingo->env = prev_env;
 
 	// If class, create an instance.
 
