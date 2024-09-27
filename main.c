@@ -18,7 +18,7 @@
 static char const* init_name = "flamingo";
 
 static void usage(void) {
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__)
 	char const* const progname = getprogname();
 #elif defined(__linux__)
 	char progname[16];
