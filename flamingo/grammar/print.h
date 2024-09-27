@@ -6,7 +6,7 @@
 #include "expr.h"
 
 #include <common.h>
-#include <val.c>
+#include <val.h>
 
 #include <inttypes.h>
 

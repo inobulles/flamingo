@@ -4,7 +4,7 @@
 #pragma once
 
 #include <common.h>
-#include <scope.c>
+#include <scope.h>
 
 #include <assert.h>
 #include <stdlib.h>

@@ -4,7 +4,7 @@
 #pragma once
 
 #include <common.h>
-#include <val.c>
+#include <val.h>
 
 static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "literal") == 0);

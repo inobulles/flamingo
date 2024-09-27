@@ -4,8 +4,8 @@
 #pragma once
 
 #include <common.h>
-#include <env.c>
-#include <val.c>
+#include <env.h>
+#include <val.h>
 
 static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "identifier") == 0);

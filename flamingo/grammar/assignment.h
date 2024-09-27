@@ -7,9 +7,9 @@
 #include "expr.h"
 
 #include <common.h>
-#include <scope.c>
-#include <val.c>
-#include <var.c>
+#include <scope.h>
+#include <val.h>
+#include <var.h>
 
 static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "assignment") == 0);

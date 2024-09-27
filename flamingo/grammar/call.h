@@ -5,7 +5,7 @@
 
 #include "block.h"
 #include "expr.h"
-#include <scope.c>
+#include <scope.h>
 
 #include <common.h>
 

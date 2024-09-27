@@ -6,8 +6,8 @@
 #include "expr.h"
 
 #include <common.h>
-#include <env.c>
-#include <scope.c>
+#include <env.h>
+#include <scope.h>
 
 static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 	size_t const child_count = ts_node_named_child_count(node);

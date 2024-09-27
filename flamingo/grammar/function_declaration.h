@@ -4,9 +4,9 @@
 #pragma once
 
 #include <common.h>
-#include <env.c>
-#include <scope.c>
-#include <val.c>
+#include <env.h>
+#include <scope.h>
+#include <val.h>
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind) {
 	size_t const child_count = ts_node_child_count(node);

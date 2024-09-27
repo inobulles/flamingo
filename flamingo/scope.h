@@ -4,7 +4,7 @@
 #pragma once
 
 #include <common.h>
-#include <val.c>
+#include <val.h>
 
 #include <assert.h>
 #include <stdlib.h>

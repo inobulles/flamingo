@@ -5,7 +5,7 @@
 
 #include <common.h>
 
-#include <env.c>
+#include <env.h>
 
 #include <errno.h>
 #include <sys/stat.h>

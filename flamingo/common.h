@@ -33,34 +33,34 @@ static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node, 
 
 // Environment prototypes.
 
-static flamingo_env_t* env_alloc(void);
-static flamingo_scope_t* env_parent_scope(flamingo_env_t* env);
-static flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
-static void env_gently_attach_scope(flamingo_env_t* env, flamingo_scope_t* scope);
-static flamingo_scope_t* env_gently_detach_scope(flamingo_env_t* env);
-static flamingo_scope_t* env_push_scope(flamingo_env_t* env);
-static void env_pop_scope(flamingo_env_t* env);
-static flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key, size_t key_size);
+static inline flamingo_env_t* env_alloc(void);
+static inline flamingo_scope_t* env_parent_scope(flamingo_env_t* env);
+static inline flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
+static inline void env_gently_attach_scope(flamingo_env_t* env, flamingo_scope_t* scope);
+static inline flamingo_scope_t* env_gently_detach_scope(flamingo_env_t* env);
+static inline flamingo_scope_t* env_push_scope(flamingo_env_t* env);
+static inline void env_pop_scope(flamingo_env_t* env);
+static inline flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key, size_t key_size);
 
 // Scope prototypes.
 
-static flamingo_scope_t* scope_alloc(void);
-static void scope_free(flamingo_scope_t* scope);
-static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, size_t key_size);
-static flamingo_var_t* scope_shallow_find_var(flamingo_scope_t* scope, char const* key, size_t key_size);
+static inline flamingo_scope_t* scope_alloc(void);
+static inline void scope_free(flamingo_scope_t* scope);
+static inline flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, size_t key_size);
+static inline flamingo_var_t* scope_shallow_find_var(flamingo_scope_t* scope, char const* key, size_t key_size);
 
 // Variable prototypes.
 
-static void var_set_val(flamingo_var_t* var, flamingo_val_t* val);
+static inline void var_set_val(flamingo_var_t* var, flamingo_val_t* val);
 
 // Value prototypes.
 
-static flamingo_val_t* val_incref(flamingo_val_t* val);
-static flamingo_val_t* val_init(flamingo_val_t* val);
-static char const* val_type_str(flamingo_val_t* val);
-static char const* val_role_str(flamingo_val_t* val);
-static flamingo_val_t* val_alloc(void);
-static void val_free(flamingo_val_t* val);
-static flamingo_val_t* val_decref(flamingo_val_t* val);
+static inline flamingo_val_t* val_incref(flamingo_val_t* val);
+static inline flamingo_val_t* val_init(flamingo_val_t* val);
+static inline char const* val_type_str(flamingo_val_t* val);
+static inline char const* val_role_str(flamingo_val_t* val);
+static inline flamingo_val_t* val_alloc(void);
+static inline void val_free(flamingo_val_t* val);
+static inline flamingo_val_t* val_decref(flamingo_val_t* val);
 
 #define error(...) (flamingo_raise_error(__VA_ARGS__))
