@@ -1,0 +1,10 @@
+fn curry(x: int) {
+	fn sum(y: int) {
+		return x + y
+	}
+
+	return sum
+}
+
+assert curry(420)(69) == 489
+assert curry(420)(69) == curry(69)(420)
