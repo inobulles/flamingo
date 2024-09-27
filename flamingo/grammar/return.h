@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <val.c>
+#include <env.c>
 
 static int parse_return(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 2);
@@ -14,11 +15,11 @@ static int parse_return(flamingo_t* flamingo, TSNode node) {
 	// Don't allow returns in top level scopes.
 	// Maybe in the future this could serve as an exit kind of thing, but I think I want an explicit 'exit' statement.
 
-	if (parent_scope(flamingo) == NULL) {
+	if (env_parent_scope(flamingo->env) == NULL) {
 		return error(flamingo, "Return can't be used in top-level scope");
 	}
 
-	bool const in_class = cur_scope(flamingo)->class_scope;
+	bool const in_class = env_cur_scope(flamingo->env)->class_scope;
 
 	// Get return value.
 

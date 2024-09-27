@@ -7,6 +7,7 @@
 
 #include <common.h>
 #include <scope.c>
+#include <env.c>
 
 static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 	size_t const child_count = ts_node_named_child_count(node);
@@ -56,7 +57,8 @@ static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 	// Check if identifier is already in current scope (shallow search) and error if it is.
 	// If its in a previous one, that's alright, we'll just shadow it.
 
-	flamingo_var_t* const prev_var = scope_shallow_find_var(cur_scope(flamingo), name, name_size);
+	flamingo_scope_t* const cur_scope = env_cur_scope(flamingo->env);
+	flamingo_var_t* const prev_var = scope_shallow_find_var(cur_scope, name, name_size);
 
 	if (prev_var != NULL) {
 		return error(flamingo, "%s '%.*s' already declared in this scope", val_role_str(prev_var->val), (int) name_size, name);
@@ -64,7 +66,7 @@ static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 
 	// Now, we can add our variable to the scope.
 
-	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, name_size);
+	flamingo_var_t* const var = scope_add_var(cur_scope, name, name_size);
 
 	// And parse the initial expression if there is one to the variable's value.
 

@@ -5,6 +5,8 @@
 
 #include <common.h>
 
+#include <env.c>
+
 #include <errno.h>
 #include <sys/stat.h>
 
@@ -66,8 +68,8 @@ static int import(flamingo_t* flamingo, char* path) {
 
 	// Set the scope stack for the imported flamingo instance to be the same as ours.
 
-	if (flamingo_inherit_scope_stack(imported_flamingo, flamingo->scope_stack_size, flamingo->scope_stack) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_inherit_scope_stack: %s\n", path, flamingo_err(imported_flamingo));
+	if (flamingo_inherit_env(imported_flamingo, flamingo->env) < 0) {
+		rv = error(flamingo, "failed to import '%s': flamingo_inherit_env: %s\n", path, flamingo_err(imported_flamingo));
 		goto err_flamingo_inherit_scope_stack;
 	}
 
@@ -80,8 +82,8 @@ static int import(flamingo_t* flamingo, char* path) {
 
 	// Don't forget to copy back the scope stack, as after a few reallocs the pointers might be different!
 
-	flamingo->scope_stack = imported_flamingo->scope_stack;
-	assert(flamingo->scope_stack_size == imported_flamingo->scope_stack_size);
+	assert(flamingo->env->scope_stack_size == imported_flamingo->env->scope_stack_size);
+	flamingo->env = imported_flamingo->env;
 
 err_flamingo_run:
 err_flamingo_inherit_scope_stack:

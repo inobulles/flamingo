@@ -37,7 +37,7 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	flamingo_var_t* var;
 
 	if (strcmp(left_type, "identifier") == 0) {
-		var = flamingo_scope_find_var(flamingo, lhs, lhs_size);
+		var = env_find_var(flamingo->env, lhs, lhs_size);
 
 		if (var == NULL) {
 			return error(flamingo, "'%.*s' was never declared", (int) lhs_size, lhs);

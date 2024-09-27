@@ -6,6 +6,7 @@
 #include <common.h>
 #include <scope.c>
 #include <val.c>
+#include <env.c>
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind) {
 	size_t const child_count = ts_node_child_count(node);
@@ -100,7 +101,8 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 	// Redeclaring functions/classes is not allowed (I have decided against prototypes).
 	// If its in a previous one, that's alright, we'll just shadow it.
 
-	flamingo_var_t* const prev_var = scope_shallow_find_var(cur_scope(flamingo), name, size);
+	flamingo_scope_t* const cur_scope = env_cur_scope(flamingo->env);
+	flamingo_var_t* const prev_var = scope_shallow_find_var(cur_scope, name, size);
 
 	if (prev_var != NULL) {
 		return error(flamingo, "the %s '%.*s' has already been declared in this scope", val_role_str(prev_var->val), (int) size, name);
@@ -108,7 +110,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 	// Add function/class to scope.
 
-	flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
+	flamingo_var_t* const var = scope_add_var(cur_scope, name, size);
 
 	var_set_val(var, val_alloc());
 	var->val->kind = FLAMINGO_VAL_KIND_FN;

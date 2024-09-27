@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
 
 	// print out all top-level scope variables
 
-	flamingo_scope_t* const scope = flamingo.scope_stack[0];
+	flamingo_scope_t* const scope = flamingo.env->scope_stack[0];
 
 	for (size_t j = 0; j < scope->vars_size; j++) {
 		flamingo_var_t* const var = &scope->vars[j];

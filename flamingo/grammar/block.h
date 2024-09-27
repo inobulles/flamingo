@@ -6,12 +6,12 @@
 #include "statement.h"
 
 #include <common.h>
-#include <scope.c>
+#include <env.c>
 
 static int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inner_scope) {
 	assert(strcmp(ts_node_type(node), "block") == 0);
 
-	scope_stack_push(flamingo);
+	env_push_scope(flamingo->env);
 	size_t const n = ts_node_named_child_count(node);
 
 	for (size_t i = 0; i < n; i++) {
@@ -28,11 +28,11 @@ static int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inn
 	}
 
 	if (inner_scope == NULL) {
-		scope_pop(flamingo);
+		env_pop_scope(flamingo->env);
 	}
 
 	else {
-		*inner_scope = scope_gently_detach(flamingo);
+		*inner_scope = env_gently_detach_scope(flamingo->env);
 	}
 
 	return 0;

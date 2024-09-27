@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include <val.c>
+#include <env.c>
 
 static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "identifier") == 0);
@@ -16,7 +17,7 @@ static int parse_identifier(flamingo_t* flamingo, TSNode node, flamingo_val_t** 
 	char const* const identifier = flamingo->src + start;
 	size_t const size = end - start;
 
-	flamingo_var_t* const var = flamingo_scope_find_var(flamingo, identifier, size);
+	flamingo_var_t* const var = env_find_var(flamingo->env, identifier, size);
 
 	if (var == NULL) {
 		return error(flamingo, "could not find identifier: %.*s", (int) size, identifier);

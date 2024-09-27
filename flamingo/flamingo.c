@@ -13,6 +13,7 @@
 #include <common.h>
 #include <grammar/statement.h>
 #include <scope.c>
+#include <env.c>
 
 typedef struct {
 	TSParser* parser;
@@ -63,8 +64,8 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	flamingo->src = src;
 	flamingo->src_size = src_size;
 
-	flamingo->inherited_scope_stack = false;
-	flamingo->scope_stack = NULL;
+	flamingo->inherited_env = false;
+	flamingo->env = NULL;
 
 	flamingo->import_count = 0;
 	flamingo->imported_srcs = NULL;
@@ -138,13 +139,13 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	// If we didn't inherit our scope stack, free it and all the scopes on it.
 
-	if (!flamingo->inherited_scope_stack) {
-		for (size_t i = 0; i < flamingo->scope_stack_size; i++) {
-			scope_free(flamingo->scope_stack[i]);
+	if (!flamingo->inherited_env) {
+		for (size_t i = 0; i < flamingo->env->scope_stack_size; i++) {
+			scope_free(flamingo->env->scope_stack[i]);
 		}
 
-		if (flamingo->scope_stack != NULL) {
-			free(flamingo->scope_stack);
+		if (flamingo->env->scope_stack != NULL) {
+			free(flamingo->env->scope_stack);
 		}
 	}
 
@@ -205,15 +206,14 @@ static int parse(flamingo_t* flamingo, TSNode node) {
 	return 0;
 }
 
-int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t** stack) {
-	if (flamingo->scope_stack != NULL) {
-		assert(flamingo->scope_stack_size == 0);
-		return error(flamingo, "there already is a scope stack on this flamingo instance");
+int flamingo_inherit_env(flamingo_t* flamingo, flamingo_env_t* env) {
+	if (flamingo->env != NULL) {
+		assert(flamingo->env->scope_stack_size == 0);
+		return error(flamingo, "there is already an environment on this flamingo instance");
 	}
 
-	flamingo->inherited_scope_stack = true;
-	flamingo->scope_stack_size = stack_size;
-	flamingo->scope_stack = stack;
+	flamingo->inherited_env = true;
+	flamingo->env = env;
 
 	return 0;
 }
@@ -222,16 +222,18 @@ int flamingo_run(flamingo_t* flamingo) {
 	ts_state_t* const ts_state = flamingo->ts_state;
 	assert(strcmp(ts_node_type(ts_state->root), "source_file") == 0);
 
-	if (!flamingo->inherited_scope_stack) {
-		if (flamingo->scope_stack != NULL) {
-			free(flamingo->scope_stack);
+	if (!flamingo->inherited_env) {
+		if (flamingo->env != NULL) {
+			free(flamingo->env);
 		}
 
-		flamingo->scope_stack_size = 0;
-		flamingo->scope_stack = NULL;
-
-		scope_stack_push(flamingo);
+		flamingo->env = env_alloc();
+		env_push_scope(flamingo->env);
 	}
 
 	return parse(flamingo, ts_state->root);
+}
+
+flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t key_size) {
+	return env_find_var(flamingo->env, key, key_size);
 }

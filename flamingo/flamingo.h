@@ -12,6 +12,7 @@ typedef struct flamingo_t flamingo_t;
 typedef struct flamingo_val_t flamingo_val_t;
 typedef struct flamingo_var_t flamingo_var_t;
 typedef struct flamingo_scope_t flamingo_scope_t;
+typedef struct flamingo_env_t flamingo_env_t;
 typedef struct flamingo_arg_list_t flamingo_arg_list_t;
 
 typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv);
@@ -58,6 +59,10 @@ struct flamingo_val_t {
 			flamingo_ts_node_t body;
 			flamingo_ts_node_t params;
 
+			// The environment the function closes over.
+
+			flamingo_env_t* env;
+
 			// Functions can be defined in other files entirely.
 			// While the Tree-sitter state is held within the nodes themselves, the source they point to is not, which is why we need to keep track of it here.
 
@@ -88,12 +93,19 @@ struct flamingo_var_t {
 };
 
 struct flamingo_scope_t {
+	size_t ref_count;
+
 	size_t vars_size;
 	flamingo_var_t* vars;
 
 	// Used for return to know what it can and can't return.
 
 	bool class_scope;
+};
+
+struct flamingo_env_t {
+	size_t scope_stack_size;
+	flamingo_scope_t** scope_stack;
 };
 
 struct flamingo_arg_list_t {
@@ -116,9 +128,8 @@ struct flamingo_t {
 
 	// Runtime stuff.
 
-	bool inherited_scope_stack;
-	size_t scope_stack_size;
-	flamingo_scope_t** scope_stack;
+	bool inherited_env;
+	flamingo_env_t* env;
 
 	// Tree-sitter stuff.
 
@@ -143,10 +154,10 @@ void flamingo_destroy(flamingo_t* flamingo);
 
 char* flamingo_err(flamingo_t* flamingo);
 void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn_cb_t cb, void* data);
-int flamingo_inherit_scope_stack(flamingo_t* flamingo, size_t stack_size, flamingo_scope_t** stack);
+int flamingo_inherit_env(flamingo_t* flamingo, flamingo_env_t* env);
 int flamingo_run(flamingo_t* flamingo);
 
-flamingo_var_t* flamingo_scope_find_var(flamingo_t* flamingo, char const* key, size_t key_size);
+flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t key_size);
 
 flamingo_val_t* flamingo_val_make_none(void);
 flamingo_val_t* flamingo_val_make_int(int64_t integer);

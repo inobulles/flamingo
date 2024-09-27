@@ -58,7 +58,8 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 
 		// Create parameter variable.
 
-		flamingo_var_t* const var = scope_add_var(cur_scope(flamingo), name, size);
+		flamingo_scope_t* const scope = env_cur_scope(flamingo->env);
+		flamingo_var_t* const var = scope_add_var(scope, name, size);
 
 		// Parse argument expression into that parameter variable.
 
@@ -152,13 +153,13 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// We do this before the arguments scope because we want parameters to shadow stuff in the instance's scope.
 
 	if (on_inst) {
-		scope_gently_attach(flamingo, accessed_val->inst.scope);
+		env_gently_attach_scope(flamingo->env, accessed_val->inst.scope);
 	}
 
 	// Create a new scope for the function for the argument assignments.
 	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
 
-	flamingo_scope_t* scope = scope_stack_push(flamingo);
+	flamingo_scope_t* scope = env_push_scope(flamingo->env);
 	scope->class_scope = is_class;
 
 	// Evaluate argument expressions.
@@ -185,7 +186,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 		// Create arg list.
 
-		flamingo_scope_t* const arg_scope = flamingo->scope_stack[flamingo->scope_stack_size - 1];
+		flamingo_scope_t* const arg_scope = env_cur_scope(flamingo->env);
 
 		size_t const arg_count = arg_scope->vars_size;
 		flamingo_val_t** const args = malloc(arg_count * sizeof *args);
@@ -217,10 +218,10 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	// Unwind the scope stack and switch back to previous source and current function body context.
 
-	scope_pop(flamingo);
+	env_pop_scope(flamingo->env);
 
 	if (on_inst) {
-		scope_gently_detach(flamingo);
+		env_gently_detach_scope(flamingo->env);
 	}
 
 	flamingo->src = prev_src;

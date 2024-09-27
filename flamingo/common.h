@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Grammar parsing prototypes.
+
 static inline int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref);
 static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val);
@@ -28,5 +30,16 @@ static inline int parse_var_decl(flamingo_t* flamingo, TSNode node);
 static inline int parse_assignment(flamingo_t* flamingo, TSNode node);
 static inline int parse_import(flamingo_t* flamingo, TSNode node);
 static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind);
+
+// Environment prototypes.
+
+static flamingo_env_t* env_alloc(void);
+static flamingo_scope_t* env_parent_scope(flamingo_env_t* env);
+static flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
+static void env_gently_attach_scope(flamingo_env_t* env, flamingo_scope_t* scope);
+static flamingo_scope_t* env_gently_detach_scope(flamingo_env_t* env);
+static flamingo_scope_t* env_push_scope(flamingo_env_t* env);
+static void env_pop_scope(flamingo_env_t* env);
+static flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key, size_t key_size);
 
 #define error(...) (flamingo_raise_error(__VA_ARGS__))
