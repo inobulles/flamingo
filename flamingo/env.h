@@ -73,7 +73,7 @@ static flamingo_scope_t* env_push_scope(flamingo_env_t* env) {
 
 static void env_pop_scope(flamingo_env_t* env) {
 	// TODO Free containing variables.
-	scope_free(env_gently_detach_scope(env));
+	/* scope_free( */ env_gently_detach_scope(env) /* ) */;
 }
 
 static flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key, size_t key_size) {
