@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "flamingo.h"
+#include <common.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -80,8 +80,6 @@ static flamingo_val_t* val_alloc(void) {
 	return val_init(val);
 }
 
-static void scope_free(flamingo_scope_t* scope);
-
 static void val_free(flamingo_val_t* val) {
 	if (val->kind == FLAMINGO_VAL_KIND_STR) {
 		free(val->str.str);
@@ -117,43 +115,4 @@ static flamingo_val_t* val_decref(flamingo_val_t* val) {
 
 	val_free(val);
 	return NULL;
-}
-
-flamingo_val_t* flamingo_val_make_none(void) {
-	return val_alloc();
-}
-
-flamingo_val_t* flamingo_val_make_int(int64_t integer) {
-	flamingo_val_t* const val = val_alloc();
-
-	val->kind = FLAMINGO_VAL_KIND_INT;
-	val->integer.integer = integer;
-
-	return val;
-}
-
-flamingo_val_t* flamingo_val_make_str(size_t size, char* str) {
-	flamingo_val_t* const val = val_alloc();
-
-	val->kind = FLAMINGO_VAL_KIND_STR;
-
-	val->str.size = size;
-	val->str.str = malloc(size);
-	assert(val->str.str != NULL);
-	memcpy(val->str.str, str, size);
-
-	return val;
-}
-
-flamingo_val_t* flamingo_val_make_cstr(char* str) {
-	return flamingo_val_make_str(strlen(str), str);
-}
-
-flamingo_val_t* flamingo_val_make_bool(bool boolean) {
-	flamingo_val_t* const val = val_alloc();
-
-	val->kind = FLAMINGO_VAL_KIND_BOOL;
-	val->boolean.boolean = boolean;
-
-	return val;
 }

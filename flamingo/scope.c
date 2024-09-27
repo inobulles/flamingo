@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "flamingo.h"
+#include <common.h>
 #include <val.c>
 
 #include <assert.h>
@@ -47,20 +47,6 @@ static flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, s
 	var->val = NULL;
 
 	return var;
-}
-
-static void var_set_val(flamingo_var_t* var, flamingo_val_t* val) {
-	if (var->val != NULL && val != NULL) {
-		val->name = NULL;
-		val->name_size = 0;
-	}
-
-	var->val = val;
-
-	if (val != NULL) {
-		val->name = var->key;
-		val->name_size = var->key_size;
-	}
 }
 
 static flamingo_var_t* scope_shallow_find_var(flamingo_scope_t* scope, char const* key, size_t key_size) {
