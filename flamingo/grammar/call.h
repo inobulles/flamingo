@@ -115,27 +115,6 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	bool const on_inst = accessed_val != NULL && accessed_val->kind == FLAMINGO_VAL_KIND_INST;
 
 	// Actually call the callable.
-
-	/* TODO
-		The issue with this is that the body we're calling may further down the scope stack, and blocks just blindly push a new scope on top of the stack.
-	   What we should really be doing is copying the scope stack, rolling it back to the scope where the function was declared, and then pushing a new scope on top of that.
-	   Maybe there's a better way? Here's an illustration of the problem:
-
-		fn fun2() {
-			print(a) # I should not have access to 'a' in here.
-		}
-
-		fn fun1() {
-			fn fun3() {
-				print(a) # In fact, and this is a semi-unrelated issue, I should have access to 'a' here either.
-			}
-
-			a = "hello"
-			fun2()
-			fun3()
-		}
-	*/
-
 	// Switch context's source if the callable was created in another.
 
 	char* const prev_src = flamingo->src;
