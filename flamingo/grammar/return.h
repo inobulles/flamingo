@@ -6,8 +6,8 @@
 #include "expr.h"
 
 #include <common.h>
-#include <val.c>
 #include <env.c>
+#include <val.c>
 
 static int parse_return(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 1 || ts_node_child_count(node) == 2);

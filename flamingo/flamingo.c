@@ -11,9 +11,9 @@
 #include "runtime/lib.c"
 
 #include <common.h>
+#include <env.c>
 #include <grammar/statement.h>
 #include <scope.c>
-#include <env.c>
 
 typedef struct {
 	TSParser* parser;
