@@ -11,8 +11,8 @@
 #include "runtime/lib.c"
 
 #include <common.h>
-#include <grammar/statement.h>
 #include <env.h>
+#include <grammar/statement.h>
 #include <scope.h>
 
 typedef struct {
