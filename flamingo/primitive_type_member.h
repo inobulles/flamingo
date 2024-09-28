@@ -92,6 +92,34 @@ static int str_len(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list
 	return 0;
 }
 
+static int str_startswith(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+	assert(self->kind == FLAMINGO_VAL_KIND_STR);
+
+	// Check our arguments.
+
+	if (args->count != 1) {
+		return error(flamingo, "'str.startswith' expected 1 argument, got %zu", args->count);
+	}
+
+	flamingo_val_t* const start = args->args[0];
+
+	if (start->kind != FLAMINGO_VAL_KIND_STR) {
+		return error(flamingo, "'str.startswith' expected 'start' argument to be a string, got a %s", val_role_str(start));
+	}
+
+	// Actually check self's string starts with 'start'.
+
+	bool startswith = false;
+
+	if (start->str.size <= self->str.size) {
+		startswith = memcmp(self->str.str, start->str.str, start->str.size) == 0;
+	}
+
+	*rv = flamingo_val_make_bool(startswith);
+
+	return 0;
+}
+
 static int str_endswith(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv) {
 	assert(self->kind == FLAMINGO_VAL_KIND_STR);
 
@@ -131,11 +159,7 @@ static int primitive_type_member_std(flamingo_t* flamingo) {
 
 	ADD(FLAMINGO_VAL_KIND_STR, "len", str_len);
 	ADD(FLAMINGO_VAL_KIND_STR, "endswith", str_endswith);
-
-	/*
-	ADD(FLAMINGO_VAL_KIND_STR, "contains", str_contains);
 	ADD(FLAMINGO_VAL_KIND_STR, "startswith", str_startswith);
-	*/
 
 	return 0;
 }
