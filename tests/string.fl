@@ -1,0 +1,8 @@
+assert "zonnebloemgranen".len() == 16
+assert "zonnebloemgranen".endswith("granen") == true
+assert "zonnebloemgranen".endswith("zonne") == false
+assert "zonnebloemgranen".startswith("granen") == false
+assert "zonnebloemgranen".startswith("zonne") == true
+
+let x = "zonnebloemgranen"
+assert x.len() == 16
