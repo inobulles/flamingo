@@ -16,6 +16,7 @@ typedef struct flamingo_env_t flamingo_env_t;
 typedef struct flamingo_arg_list_t flamingo_arg_list_t;
 
 typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv);
+typedef int (*flamingo_ptm_cb_t)(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv);
 
 typedef enum {
 	FLAMINGO_VAL_KIND_NONE,
@@ -24,12 +25,14 @@ typedef enum {
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_FN,
 	FLAMINGO_VAL_KIND_INST,
+	FLAMINGO_VAL_KIND_COUNT,
 } flamingo_val_kind_t;
 
 typedef enum {
 	FLAMINGO_FN_KIND_FUNCTION,
 	FLAMINGO_FN_KIND_CLASS,
 	FLAMINGO_FN_KIND_EXTERN,
+	FLAMINGO_FN_KIND_PTM,
 } flamingo_fn_kind_t;
 
 typedef void* flamingo_ts_node_t; // Opaque type, because user shouldn't have to include Tree-sitter stuff in their namespace (or concern themselves with Tree-sitter at all for that matter).
@@ -72,6 +75,10 @@ struct flamingo_val_t {
 			// Classes are just functions which can only return instances.
 
 			flamingo_fn_kind_t kind;
+
+			// Only used for primitive type members.
+
+			flamingo_ptm_cb_t ptm_cb;
 		} fn;
 
 		struct {
@@ -87,6 +94,7 @@ struct flamingo_val_t {
 };
 
 struct flamingo_var_t {
+	bool anonymous;
 	char* key;
 	size_t key_size;
 	flamingo_val_t* val;
@@ -145,6 +153,14 @@ struct flamingo_t {
 
 	flamingo_ts_node_t cur_fn_body;
 	flamingo_val_t* cur_fn_rv;
+
+	// Variables on primitive types.
+	// This is for stuff like e.g. '"zonnebloemgranen".endswith("granen")'.
+
+	struct {
+		size_t count;
+		flamingo_var_t* vars;
+	} primitive_type_members[FLAMINGO_VAL_KIND_COUNT];
 };
 
 __attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flamingo, char const* fmt, ...);
@@ -165,7 +181,7 @@ flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
 flamingo_val_t* flamingo_val_make_cstr(char* str);
 flamingo_val_t* flamingo_val_make_bool(bool boolean);
 
-static inline int flamingo_strcmp(char* a, char* b, size_t a_size, size_t b_size) {
+static inline int flamingo_strcmp(char const* a, char const* b, size_t a_size, size_t b_size) {
 	if (a_size != b_size) {
 		return -1; // XXX Not right but whatever.
 	}

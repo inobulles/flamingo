@@ -58,10 +58,17 @@ static inline void var_set_val(flamingo_var_t* var, flamingo_val_t* val);
 
 static inline flamingo_val_t* val_incref(flamingo_val_t* val);
 static inline flamingo_val_t* val_init(flamingo_val_t* val);
-static inline char const* val_type_str(flamingo_val_t* val);
+static inline char const* val_type_str(flamingo_val_t const* val);
 static inline char const* val_role_str(flamingo_val_t* val);
 static inline flamingo_val_t* val_alloc(void);
 static inline void val_free(flamingo_val_t* val);
 static inline flamingo_val_t* val_decref(flamingo_val_t* val);
+
+// Primitive type member prototypes.
+
+static inline void primitive_type_member_init(flamingo_t* flamingo);
+static inline void primitive_type_member_free(flamingo_t* flamingo);
+static inline int primitive_type_member_add(flamingo_t* flamingo, flamingo_val_kind_t type, size_t key_size, char* key, flamingo_ptm_cb_t cb);
+static inline int primitive_type_member_std(flamingo_t* flamingo);
 
 #define error(...) (flamingo_raise_error(__VA_ARGS__))

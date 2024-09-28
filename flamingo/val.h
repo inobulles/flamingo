@@ -30,7 +30,7 @@ static flamingo_val_t* val_init(flamingo_val_t* val) {
 	return val;
 }
 
-static char const* val_type_str(flamingo_val_t* val) {
+static char const* val_type_str(flamingo_val_t const* val) {
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_BOOL:
 		return "boolean";
@@ -46,6 +46,8 @@ static char const* val_type_str(flamingo_val_t* val) {
 			return "function";
 		case FLAMINGO_FN_KIND_CLASS:
 			return "class";
+		case FLAMINGO_FN_KIND_PTM:
+			return "primitive type member";
 		default:
 			assert(false);
 		}

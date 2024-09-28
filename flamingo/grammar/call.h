@@ -9,6 +9,38 @@
 
 #include <common.h>
 
+// XXX Right now, there's no way of defining primitive type member parameters.
+// So I'm just ignoring them for now.
+// We need to find a long-term solution at some point.
+
+static int setup_args_no_param(flamingo_t* flamingo, TSNode args) {
+	size_t const n = ts_node_named_child_count(args);
+
+	for (size_t i = 0; i < n; i++) {
+		// Get argument.
+
+		TSNode const arg = ts_node_named_child(args, i);
+		char const* const arg_type = ts_node_type(arg);
+
+		if (strcmp(arg_type, "expression") != 0) {
+			return error(flamingo, "expected expression in argument list, got %s", arg_type);
+		}
+
+		// Create parameter variable.
+
+		flamingo_scope_t* const scope = env_cur_scope(flamingo->env);
+		flamingo_var_t* const var = scope_add_var(scope, "nothing to see here!", 0);
+
+		// Parse argument expression into that parameter variable.
+
+		if (parse_expr(flamingo, arg, &var->val, NULL) < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 	size_t const n = ts_node_named_child_count(args);
 	size_t const param_count = params == NULL ? 0 : ts_node_named_child_count(*params);
@@ -108,11 +140,13 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	}
 
 	if (callable->kind != FLAMINGO_VAL_KIND_FN) {
-		return error(flamingo, "callable has a value kind of %d, which is not callable", callable->kind);
+		return error(flamingo, "callable expression is of type %s, which is not callable", val_type_str(callable));
 	}
 
 	bool const is_class = callable->fn.kind == FLAMINGO_FN_KIND_CLASS;
 	bool const on_inst = accessed_val != NULL && accessed_val->kind == FLAMINGO_VAL_KIND_INST;
+	bool const is_extern = callable->fn.kind == FLAMINGO_FN_KIND_EXTERN;
+	bool const is_ptm = callable->fn.kind == FLAMINGO_FN_KIND_PTM;
 
 	// Actually call the callable.
 	// Switch context's source if the callable was created in another.
@@ -120,8 +154,10 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	char* const prev_src = flamingo->src;
 	size_t const prev_src_size = flamingo->src_size;
 
-	flamingo->src = callable->fn.src;
-	flamingo->src_size = callable->fn.src_size;
+	if (callable->fn.src != NULL) {
+		flamingo->src = callable->fn.src;
+		flamingo->src_size = callable->fn.src_size;
+	}
 
 	// Switch context's current callable body if we were called from another.
 
@@ -131,7 +167,7 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// Switch context's current environment to the one closed over by the function.
 
 	flamingo_env_t* const prev_env = flamingo->env;
-	flamingo->env = callable->fn.env;
+	flamingo->env = callable->fn.env == NULL ? prev_env : callable->fn.env;
 
 	// If calling on an instance, add that instance's scope to the scope stack.
 	// We do this before the arguments scope because we want parameters to shadow stuff in the instance's scope.
@@ -152,19 +188,25 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	TSNode* const params = callable->fn.params;
 
 	if (has_args) {
-		if (setup_args(flamingo, args, params) < 0) {
+		if (is_ptm) {
+			if (setup_args_no_param(flamingo, args) < 0) {
+				return -1;
+			}
+		}
+
+		else if (setup_args(flamingo, args, params) < 0) {
 			return -1;
 		}
 	}
 
-	// If external function: call the external function callback.
+	// If external function or primitive type member: call the function's callback.
 	// If function or class: actually parse the function's body.
 
 	TSNode* const body = callable->fn.body;
 	flamingo_scope_t* inner_scope;
 
-	if (callable->fn.kind == FLAMINGO_FN_KIND_EXTERN) {
-		if (flamingo->external_fn_cb == NULL) {
+	if (is_extern || is_ptm) {
+		if (is_extern && flamingo->external_fn_cb == NULL) {
 			return error(flamingo, "cannot call external function without a external function callback being set");
 		}
 
@@ -185,11 +227,15 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 			.args = args,
 		};
 
-		// Actually call the external function callback.
+		// Actually call the external function callback or primitive type member.
 
 		assert(flamingo->cur_fn_rv == NULL);
 
-		if (flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data, &arg_list, &flamingo->cur_fn_rv) < 0) {
+		if (is_extern && flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data, &arg_list, &flamingo->cur_fn_rv) < 0) {
+			return -1;
+		}
+
+		else if (is_ptm && callable->fn.ptm_cb(flamingo, accessed_val, &arg_list, &flamingo->cur_fn_rv)) {
 			return -1;
 		}
 

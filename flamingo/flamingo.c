@@ -13,6 +13,7 @@
 #include <common.h>
 #include <env.h>
 #include <grammar/statement.h>
+#include <primitive_type_member.h>
 #include <scope.h>
 
 typedef struct {
@@ -58,6 +59,8 @@ __attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flami
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size) {
 	flamingo->consistent = false;
 
+	// Set initial state up.
+
 	flamingo->progname = progname;
 	flamingo->errors_outstanding = false;
 
@@ -73,6 +76,8 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 
 	flamingo->cur_fn_body = NULL;
 	flamingo->cur_fn_rv = NULL;
+
+	// Set up Tree-sitter and parser.
 
 	ts_state_t* const ts_state = calloc(1, sizeof *ts_state);
 
@@ -106,9 +111,19 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	//      I don't know if Tree-sitter has a simple way to check AST-coherency itself but otherwise just go down the tree and look for any MISSING or UNEXPECTED nodes
 
 	flamingo->ts_state = ts_state;
-	flamingo->consistent = true;
 
+	// Set primitive type members.
+
+	primitive_type_member_init(flamingo);
+
+	if (primitive_type_member_std(flamingo) < 0) {
+		goto err_primitive_type_member_std;
+	}
+
+	flamingo->consistent = true;
 	return 0;
+
+err_primitive_type_member_std:
 
 	ts_tree_delete(tree);
 
@@ -166,6 +181,10 @@ void flamingo_destroy(flamingo_t* flamingo) {
 	if (flamingo->imported_srcs != NULL) {
 		free(flamingo->imported_srcs);
 	}
+
+	// Finally, free the primitive type members.
+
+	primitive_type_member_free(flamingo);
 
 	flamingo->consistent = false;
 }

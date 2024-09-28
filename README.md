@@ -33,7 +33,7 @@ sh scripts/update-ts-flamingo.sh [optional repo URL, can be file://] # Update th
 
 For the first version of Flamingo, to be integrated into Bob the Builder, this is what I wanna get done:
 
-- [ ] `str.endswith` &co (will I have to revamp how classes work to do this?).
+- [x] `str.endswith` &co (will I have to revamp how classes work to do this?).
 - [ ] Static functions on classes (`static` qualifier).
 - [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
 - [ ] Vector literals (i.e. `[1, 2, 3]`).
@@ -45,6 +45,7 @@ For the first version of Flamingo, to be integrated into Bob the Builder, this i
 - [ ] Ensure language is not Turing complete in other places (i.e. no recursion).
 - [ ] Anonymous functions.
 - [x] Sort out function scope weirdness by making all functions closures.
+- [ ] Make sure everything actually winds up getting freed (and figure out scope and value reference counting correctly).
 
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
 
@@ -52,6 +53,7 @@ Next, I want to work on making the language enjoyable to use, and this involves 
 - [ ] Type checking.
 - [ ] The LSP itself!
 - [ ] Comprehensive docs.
+- [ ] Normalize usage of type vs kind terms.
 
 Nice-to-haves in future versions but not super necessary for right now in my eyes:
 

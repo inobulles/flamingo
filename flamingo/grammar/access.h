@@ -44,20 +44,44 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 		return -1;
 	}
 
-	// Check if accessed value is accessible.
-	// XXX For now this is only instances, but in the future I'm going to want to be able to access static members on classes directly too.
-
-	if ((*accessed_val)->kind != FLAMINGO_VAL_KIND_INST) {
-		return error(flamingo, "accessed expression is not accessible (must be instance, is %s)", val_type_str(*accessed_val));
-	}
-
 	// Actually access.
+	// Error if accessed value is not accessible.
+	// XXX For now only instances are accessible, but in the future I'm going to want to be able to access static members on classes directly too.
+	// TODO Should I keep this pattern? Or just only special-case instances and always look for primitive type members on other types?
 
-	flamingo_scope_t* const scope = (*accessed_val)->inst.scope;
-	*var = scope_shallow_find_var(scope, accessor, size);
+	*var = NULL;
+	flamingo_val_kind_t const kind = (*accessed_val)->kind;
 
-	if (*var == NULL) {
-		return error(flamingo, "member '%.*s' was never in declared", (int) size, accessor);
+	switch (kind) {
+	case FLAMINGO_VAL_KIND_INST:;
+		flamingo_scope_t* const scope = (*accessed_val)->inst.scope;
+		*var = scope_shallow_find_var(scope, accessor, size);
+
+		if (*var == NULL) {
+			return error(flamingo, "member '%.*s' was never in declared", (int) size, accessor);
+		}
+
+		break;
+	case FLAMINGO_VAL_KIND_STR:;
+		size_t const count = flamingo->primitive_type_members[kind].count;
+		flamingo_var_t* const type_vars = flamingo->primitive_type_members[kind].vars;
+
+		for (size_t i = 0; i < count; i++) {
+			flamingo_var_t* const type_var = &type_vars[i];
+
+			if (flamingo_strcmp(type_var->key, accessor, type_var->key_size, size) == 0) {
+				*var = type_var;
+				break;
+			}
+		}
+
+		if (*var == NULL) {
+			return error(flamingo, "primitive type member '%.*s' doesn't exist on expression of type %s", (int) size, accessor, val_type_str(*accessed_val));
+		}
+
+		break;
+	default:
+		return error(flamingo, "accessed expression is not accessible (is of type %s)", val_type_str(*accessed_val));
 	}
 
 	return 0;
@@ -85,6 +109,6 @@ static int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val,
 	*val = var->val;
 	val_incref(*val);
 
-	val_decref(accessed_val);
+	// TODO val_decref(accessed_val);
 	return 0;
 }
