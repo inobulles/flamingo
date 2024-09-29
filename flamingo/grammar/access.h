@@ -45,15 +45,12 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 	}
 
 	// Actually access.
-	// Error if accessed value is not accessible.
-	// XXX For now only instances are accessible, but in the future I'm going to want to be able to access static members on classes directly too.
-	// TODO Should I keep this pattern? Or just only special-case instances and always look for primitive type members on other types?
+	// XXX For now only instances and things with PTM's are accessible, but in the future I'm going to want to be able to access static members on classes directly too.
 
 	*var = NULL;
 	flamingo_val_kind_t const kind = (*accessed_val)->kind;
 
-	switch (kind) {
-	case FLAMINGO_VAL_KIND_INST:;
+	if (kind == FLAMINGO_VAL_KIND_INST) {
 		flamingo_scope_t* const scope = (*accessed_val)->inst.scope;
 		*var = scope_shallow_find_var(scope, accessor, size);
 
@@ -61,28 +58,23 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 			return error(flamingo, "member '%.*s' was never in declared", (int) size, accessor);
 		}
 
-		break;
-	case FLAMINGO_VAL_KIND_VEC:
-	case FLAMINGO_VAL_KIND_STR:;
-		size_t const count = flamingo->primitive_type_members[kind].count;
-		flamingo_var_t* const type_vars = flamingo->primitive_type_members[kind].vars;
+		return 0;
+	}
 
-		for (size_t i = 0; i < count; i++) {
-			flamingo_var_t* const type_var = &type_vars[i];
+	size_t const count = flamingo->primitive_type_members[kind].count;
+	flamingo_var_t* const type_vars = flamingo->primitive_type_members[kind].vars;
 
-			if (flamingo_strcmp(type_var->key, accessor, type_var->key_size, size) == 0) {
-				*var = type_var;
-				break;
-			}
+	for (size_t i = 0; i < count; i++) {
+		flamingo_var_t* const type_var = &type_vars[i];
+
+		if (flamingo_strcmp(type_var->key, accessor, type_var->key_size, size) == 0) {
+			*var = type_var;
+			break;
 		}
+	}
 
-		if (*var == NULL) {
-			return error(flamingo, "primitive type member '%.*s' doesn't exist on expression of type %s", (int) size, accessor, val_type_str(*accessed_val));
-		}
-
-		break;
-	default:
-		return error(flamingo, "accessed expression is not accessible (is of type %s)", val_type_str(*accessed_val));
+	if (*var == NULL) {
+		return error(flamingo, "primitive type member '%.*s' doesn't exist on expression of type %s", (int) size, accessor, val_type_str(*accessed_val));
 	}
 
 	return 0;
