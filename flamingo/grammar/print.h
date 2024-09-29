@@ -10,7 +10,7 @@
 
 #include <inttypes.h>
 
-static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res) {
+static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inner) {
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_NONE:
 		*res = strdup("<none>");
@@ -22,7 +22,14 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res) {
 		asprintf(res, "%" PRId64, val->integer.integer);
 		break;
 	case FLAMINGO_VAL_KIND_STR:
-		asprintf(res, "%.*s", (int) val->str.size, val->str.str);
+		if (inner) {
+			asprintf(res, "\"%.*s\"", (int) val->str.size, val->str.str);
+		}
+
+		else {
+			asprintf(res, "%.*s", (int) val->str.size, val->str.str);
+		}
+
 		break;
 	case FLAMINGO_VAL_KIND_VEC:;
 		*res = strdup("[");
@@ -32,7 +39,7 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res) {
 			flamingo_val_t* const elem = val->vec.elems[i];
 			char* elem_repr;
 
-			if (repr(flamingo, elem, &elem_repr) < 0) {
+			if (repr(flamingo, elem, &elem_repr, true) < 0) {
 				free(res);
 				return -1;
 			}
@@ -88,7 +95,7 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 	// XXX Don't forget to decrement reference at the end!
 
 	char* to_print = NULL;
-	int rv = repr(flamingo, val, &to_print);
+	int rv = repr(flamingo, val, &to_print, false);
 
 	if (rv == 0) {
 		assert(to_print != NULL);
