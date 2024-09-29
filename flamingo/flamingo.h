@@ -23,6 +23,7 @@ typedef enum {
 	FLAMINGO_VAL_KIND_BOOL,
 	FLAMINGO_VAL_KIND_INT,
 	FLAMINGO_VAL_KIND_STR,
+	FLAMINGO_VAL_KIND_VEC,
 	FLAMINGO_VAL_KIND_FN,
 	FLAMINGO_VAL_KIND_INST,
 	FLAMINGO_VAL_KIND_COUNT,
@@ -50,13 +51,18 @@ struct flamingo_val_t {
 		} boolean;
 
 		struct {
+			int64_t integer;
+		} integer;
+
+		struct {
 			char* str;
 			size_t size;
 		} str;
 
 		struct {
-			int64_t integer;
-		} integer;
+			size_t count;
+			flamingo_val_t** elems;
+		} vec;
 
 		struct {
 			flamingo_ts_node_t body;

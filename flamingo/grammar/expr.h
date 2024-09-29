@@ -8,6 +8,7 @@
 #include "call.h"
 #include "identifier.h"
 #include "literal.h"
+#include "vec.h"
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
@@ -28,6 +29,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 	}
 
 	// These expressions could have side-effects, so we need to parse them anyway, even if 'val != NULL'.
+
+	if (strcmp(type, "vec") == 0) {
+		return parse_vec(flamingo, child, val);
+	}
 
 	if (strcmp(type, "call") == 0) {
 		return parse_call(flamingo, child, val);
