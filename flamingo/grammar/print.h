@@ -10,6 +10,65 @@
 
 #include <inttypes.h>
 
+static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res) {
+	switch (val->kind) {
+	case FLAMINGO_VAL_KIND_NONE:
+		*res = strdup("<none>");
+		break;
+	case FLAMINGO_VAL_KIND_BOOL:
+		*res = strdup(val->boolean.boolean ? "true" : "false");
+		break;
+	case FLAMINGO_VAL_KIND_INT:
+		asprintf(res, "%" PRId64, val->integer.integer);
+		break;
+	case FLAMINGO_VAL_KIND_STR:
+		asprintf(res, "%.*s", (int) val->str.size, val->str.str);
+		break;
+	case FLAMINGO_VAL_KIND_VEC:;
+		*res = strdup("[");
+		assert(*res != NULL);
+
+		for (size_t i = 0; i < val->vec.count; i++) {
+			flamingo_val_t* const elem = val->vec.elems[i];
+			char* elem_repr;
+
+			if (repr(flamingo, elem, &elem_repr) < 0) {
+				free(res);
+				return -1;
+			}
+
+			char* buf = strdup(*res);
+			assert(buf != NULL);
+			asprintf(res, "%s%s%s", buf, i == 0 ? "" : ", ", elem_repr);
+			assert(*res != NULL);
+
+			free(buf);
+			free(elem_repr);
+		}
+
+		char* buf = strdup(*res);
+		assert(buf != NULL);
+		asprintf(res, "%s]", buf);
+		free(buf);
+
+		break;
+	case FLAMINGO_VAL_KIND_FN:
+		printf("<%s %.*s>\n", val_type_str(val), (int) val->name_size, val->name);
+		break;
+	case FLAMINGO_VAL_KIND_INST:;
+		flamingo_val_t* const class = val->inst.class;
+		assert(class != NULL);
+
+		printf("<instance of %.*s>\n", (int) class->name_size, class->name);
+		break;
+	default:
+		return error(flamingo, "can't print expression kind: %s (%d)", val_type_str(val), val->kind);
+	}
+
+	assert(*res != NULL);
+	return 0;
+}
+
 static int parse_print(flamingo_t* flamingo, TSNode node) {
 	assert(ts_node_child_count(node) == 2);
 
@@ -28,35 +87,16 @@ static int parse_print(flamingo_t* flamingo, TSNode node) {
 
 	// XXX Don't forget to decrement reference at the end!
 
-	int rv = 0;
-	flamingo_val_t* class;
+	char* to_print = NULL;
+	int rv = repr(flamingo, val, &to_print);
 
-	switch (val->kind) {
-	case FLAMINGO_VAL_KIND_NONE:
-		printf("<none>\n");
-		break;
-	case FLAMINGO_VAL_KIND_BOOL:
-		printf("%s\n", val->boolean.boolean ? "true" : "false");
-		break;
-	case FLAMINGO_VAL_KIND_INT:
-		printf("%" PRId64 "\n", val->integer.integer);
-		break;
-	case FLAMINGO_VAL_KIND_STR:
-		printf("%.*s\n", (int) val->str.size, val->str.str);
-		break;
-	case FLAMINGO_VAL_KIND_FN:
-		printf("<%s %.*s>\n", val_type_str(val), (int) val->name_size, val->name);
-		break;
-	case FLAMINGO_VAL_KIND_INST:
-		class = val->inst.class;
-		assert(class != NULL);
-
-		printf("<instance of %.*s>\n", (int) class->name_size, class->name);
-		break;
-	default:
-		rv = error(flamingo, "can't print expression kind: %d", val->kind);
+	if (rv == 0) {
+		assert(to_print != NULL);
+		printf("%s\n", to_print);
 	}
 
+	free(to_print);
 	val_decref(val);
+
 	return rv;
 }
