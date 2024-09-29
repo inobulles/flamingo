@@ -85,7 +85,7 @@ static int str_len(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list
 	assert(self->kind == FLAMINGO_VAL_KIND_STR);
 
 	if (args->count != 0) {
-		return error(flamingo, "'str.length' expected 0 arguments, got %zu", args->count);
+		return error(flamingo, "'str.len' expected 0 arguments, got %zu", args->count);
 	}
 
 	*rv = flamingo_val_make_int(self->str.size);
@@ -149,6 +149,17 @@ static int str_endswith(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg
 	return 0;
 }
 
+static int vec_len(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+	assert(self->kind == FLAMINGO_VAL_KIND_VEC);
+
+	if (args->count != 0) {
+		return error(flamingo, "'vec.len' expected 0 arguments, got %zu", args->count);
+	}
+
+	*rv = flamingo_val_make_int(self->vec.count);
+	return 0;
+}
+
 static int primitive_type_member_std(flamingo_t* flamingo) {
 #define ADD(type, key, cb)                                                               \
 	do {                                                                                  \
@@ -160,6 +171,8 @@ static int primitive_type_member_std(flamingo_t* flamingo) {
 	ADD(FLAMINGO_VAL_KIND_STR, "len", str_len);
 	ADD(FLAMINGO_VAL_KIND_STR, "endswith", str_endswith);
 	ADD(FLAMINGO_VAL_KIND_STR, "startswith", str_startswith);
+
+	ADD(FLAMINGO_VAL_KIND_VEC, "len", vec_len);
 
 	return 0;
 }

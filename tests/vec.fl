@@ -5,3 +5,4 @@ assert [1, ["zonnebloem"], 2] != [1, ["granen"], 2]
 assert [] == []
 assert [] != [true]
 assert [6, 9] + [4, 2, 0] == [6, 9, 4, 2, 0]
+assert [1, 2, [3, 4, 5]].len() == 3

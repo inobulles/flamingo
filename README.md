@@ -36,10 +36,10 @@ For the first version of Flamingo, to be integrated into Bob the Builder, this i
 - [x] `str.endswith` &co (will I have to revamp how classes work to do this?).
 - [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
 - [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
-- [ ] Vector literals (i.e. `[1, 2, 3]`).
+- [x] Vector literals (i.e. `[1, 2, 3]`).
 - [ ] Vector getters and setters (i.e. `v[0]`).
 - [ ] Vector slicing (i.e. `v[1:3]`).
-- [ ] All the other vector operations.
+- [x] All the other vector operations.
 - [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
 - [ ] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. no recursion).

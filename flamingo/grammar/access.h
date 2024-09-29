@@ -62,6 +62,7 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 		}
 
 		break;
+	case FLAMINGO_VAL_KIND_VEC:
 	case FLAMINGO_VAL_KIND_STR:;
 		size_t const count = flamingo->primitive_type_members[kind].count;
 		flamingo_var_t* const type_vars = flamingo->primitive_type_members[kind].vars;
