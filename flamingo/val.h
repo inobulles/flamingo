@@ -38,6 +38,8 @@ static char const* val_type_str(flamingo_val_t const* val) {
 		return "integer";
 	case FLAMINGO_VAL_KIND_STR:
 		return "string";
+	case FLAMINGO_VAL_KIND_VEC:
+		return "vector";
 	case FLAMINGO_VAL_KIND_FN:
 		switch (val->fn.kind) {
 		case FLAMINGO_FN_KIND_EXTERN:
@@ -62,9 +64,9 @@ static char const* val_type_str(flamingo_val_t const* val) {
 
 static char const* val_role_str(flamingo_val_t* val) {
 	switch (val->kind) {
-	case FLAMINGO_VAL_KIND_STR:
-	case FLAMINGO_VAL_KIND_INT:
 	case FLAMINGO_VAL_KIND_BOOL:
+	case FLAMINGO_VAL_KIND_INT:
+	case FLAMINGO_VAL_KIND_STR:
 	case FLAMINGO_VAL_KIND_NONE:
 	case FLAMINGO_VAL_KIND_INST:
 		return "variable";
