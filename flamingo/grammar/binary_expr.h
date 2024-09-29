@@ -10,6 +10,22 @@
 
 #include <math.h>
 
+static bool equality(char const* op, size_t op_size, flamingo_val_t* left_val, flamingo_val_t* right_val, flamingo_val_t** val) {
+	if (strncmp(op, "==", op_size) == 0) {
+		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+		(*val)->boolean.boolean = val_eq(left_val, right_val);
+		return true;
+	}
+
+	if (strncmp(op, "!=", op_size) == 0) {
+		(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
+		(*val)->boolean.boolean = !val_eq(left_val, right_val);
+		return true;
+	}
+
+	return false;
+}
+
 static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "binary_expression") == 0);
 	assert(ts_node_named_child_count(node) == 3);
@@ -151,15 +167,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 		// Comparisons.
 
-		if (strncmp(op, "==", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->integer.integer == right_val->integer.integer;
-			goto done;
-		}
-
-		if (strncmp(op, "!=", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->integer.integer != right_val->integer.integer;
+		if (equality(op, op_size, left_val, right_val, val)) {
 			goto done;
 		}
 
@@ -209,24 +217,14 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 			goto done;
 		}
 
-		// Comparisons.
-
-		if (strncmp(op, "==", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->boolean.boolean == right_val->boolean.boolean;
-			goto done;
-		}
-
-		if (strncmp(op, "!=", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->boolean.boolean != right_val->boolean.boolean;
+		if (equality(op, op_size, left_val, right_val, val)) {
 			goto done;
 		}
 	}
 
 	if (kind == FLAMINGO_VAL_KIND_STR) {
 		// String concatenation.
-		// TODO Multiplication (but then I need to rethink the whole operands having to have the same type thing).
+		// TODO Multiplication (but then I need to rethink the whole operands having to have the same type thing). (For vectors too.)
 
 		if (strncmp(op, "+", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_STR;
@@ -241,17 +239,35 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 			goto done;
 		}
 
-		// Comparisons.
+		if (equality(op, op_size, left_val, right_val, val)) {
+			goto done;
+		}
+	}
 
-		if (strncmp(op, "==", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->str.size == right_val->str.size && memcmp(left_val->str.str, right_val->str.str, left_val->str.size) == 0;
+	if (kind == FLAMINGO_VAL_KIND_VEC) {
+		// Vector concatenation.
+
+		if (strncmp(op, "+", op_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_VEC;
+
+			(*val)->vec.count = left_val->vec.count + right_val->vec.count;
+			(*val)->vec.elems = malloc((*val)->vec.count);
+			assert((*val)->vec.elems != NULL);
+
+			// Copy all the elements from the left vector.
+
+			for (size_t i = 0; i < left_val->vec.count; i++) {
+				(*val)->vec.elems[i] = val_copy(left_val->vec.elems[i]);
+			}
+
+			for (size_t i = left_val->vec.count; i < (*val)->vec.count; i++) {
+				(*val)->vec.elems[i] = val_copy(right_val->vec.elems[i - left_val->vec.count]);
+			}
+
 			goto done;
 		}
 
-		if (strncmp(op, "!=", op_size) == 0) {
-			(*val)->kind = FLAMINGO_VAL_KIND_BOOL;
-			(*val)->boolean.boolean = left_val->str.size != right_val->str.size || memcmp(left_val->str.str, right_val->str.str, left_val->str.size) != 0;
+		if (equality(op, op_size, left_val, right_val, val)) {
 			goto done;
 		}
 	}

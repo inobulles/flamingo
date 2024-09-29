@@ -62,6 +62,8 @@ static inline flamingo_val_t* val_init(flamingo_val_t* val);
 static inline char const* val_type_str(flamingo_val_t const* val);
 static inline char const* val_role_str(flamingo_val_t* val);
 static inline flamingo_val_t* val_alloc(void);
+static inline flamingo_val_t* val_copy(flamingo_val_t* val);
+static inline bool val_eq(flamingo_val_t* x, flamingo_val_t* y);
 static inline void val_free(flamingo_val_t* val);
 static inline flamingo_val_t* val_decref(flamingo_val_t* val);
 

@@ -84,6 +84,81 @@ static flamingo_val_t* val_alloc(void) {
 	return val_init(val);
 }
 
+static flamingo_val_t* val_copy(flamingo_val_t* val) {
+	flamingo_val_t* const copy = calloc(1, sizeof *copy);
+	assert(copy != NULL);
+
+	memcpy(copy, val, sizeof *val);
+	copy->ref_count = 1;
+
+	copy->name = malloc(val->name_size);
+	assert(copy->name != NULL);
+	memcpy(copy->name, val->name, val->name_size);
+
+	switch (copy->kind) {
+	case FLAMINGO_VAL_KIND_NONE:
+	case FLAMINGO_VAL_KIND_BOOL:
+	case FLAMINGO_VAL_KIND_INT:
+		break;
+	case FLAMINGO_VAL_KIND_STR:
+		copy->str.str = malloc(val->str.size);
+		assert(copy->str.str != NULL);
+		memcpy(copy->str.str, val->str.str, val->str.size);
+		break;
+	case FLAMINGO_VAL_KIND_VEC:
+	case FLAMINGO_VAL_KIND_FN:
+	case FLAMINGO_VAL_KIND_INST:
+		// TODO
+		break;
+	case FLAMINGO_VAL_KIND_COUNT:
+		break;
+	}
+
+	return copy;
+}
+
+static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
+	if (x->kind != y->kind) {
+		return false;
+	}
+
+	// Don't check that the names are equal here!
+
+	flamingo_val_kind_t const kind = x->kind;
+
+	switch (kind) {
+	case FLAMINGO_VAL_KIND_NONE:
+		return true;
+	case FLAMINGO_VAL_KIND_BOOL:
+		return x->boolean.boolean == y->boolean.boolean;
+	case FLAMINGO_VAL_KIND_INT:
+		return x->integer.integer == y->integer.integer;
+	case FLAMINGO_VAL_KIND_STR:
+		return flamingo_strcmp(x->str.str, y->str.str, x->str.size, y->str.size) == 0;
+	case FLAMINGO_VAL_KIND_VEC:
+		if (x->vec.count != y->vec.count) {
+			return false;
+		}
+
+		for (size_t i = 0; i < x->vec.count; i++) {
+			flamingo_val_t* const x_val = x->vec.elems[i];
+			flamingo_val_t* const y_val = y->vec.elems[i];
+
+			if (!val_eq(x_val, y_val)) {
+				return false;
+			}
+		}
+
+		return true;
+	case FLAMINGO_VAL_KIND_FN:
+		return memcmp(&x->fn, &y->fn, sizeof x->fn) == 0;
+	case FLAMINGO_VAL_KIND_INST:
+		return memcmp(&x->inst, &y->inst, sizeof x->inst) == 0;
+	case FLAMINGO_VAL_KIND_COUNT:
+		return false;
+	}
+}
+
 static void val_free(flamingo_val_t* val) {
 	if (val->kind == FLAMINGO_VAL_KIND_STR) {
 		free(val->str.str);
