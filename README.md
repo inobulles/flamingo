@@ -37,7 +37,8 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Sort out function scope weirdness by making all functions closures.
 - [x] Vector literals (i.e. `[1, 2, 3]`).
 - [x] All the other vector operations.
-- [ ] Vector indexing getters (i.e. `v[0]`).
+- [x] Unary expression.
+- [x] Vector indexing getters (i.e. `v[0]`).
 - [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector indexing setters.
 - [ ] Vector slicing setters.
