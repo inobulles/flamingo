@@ -44,7 +44,7 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 				return -1;
 			}
 
-			char* buf = strdup(*res);
+			char* const buf = strdup(*res);
 			assert(buf != NULL);
 			asprintf(res, "%s%s%s", buf, i == 0 ? "" : ", ", elem_repr);
 			assert(*res != NULL);
@@ -53,7 +53,7 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 			free(elem_repr);
 		}
 
-		char* buf = strdup(*res);
+		char* const buf = strdup(*res);
 		assert(buf != NULL);
 		asprintf(res, "%s]", buf);
 		free(buf);

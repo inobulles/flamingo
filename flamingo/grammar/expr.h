@@ -9,6 +9,7 @@
 #include "identifier.h"
 #include "literal.h"
 #include "vec.h"
+#include "index.h"
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
@@ -49,6 +50,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 
 	if (strcmp(type, "access") == 0) {
 		return parse_access(flamingo, child, val, accessed_val_ref);
+	}
+
+	if (strcmp(type, "index") == 0) {
+		return parse_index(flamingo, child, val);
 	}
 
 	return error(flamingo, "unknown expression type: %s", type);
