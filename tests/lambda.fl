@@ -1,0 +1,42 @@
+# Basic tests.
+
+let f = || 5
+assert f() == 5
+
+let g = |a, b| a + b
+assert g(1, 2) == 3
+
+# Inline function test.
+
+assert (|a, b| a + b)(1, 2) == 1 + 2
+
+# Closure test.
+
+fn make_incrementer(step: int) {
+	let x = 0
+
+	return || {
+		x = x + step
+		return x
+	}
+}
+
+let inc1 = make_incrementer(1)
+let inc2 = make_incrementer(2)
+
+assert inc1() == 1
+assert inc2() == 2
+
+assert inc1() == 2
+assert inc2() == 4
+
+assert inc1() == 3
+assert inc2() == 6
+
+# Example of a recursive lambda function.
+# This should not be possible!
+
+# let f
+# let g = || f()
+# f = || g()
+# f()
