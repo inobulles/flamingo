@@ -60,6 +60,11 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 
 		break;
 	case FLAMINGO_VAL_KIND_FN:
+		if (val->name_size == 0) {
+			*res = strdup("<anonymous function>");
+			break;
+		}
+
 		asprintf(res, "<%s %.*s>", val_type_str(val), (int) val->name_size, val->name);
 		break;
 	case FLAMINGO_VAL_KIND_INST:;
