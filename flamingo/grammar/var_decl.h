@@ -76,5 +76,10 @@ static int parse_var_decl(flamingo_t* flamingo, TSNode node) {
 		}
 	}
 
+	else {
+		var->val = val_alloc();
+		var->val->kind = FLAMINGO_VAL_KIND_NONE;
+	}
+
 	return 0;
 }
