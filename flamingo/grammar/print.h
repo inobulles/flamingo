@@ -11,6 +11,8 @@
 #include <inttypes.h>
 
 static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inner) {
+	char* buf;
+
 	switch (val->kind) {
 	case FLAMINGO_VAL_KIND_NONE:
 		*res = strdup("<none>");
@@ -31,7 +33,7 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 		}
 
 		break;
-	case FLAMINGO_VAL_KIND_VEC:;
+	case FLAMINGO_VAL_KIND_VEC:
 		*res = strdup("[");
 		assert(*res != NULL);
 
@@ -44,7 +46,7 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 				return -1;
 			}
 
-			char* const buf = strdup(*res);
+			buf = strdup(*res);
 			assert(buf != NULL);
 			asprintf(res, "%s%s%s", buf, i == 0 ? "" : ", ", elem_repr);
 			assert(*res != NULL);
@@ -53,9 +55,47 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 			free(elem_repr);
 		}
 
-		char* const buf = strdup(*res);
+		buf = strdup(*res);
 		assert(buf != NULL);
 		asprintf(res, "%s]", buf);
+		free(buf);
+
+		break;
+	case FLAMINGO_VAL_KIND_MAP:
+		*res = strdup("{");
+		assert(*res != NULL);
+
+		for (size_t i = 0; i < val->map.count; i++) {
+			flamingo_val_t* const k = val->map.keys[i];
+			flamingo_val_t* const v = val->map.vals[i];
+
+			char* key_repr;
+
+			if (repr(flamingo, k, &key_repr, true) < 0) {
+				free(res);
+				return -1;
+			}
+
+			char* val_repr;
+
+			if (repr(flamingo, v, &val_repr, true) < 0) {
+				free(key_repr);
+				free(res);
+				return -1;
+			}
+
+			buf = strdup(*res);
+			assert(buf != NULL);
+			asprintf(res, "%s%s%s: %s", buf, i == 0 ? "" : ", ", key_repr, val_repr);
+			assert(*res != NULL);
+			free(key_repr);
+			free(val_repr);
+			free(buf);
+		}
+
+		buf = strdup(*res);
+		assert(buf != NULL);
+		asprintf(res, "%s}", buf);
 		free(buf);
 
 		break;
