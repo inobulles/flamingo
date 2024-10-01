@@ -260,6 +260,8 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 				(*val)->vec.elems[i] = val_copy(left_val->vec.elems[i]);
 			}
 
+			// Copy all the elements from the right vector.
+
 			for (size_t i = left_val->vec.count; i < (*val)->vec.count; i++) {
 				(*val)->vec.elems[i] = val_copy(right_val->vec.elems[i - left_val->vec.count]);
 			}
@@ -273,6 +275,36 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 	}
 
 	if (kind == FLAMINGO_VAL_KIND_MAP) {
+		// Map concatenation.
+
+		if (strncmp(op, "+", op_size) == 0) {
+			(*val)->kind = FLAMINGO_VAL_KIND_MAP;
+
+			(*val)->map.count = left_val->map.count + right_val->map.count;
+
+			(*val)->map.keys = malloc((*val)->map.count);
+			assert((*val)->map.keys != NULL);
+
+			(*val)->map.vals = malloc((*val)->map.count);
+			assert((*val)->map.vals != NULL);
+
+			// Copy all key-value pairs from the left vector.
+
+			for (size_t i = 0; i < left_val->map.count; i++) {
+				(*val)->map.keys[i] = val_copy(left_val->map.keys[i]);
+				(*val)->map.vals[i] = val_copy(left_val->map.vals[i]);
+			}
+
+			// Copy all key-value pairs from the right vector.
+
+			for (size_t i = left_val->map.count; i < (*val)->map.count; i++) {
+				(*val)->map.keys[i] = val_copy(left_val->map.keys[i - left_val->map.count]);
+				(*val)->map.vals[i] = val_copy(left_val->map.vals[i - left_val->map.count]);
+			}
+
+			goto done;
+		}
+
 		if (equality(op, op_size, left_val, right_val, val)) {
 			goto done;
 		}
