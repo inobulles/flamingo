@@ -272,6 +272,12 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 		}
 	}
 
+	if (kind == FLAMINGO_VAL_KIND_MAP) {
+		if (equality(op, op_size, left_val, right_val, val)) {
+			goto done;
+		}
+	}
+
 	// XXX We don't actually need to decref if there's an error, as the flamingo engine will anyway be entirely freed.
 	//     This is robust w.r.t. failures in imported flamingo engines, since we fail if the imported program fails (so the scope is freed instantly).
 
