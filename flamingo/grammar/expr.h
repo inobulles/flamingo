@@ -7,9 +7,10 @@
 #include "binary_expr.h"
 #include "call.h"
 #include "identifier.h"
-#include "literal.h"
-#include "vec.h"
 #include "index.h"
+#include "literal.h"
+#include "unary_expr.h"
+#include "vec.h"
 
 static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref) {
 	assert(strcmp(ts_node_type(node), "expression") == 0);
@@ -42,6 +43,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 	if (strcmp(type, "parenthesized_expression") == 0) {
 		TSNode const grandchild = ts_node_child_by_field_name(child, "expression", 10);
 		return parse_expr(flamingo, grandchild, val, accessed_val_ref);
+	}
+
+	if (strcmp(type, "unary_expression") == 0) {
+		return parse_unary_expr(flamingo, child, val);
 	}
 
 	if (strcmp(type, "binary_expression") == 0) {

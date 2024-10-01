@@ -45,6 +45,8 @@ static int parse_literal(flamingo_t* flamingo, TSNode node, flamingo_val_t** val
 		size_t const size = end - start;
 		assert(size > 0);
 
+		// TODO Should I keep this negative check? Technically, number literals can't have minus signs, and it's only a unary operator.
+
 		bool negative = false;
 
 		if (number[0] == '-') {

@@ -16,6 +16,7 @@
 
 static inline int parse_vec(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val_ref);
+static inline int parse_unary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val);
 static inline int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val);
