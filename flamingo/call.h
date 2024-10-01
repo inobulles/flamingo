@@ -4,16 +4,14 @@
 #pragma once
 
 #include <common.h>
-#include <scope.h>
 #include <env.h>
+#include <scope.h>
 #include <var.h>
 
-#include "grammar/expr.h"
 #include "grammar/block.h"
+#include "grammar/expr.h"
 
-typedef int (*set_args_cb_t)(flamingo_t* flamingo, void* data);
-
-static inline int call_with_set_args_cb(
+static int call_with_set_args_cb(
 	flamingo_t* flamingo,
 	flamingo_val_t* callable,
 	flamingo_val_t* accessed_val,
@@ -244,7 +242,7 @@ static int set_args_from_arg_list(flamingo_t* flamingo, void* _data) {
 	return 0;
 }
 
-static inline int call(
+static int call(
 	flamingo_t* flamingo,
 	flamingo_val_t* callable,
 	flamingo_val_t* accessed_val,
