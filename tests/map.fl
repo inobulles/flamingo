@@ -14,3 +14,7 @@ let a = {
 let b = a
 
 assert a == b
+
+# Concatenation.
+
+assert {"a": 1} + {"b": 2} == {"a": 1, "b": 2}
