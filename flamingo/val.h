@@ -40,6 +40,8 @@ static char const* val_type_str(flamingo_val_t const* val) {
 		return "string";
 	case FLAMINGO_VAL_KIND_VEC:
 		return "vector";
+	case FLAMINGO_VAL_KIND_MAP:
+		return "map";
 	case FLAMINGO_VAL_KIND_FN:
 		switch (val->fn.kind) {
 		case FLAMINGO_FN_KIND_EXTERN:
@@ -106,6 +108,7 @@ static flamingo_val_t* val_copy(flamingo_val_t* val) {
 		memcpy(copy->str.str, val->str.str, val->str.size);
 		break;
 	case FLAMINGO_VAL_KIND_VEC:
+	case FLAMINGO_VAL_KIND_MAP:
 	case FLAMINGO_VAL_KIND_FN:
 	case FLAMINGO_VAL_KIND_INST:
 		// TODO
@@ -150,6 +153,35 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 		}
 
 		return true;
+	case FLAMINGO_VAL_KIND_MAP:
+		if (x->map.count != y->map.count) {
+			return false;
+		}
+
+		for (size_t i = 0; i < x->map.count; i++) {
+			flamingo_val_t* const k = x->map.keys[i];
+
+			// Find key in y.
+
+			bool found = false;
+
+			for (size_t j = 0; j < y->map.count; j++) {
+				if (!val_eq(k, y->map.keys[j])) {
+					continue;
+				}
+
+				if (!val_eq(x->map.vals[i], y->map.vals[j])) {
+					return false;
+				}
+
+				found = true;
+				break;
+			}
+
+			if (!found) {
+				return false;
+			}
+		}
 	case FLAMINGO_VAL_KIND_FN:
 		return memcmp(&x->fn, &y->fn, sizeof x->fn) == 0;
 	case FLAMINGO_VAL_KIND_INST:

@@ -10,6 +10,7 @@
 #include "index.h"
 #include "lambda.h"
 #include "literal.h"
+#include "map.h"
 #include "unary_expr.h"
 #include "vec.h"
 
@@ -39,6 +40,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 
 	if (strcmp(type, "vec") == 0) {
 		return parse_vec(flamingo, child, val);
+	}
+
+	if (strcmp(type, "map") == 0) {
+		return parse_map(flamingo, child, val);
 	}
 
 	if (strcmp(type, "call") == 0) {

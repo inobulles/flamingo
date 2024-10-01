@@ -24,6 +24,7 @@ typedef enum {
 	FLAMINGO_VAL_KIND_INT,
 	FLAMINGO_VAL_KIND_STR,
 	FLAMINGO_VAL_KIND_VEC,
+	FLAMINGO_VAL_KIND_MAP,
 	FLAMINGO_VAL_KIND_FN,
 	FLAMINGO_VAL_KIND_INST,
 	FLAMINGO_VAL_KIND_COUNT,
@@ -63,6 +64,12 @@ struct flamingo_val_t {
 			size_t count;
 			flamingo_val_t** elems;
 		} vec;
+
+		struct {
+			size_t count;
+			flamingo_val_t** keys;
+			flamingo_val_t** vals;
+		} map;
 
 		struct {
 			flamingo_ts_node_t body;

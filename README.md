@@ -42,9 +42,9 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Anonymous functions (lambda).
 - [x] Vector `.map` function.
 - [x] Vector `.where` function.
+- [ ] (Hash)maps.
 - [ ] Vector indexing setters.
 - [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
-- [ ] (Hash)maps.
 
 For the first complete version of Flamingo (which I'll probably need for the full AQUA build system):
 
