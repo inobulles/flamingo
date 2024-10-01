@@ -42,14 +42,14 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Anonymous functions (lambda).
 - [x] Vector `.map` function.
 - [x] Vector `.where` function.
-- [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector indexing setters.
-- [ ] Vector slicing setters.
 - [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
 - [ ] (Hash)maps.
 
 For the first complete version of Flamingo (which I'll probably need for the full AQUA build system):
 
+- [ ] Vector slicing (i.e. `v[1:3]`).
+- [ ] Vector slicing setters.
 - [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
 - [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
 - [ ] `break` and `continue` in loops.
