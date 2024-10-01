@@ -41,7 +41,7 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Vector indexing getters (i.e. `v[0]`).
 - [x] Anonymous functions (lambda).
 - [x] Vector `.map` function.
-- [ ] Vector `.where` function.
+- [x] Vector `.where` function.
 - [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector indexing setters.
 - [ ] Vector slicing setters.

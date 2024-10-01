@@ -21,3 +21,18 @@ assert v[2] == 3
 # Mapping.
 
 assert [1, 2, 3].map(|x| 2 * x) == [2, 4, 6]
+
+# Filtering.
+
+assert [
+	"textfile.txt",
+	"main.c",
+	"image.png",
+	"image2.png",
+	"header.h",
+	"util.c",
+].where(|x| x.endswith(".c") || x.endswith(".h")) == [
+	"main.c",
+	"header.h",
+	"util.c"
+]
