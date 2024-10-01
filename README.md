@@ -31,20 +31,27 @@ sh scripts/update-ts-flamingo.sh [optional repo URL, can be file://] # Update th
 
 ## Roadmap
 
-For the first version of Flamingo, to be integrated into Bob the Builder, this is what I wanna get done:
+For the first first version of Flamingo, to be integrated into Bob the Builder (for simple programs, like Umber and IAR), this is what I wanna get done:
 
 - [x] `str.endswith` &co (will I have to revamp how classes work to do this?).
-- [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
-- [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
+- [x] Sort out function scope weirdness by making all functions closures.
 - [x] Vector literals (i.e. `[1, 2, 3]`).
-- [ ] Vector getters and setters (i.e. `v[0]`).
-- [ ] Vector slicing (i.e. `v[1:3]`).
 - [x] All the other vector operations.
+- [ ] Vector indexing getters (i.e. `v[0]`).
+- [ ] Vector slicing (i.e. `v[1:3]`).
+- [ ] Vector indexing setters.
+- [ ] Vector slicing setters.
+- [ ] Anonymous functions.
+- [ ] Vector `.map` and `.where` functions.
+- [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
+- [ ] (Hash)maps.
+
+For the first complete version of Flamingo (which I'll probably need for the full AQUA build system):
+
+- [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
 - [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
 - [ ] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. no recursion).
-- [ ] Anonymous functions.
-- [x] Sort out function scope weirdness by making all functions closures.
 - [ ] Make sure everything actually winds up getting freed (and figure out scope and value reference counting correctly).
 
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
