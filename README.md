@@ -39,11 +39,11 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] All the other vector operations.
 - [x] Unary expression.
 - [x] Vector indexing getters (i.e. `v[0]`).
+- [ ] Anonymous functions.
+- [ ] Vector `.map` and `.where` functions.
 - [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector indexing setters.
 - [ ] Vector slicing setters.
-- [ ] Anonymous functions.
-- [ ] Vector `.map` and `.where` functions.
 - [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
 - [ ] (Hash)maps.
 
@@ -52,7 +52,7 @@ For the first complete version of Flamingo (which I'll probably need for the ful
 - [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
 - [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
 - [ ] `break` and `continue` in loops.
-- [ ] Ensure language is not Turing complete in other places (i.e. no recursion).
+- [ ] Ensure language is not Turing complete in other places (i.e. prevent recursion in anonymous functions).
 - [ ] Make sure everything actually winds up getting freed (and figure out scope and value reference counting correctly).
 
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
@@ -62,6 +62,7 @@ Next, I want to work on making the language enjoyable to use, and this involves 
 - [ ] The LSP itself!
 - [ ] Comprehensive docs.
 - [ ] Normalize usage of type vs kind terms.
+- [ ] For parser-related checks, do asserts instead of all the if checks, because these should never happen regardless of user input anyway (this also first requires checking for tree consistency, i.e. no errors in the tree).
 
 Nice-to-haves in future versions but not super necessary for right now in my eyes:
 

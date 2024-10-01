@@ -203,6 +203,8 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	// If function or class: actually parse the function's body.
 
 	TSNode* const body = callable->fn.body;
+	bool const is_expr = strcmp(ts_node_type(*body), "expression") == 0;
+
 	flamingo_scope_t* inner_scope;
 
 	if (is_extern || is_ptm) {
@@ -242,6 +244,14 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		free(args);
 	}
 
+	else if (is_expr) {
+		assert(callable->fn.kind == FLAMINGO_FN_KIND_FUNCTION); // The only kind of callable that can have an expression body.
+
+		if (parse_expr(flamingo, *body, val, NULL) < 0) {
+			return -1;
+		}
+	}
+
 	else if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
 		return -1;
 	}
@@ -259,6 +269,12 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	flamingo->cur_fn_body = prev_fn_body;
 	flamingo->env = prev_env;
+
+	// If the function body was an expression, we're done (no return value, call value was already set).
+
+	if (is_expr) {
+		goto done;
+	}
 
 	// If class, create an instance.
 

@@ -33,6 +33,7 @@ static inline int parse_var_decl(flamingo_t* flamingo, TSNode node);
 static inline int parse_assignment(flamingo_t* flamingo, TSNode node);
 static inline int parse_import(flamingo_t* flamingo, TSNode node);
 static inline int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind);
+static inline int parse_lambda(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 
 // Environment prototypes.
 

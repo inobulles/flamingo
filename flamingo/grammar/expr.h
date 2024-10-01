@@ -8,6 +8,7 @@
 #include "call.h"
 #include "identifier.h"
 #include "index.h"
+#include "lambda.h"
 #include "literal.h"
 #include "unary_expr.h"
 #include "vec.h"
@@ -28,6 +29,10 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 
 	if (val != NULL && strcmp(type, "identifier") == 0) {
 		return parse_identifier(flamingo, child, val);
+	}
+
+	if (val != NULL && strcmp(type, "lambda") == 0) {
+		return parse_lambda(flamingo, child, val);
 	}
 
 	// These expressions could have side-effects, so we need to parse them anyway, even if 'val != NULL'.

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "params.h"
 #include <common.h>
 #include <env.h>
 #include <scope.h>
@@ -68,6 +69,10 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 		if (strcmp(params_type, "param_list") != 0) {
 			return error(flamingo, "expected param_list for parameters, got %s", params_type);
 		}
+
+		if (check_param_types(flamingo, params) < 0) {
+			return -1;
+		}
 	}
 
 	// Get function/class body (only for non-prototypes).
@@ -80,21 +85,6 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 		if (strcmp(body_type, "block") != 0) {
 			return error(flamingo, "expected block for body, got %s", body_type);
-		}
-	}
-
-	// Check parameter types.
-
-	if (has_params) {
-		size_t const n = ts_node_named_child_count(params);
-
-		for (size_t i = 0; i < n; i++) {
-			TSNode const child = ts_node_named_child(params, i);
-			char const* const child_type = ts_node_type(child);
-
-			if (strcmp(child_type, "param") != 0) {
-				return error(flamingo, "expected param in parameter list, got %s", child_type);
-			}
 		}
 	}
 
@@ -121,6 +111,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 	if (has_params) {
 		var->val->fn.params = malloc(sizeof params);
+		assert(var->val->fn.params != NULL);
 		memcpy(var->val->fn.params, &params, sizeof params);
 	}
 
@@ -129,6 +120,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 	if (kind != FLAMINGO_FN_KIND_EXTERN) {
 		var->val->fn.body = malloc(sizeof body);
+		assert(var->val->fn.body != NULL);
 		memcpy(var->val->fn.body, &body, sizeof body);
 	}
 
