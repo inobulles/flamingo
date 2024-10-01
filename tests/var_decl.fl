@@ -1,0 +1,16 @@
+let x
+assert x == none
+
+x = 5
+assert x == 5
+assert x != none
+
+let y = 1 + 2
+assert y == 3
+assert y != none
+
+y = 23123
+assert y == 23123
+
+let z = x + y
+assert z == 23128
