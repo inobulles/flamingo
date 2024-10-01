@@ -7,6 +7,8 @@
 #include <val.h>
 #include <var.h>
 
+#include "grammar/call.h"
+
 static void primitive_type_member_init(flamingo_t* flamingo) {
 	for (size_t i = 0; i < FLAMINGO_VAL_KIND_COUNT; i++) {
 		flamingo->primitive_type_members[i].count = 0;
@@ -160,6 +162,49 @@ static int vec_len(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list
 	return 0;
 }
 
+static int vec_map(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+	assert(self->kind == FLAMINGO_VAL_KIND_VEC);
+
+	// Check our arguments.
+
+	if (args->count != 1) {
+		return error(flamingo, "'vec.map' expected 1 argument, got %zu", args->count);
+	}
+
+	flamingo_val_t* const fn = args->args[0];
+
+	if (fn->kind != FLAMINGO_VAL_KIND_FN) {
+		return error(flamingo, "'vec.map' expected 'fn' argument to be a function, got a %s", val_type_str(fn));
+	}
+
+	// Actually map the vector.
+
+	flamingo_val_t* const vec = val_alloc();
+	vec->kind = FLAMINGO_VAL_KIND_VEC;
+	vec->vec.count = self->vec.count;
+	vec->vec.elems = malloc(vec->vec.count * sizeof *vec->vec.elems);
+	assert(vec->vec.elems != NULL);
+
+	for (size_t i = 0; i < vec->vec.count; i++) {
+		flamingo_val_t* const elem = self->vec.elems[i];
+		flamingo_val_t* const args[] = {elem};
+
+		flamingo_arg_list_t arg_list = {
+			.count = 1,
+			.args = (void*) args,
+		};
+
+		if (call(flamingo, fn, NULL, &vec->vec.elems[i], &arg_list) < 0) {
+			val_free(vec);
+			return -1;
+		}
+	}
+
+	*rv = vec;
+
+	return 0;
+}
+
 static int primitive_type_member_std(flamingo_t* flamingo) {
 #define ADD(type, key, cb)                                                               \
 	do {                                                                                  \
@@ -173,6 +218,7 @@ static int primitive_type_member_std(flamingo_t* flamingo) {
 	ADD(FLAMINGO_VAL_KIND_STR, "startswith", str_startswith);
 
 	ADD(FLAMINGO_VAL_KIND_VEC, "len", vec_len);
+	ADD(FLAMINGO_VAL_KIND_VEC, "map", vec_map);
 
 	return 0;
 }

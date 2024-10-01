@@ -3,13 +3,14 @@
 
 #pragma once
 
+#include <scope.h>
+#include <common.h>
+#include <call.h>
+
 #include "block.h"
 #include "expr.h"
-#include <scope.h>
 
-#include <common.h>
-
-// XXX Right now, there's no way of defining primitive type member parameters.
+// XXX Right now, there's no way of defining primitive type member parameters, so this is for that.
 // So I'm just ignoring them for now.
 // We need to find a long-term solution at some point.
 
@@ -48,6 +49,8 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 	if (n != param_count) {
 		return error(flamingo, "callable expected %zu arguments, got %zu instead", param_count, n);
 	}
+
+	flamingo_scope_t* const scope = env_cur_scope(flamingo->env);
 
 	for (size_t i = 0; i < n; i++) {
 		// Get argument.
@@ -90,12 +93,41 @@ static int setup_args(flamingo_t* flamingo, TSNode args, TSNode* params) {
 
 		// Create parameter variable.
 
-		flamingo_scope_t* const scope = env_cur_scope(flamingo->env);
 		flamingo_var_t* const var = scope_add_var(scope, name, size);
 
 		// Parse argument expression into that parameter variable.
 
 		if (parse_expr(flamingo, arg, &var->val, NULL) < 0) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+typedef struct {
+	flamingo_val_t* callable;
+	bool has_args;
+	TSNode args;
+} set_args_data_t;
+
+static int set_args_cb(flamingo_t* flamingo, void* _data) {
+	set_args_data_t* const data = _data;
+
+	// Evaluate argument expressions.
+	// Add our arguments as variables, with the function parameters as names.
+
+	bool const is_ptm = data->callable->fn.kind == FLAMINGO_FN_KIND_PTM;
+	TSNode* const params = data->callable->fn.params;
+
+	if (data->has_args) {
+		if (is_ptm) {
+			if (setup_args_no_param(flamingo, data->args) < 0) {
+				return -1;
+			}
+		}
+
+		else if (setup_args(flamingo, data->args, params) < 0) {
 			return -1;
 		}
 	}
@@ -143,180 +175,13 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		return error(flamingo, "callable expression is of type %s, which is not callable", val_type_str(callable));
 	}
 
-	bool const is_class = callable->fn.kind == FLAMINGO_FN_KIND_CLASS;
-	bool const on_inst = accessed_val != NULL && accessed_val->kind == FLAMINGO_VAL_KIND_INST;
-	bool const is_extern = callable->fn.kind == FLAMINGO_FN_KIND_EXTERN;
-	bool const is_ptm = callable->fn.kind == FLAMINGO_FN_KIND_PTM;
+	// Actually call.
 
-	// Actually call the callable.
-	// Switch context's source if the callable was created in another.
+	set_args_data_t data = {
+		.callable = callable,
+		.has_args = has_args,
+		.args = args,
+	};
 
-	char* const prev_src = flamingo->src;
-	size_t const prev_src_size = flamingo->src_size;
-
-	if (callable->fn.src != NULL) {
-		flamingo->src = callable->fn.src;
-		flamingo->src_size = callable->fn.src_size;
-	}
-
-	// Switch context's current callable body if we were called from another.
-
-	TSNode* const prev_fn_body = flamingo->cur_fn_body;
-	flamingo->cur_fn_body = callable->fn.body;
-
-	// Switch context's current environment to the one closed over by the function.
-
-	flamingo_env_t* const prev_env = flamingo->env;
-	flamingo->env = callable->fn.env == NULL ? prev_env : callable->fn.env;
-
-	// If calling on an instance, add that instance's scope to the scope stack.
-	// We do this before the arguments scope because we want parameters to shadow stuff in the instance's scope.
-
-	if (on_inst) {
-		env_gently_attach_scope(flamingo->env, accessed_val->inst.scope);
-	}
-
-	// Create a new scope for the function for the argument assignments.
-	// It's important to set 'scope->class_scope' to false for functions as new scopes will copy the 'class_scope' property from their parents otherwise.
-
-	flamingo_scope_t* scope = env_push_scope(flamingo->env);
-	scope->class_scope = is_class;
-
-	// Evaluate argument expressions.
-	// Add our arguments as variables, with the function parameters as names.
-
-	TSNode* const params = callable->fn.params;
-
-	if (has_args) {
-		if (is_ptm) {
-			if (setup_args_no_param(flamingo, args) < 0) {
-				return -1;
-			}
-		}
-
-		else if (setup_args(flamingo, args, params) < 0) {
-			return -1;
-		}
-	}
-
-	// If external function or primitive type member: call the function's callback.
-	// If function or class: actually parse the function's body.
-
-	TSNode* const body = callable->fn.body;
-	bool const is_expr = strcmp(ts_node_type(*body), "expression") == 0;
-
-	flamingo_scope_t* inner_scope;
-
-	if (is_extern || is_ptm) {
-		if (is_extern && flamingo->external_fn_cb == NULL) {
-			return error(flamingo, "cannot call external function without a external function callback being set");
-		}
-
-		// Create arg list.
-
-		flamingo_scope_t* const arg_scope = env_cur_scope(flamingo->env);
-
-		size_t const arg_count = arg_scope->vars_size;
-		flamingo_val_t** const args = malloc(arg_count * sizeof *args);
-		assert(args != NULL);
-
-		for (size_t i = 0; i < arg_count; i++) {
-			args[i] = arg_scope->vars[i].val;
-		}
-
-		flamingo_arg_list_t arg_list = {
-			.count = arg_count,
-			.args = args,
-		};
-
-		// Actually call the external function callback or primitive type member.
-
-		assert(flamingo->cur_fn_rv == NULL);
-
-		if (is_extern && flamingo->external_fn_cb(flamingo, callable->name_size, callable->name, flamingo->external_fn_cb_data, &arg_list, &flamingo->cur_fn_rv) < 0) {
-			return -1;
-		}
-
-		else if (is_ptm && callable->fn.ptm_cb(flamingo, accessed_val, &arg_list, &flamingo->cur_fn_rv)) {
-			return -1;
-		}
-
-		free(args);
-	}
-
-	else if (is_expr) {
-		assert(callable->fn.kind == FLAMINGO_FN_KIND_FUNCTION); // The only kind of callable that can have an expression body.
-
-		if (parse_expr(flamingo, *body, val, NULL) < 0) {
-			return -1;
-		}
-	}
-
-	else if (parse_block(flamingo, *body, is_class ? &inner_scope : NULL) < 0) {
-		return -1;
-	}
-
-	// Unwind the scope stack and switch back to previous source, current function body context, and environment..
-
-	env_pop_scope(flamingo->env);
-
-	if (on_inst) {
-		env_gently_detach_scope(flamingo->env);
-	}
-
-	flamingo->src = prev_src;
-	flamingo->src_size = prev_src_size;
-
-	flamingo->cur_fn_body = prev_fn_body;
-	flamingo->env = prev_env;
-
-	// If the function body was an expression, we're done (no return value, call value was already set).
-
-	if (is_expr) {
-		goto done;
-	}
-
-	// If class, create an instance.
-
-	if (callable->fn.kind == FLAMINGO_FN_KIND_CLASS) {
-		if (val == NULL) {
-			goto done;
-		}
-
-		assert(*val == NULL);
-		*val = val_alloc();
-		(*val)->kind = FLAMINGO_VAL_KIND_INST;
-
-		(*val)->inst.class = callable;
-		(*val)->inst.scope = inner_scope;
-		(*val)->inst.data = NULL;
-		(*val)->inst.free_data = NULL;
-
-		goto done;
-	}
-
-	// Set the value of this expression to the return value.
-	// Just discard it if we're not going to set it to anything.
-
-	if (val == NULL) {
-		if (flamingo->cur_fn_rv != NULL) {
-			val_decref(flamingo->cur_fn_rv);
-		}
-	}
-
-	else {
-		// If return value was never set, just create a none value.
-
-		if (flamingo->cur_fn_rv == NULL) {
-			flamingo->cur_fn_rv = val_alloc();
-		}
-
-		assert(*val == NULL);
-		*val = flamingo->cur_fn_rv;
-	}
-
-done:
-
-	flamingo->cur_fn_rv = NULL;
-	return 0;
+	return call_with_set_args_cb(flamingo, callable, accessed_val, val, set_args_cb, &data);
 }
