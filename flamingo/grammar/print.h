@@ -60,13 +60,13 @@ static int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res, bool inne
 
 		break;
 	case FLAMINGO_VAL_KIND_FN:
-		printf("<%s %.*s>\n", val_type_str(val), (int) val->name_size, val->name);
+		asprintf(res, "<%s %.*s>", val_type_str(val), (int) val->name_size, val->name);
 		break;
 	case FLAMINGO_VAL_KIND_INST:;
 		flamingo_val_t* const class = val->inst.class;
 		assert(class != NULL);
 
-		printf("<instance of %.*s>\n", (int) class->name_size, class->name);
+		asprintf(res, "<instance of %.*s>", (int) class->name_size, class->name);
 		break;
 	default:
 		return error(flamingo, "can't print expression kind: %s (%d)", val_type_str(val), val->kind);
