@@ -88,10 +88,9 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		return -1;
 	}
 
-	val_decref(val);
-
 	if (var != NULL) {
-		var_set_val(var, val);
+		val_decref(val);
+		var_set_val(var, rhs);
 	}
 
 	else {
