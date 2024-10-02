@@ -18,6 +18,9 @@ assert [1, 2][-1] == 2
 let v = [1, 2, 3]
 assert v[2] == 3
 
+v[1] = 4
+assert v[1] == 4
+
 # Mapping.
 
 assert [1, 2, 3].map(|x| 2 * x) == [2, 4, 6]
