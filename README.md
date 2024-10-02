@@ -43,8 +43,8 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Vector `.map` function.
 - [x] Vector `.where` function.
 - [x] (Hash)maps.
-- [ ] Check for existing key in map literals.
-- [ ] Indexing setters.
+- [x] Check for existing key in map literals.
+- [x] Indexing setters.
 - [ ] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
 
 For the first complete version of Flamingo (which I'll probably need for the full AQUA build system):

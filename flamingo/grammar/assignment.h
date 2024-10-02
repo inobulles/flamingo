@@ -35,7 +35,8 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	char const* const lhs = flamingo->src + start;
 	size_t const lhs_size = end - start;
 
-	flamingo_var_t* var;
+	flamingo_var_t* var = NULL;
+	flamingo_val_t* val = NULL;
 
 	if (strcmp(left_type, "identifier") == 0) {
 		var = env_find_var(flamingo->env, lhs, lhs_size);
@@ -43,18 +44,28 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 		if (var == NULL) {
 			return error(flamingo, "'%.*s' was never declared", (int) lhs_size, lhs);
 		}
+
+		val = var->val;
 	}
 
 	else if (strcmp(left_type, "access") == 0) {
-		flamingo_val_t* accessed_val;
+		flamingo_val_t* accessed_val = NULL;
 
 		if (access_find_var(flamingo, left_node, &var, &accessed_val) < 0) {
+			return -1;
+		}
+
+		val = var->val;
+	}
+
+	else if (strcmp(left_type, "index") == 0) {
+		if (parse_index(flamingo, left_node, &val) < 0) {
 			return -1;
 		}
 	}
 
 	else {
-		return error(flamingo, "expected identifier or access for name, got %s", left_type);
+		return error(flamingo, "expected identifier, access, or index for name, got %s", left_type);
 	}
 
 	// Make sure identifier is already in scope (or a previous one).
@@ -64,24 +75,31 @@ static int parse_assignment(flamingo_t* flamingo, TSNode node) {
 	// - A variable can't be assigned a value of a different type except if it was none.
 	// - TODO This is also where the const qualifier will be checked too (but this feature is to be defined).
 
-	flamingo_val_kind_t const prev_type = var->val->kind;
-	char const* const prev_type_str = val_type_str(var->val);
+	flamingo_val_kind_t const prev_type = val->kind;
+	char const* const prev_type_str = val_type_str(val);
 
-	if (prev_type == FLAMINGO_VAL_KIND_FN) {
-		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(var->val), (int) lhs_size, lhs);
+	if (prev_type == FLAMINGO_VAL_KIND_FN && var != NULL) {
+		return error(flamingo, "cannot assign to %s '%.*s'", val_role_str(val), (int) lhs_size, lhs);
 	}
 
-	flamingo_val_t* val = NULL;
+	flamingo_val_t* rhs = NULL;
 
-	if (parse_expr(flamingo, right_node, &val, NULL) < 0) {
+	if (parse_expr(flamingo, right_node, &rhs, NULL) < 0) {
 		return -1;
 	}
 
-	val_decref(var->val);
-	var_set_val(var, val);
+	val_decref(val);
 
-	if (var->val->kind != prev_type && (prev_type != FLAMINGO_VAL_KIND_NONE && var->val->kind != FLAMINGO_VAL_KIND_NONE)) {
-		return error(flamingo, "cannot assign %s to '%.*s' (%s)", val_type_str(var->val), (int) lhs_size, lhs, prev_type_str);
+	if (var != NULL) {
+		var_set_val(var, val);
+	}
+
+	else {
+		memcpy(val, rhs, sizeof *val); // XXX I don't know if this is really the right way to do it lolz.
+	}
+
+	if (val->kind != prev_type && (prev_type != FLAMINGO_VAL_KIND_NONE && val->kind != FLAMINGO_VAL_KIND_NONE)) {
+		return error(flamingo, "cannot assign %s to '%.*s' (%s)", val_type_str(val), (int) lhs_size, lhs, prev_type_str);
 	}
 
 	return 0;
