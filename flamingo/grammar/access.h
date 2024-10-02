@@ -61,6 +61,12 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 		return 0;
 	}
 
+	if (kind == FLAMINGO_VAL_KIND_FN && (*accessed_val)->fn.kind == FLAMINGO_FN_KIND_CLASS) {
+		return error(flamingo, "static access");
+	}
+
+	// Is PTM access.
+
 	size_t const count = flamingo->primitive_type_members[kind].count;
 	flamingo_var_t* const type_vars = flamingo->primitive_type_members[kind].vars;
 
