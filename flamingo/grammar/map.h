@@ -62,6 +62,10 @@ static int parse_map(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		vals[count - 1] = v;
 	}
 
+	if (val == NULL) {
+		return 0;
+	}
+
 	assert(*val == NULL);
 	*val = val_alloc();
 

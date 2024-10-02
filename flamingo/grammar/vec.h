@@ -34,6 +34,10 @@ static int parse_vec(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		elems[elem_count - 1] = elem;
 	}
 
+	if (val == NULL) {
+		return 0;
+	}
+
 	assert(*val == NULL);
 	*val = val_alloc();
 
