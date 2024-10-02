@@ -24,3 +24,6 @@ assert {"a": 1} + {"b": 2} == {"a": 1, "b": 2}
 assert a["c"] == 1
 assert a["z"] == none
 assert a["e"]["i"][-1] == 6
+
+a["c"] = 2
+assert a["c"] == 2
