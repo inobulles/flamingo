@@ -160,6 +160,7 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 
 		for (size_t i = 0; i < x->map.count; i++) {
 			flamingo_val_t* const k = x->map.keys[i];
+			flamingo_val_t* const v = x->map.vals[i];
 
 			// Find key in y.
 
@@ -170,7 +171,7 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 					continue;
 				}
 
-				if (!val_eq(x->map.vals[i], y->map.vals[j])) {
+				if (!val_eq(v, y->map.vals[j])) {
 					return false;
 				}
 
@@ -182,6 +183,8 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 				return false;
 			}
 		}
+
+		return true;
 	case FLAMINGO_VAL_KIND_FN:
 		return memcmp(&x->fn, &y->fn, sizeof x->fn) == 0;
 	case FLAMINGO_VAL_KIND_INST:
