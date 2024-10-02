@@ -38,15 +38,15 @@ static int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) 
 		return -1;
 	}
 
-	if (indexed_val->kind != FLAMINGO_VAL_KIND_VEC) {
-		return error(flamingo, "can only index vectors, got %s", val_type_str(indexed_val));
+	bool const is_vec = indexed_val->kind == FLAMINGO_VAL_KIND_VEC;
+	bool const is_map = indexed_val->kind == FLAMINGO_VAL_KIND_MAP;
+
+	if (!is_vec && !is_map) {
+		return error(flamingo, "can only index vectors and maps, got %s", val_type_str(indexed_val));
 	}
 
-	size_t const indexed_count = indexed_val->vec.count;
-	flamingo_val_t** const indexed_elems = indexed_val->vec.elems;
-
 	// Evaluate index expression.
-	// Make sure it can be used as an index.
+	// Make sure it can be used as an index if indexing a vector.
 
 	flamingo_val_t* index_val = NULL;
 
@@ -54,23 +54,11 @@ static int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) 
 		return -1;
 	}
 
-	if (index_val->kind != FLAMINGO_VAL_KIND_INT) {
+	if (is_vec && index_val->kind != FLAMINGO_VAL_KIND_INT) {
 		return error(flamingo, "can only use integers as indices, got %s", val_type_str(index_val));
 	}
 
-	int64_t const index = index_val->integer.integer;
-
-	// Check bounds.
-
-	if (index >= 0 && (size_t) index >= indexed_count) {
-		return error(flamingo, "index %" PRId64 " is out of bounds for vector of size %zu", index, indexed_count);
-	}
-
-	if (index < 0 && (size_t) -index > indexed_count) {
-		return error(flamingo, "index %" PRId64 " is out of bounds for vector of size %zu", index, indexed_count);
-	}
-
-	// Actually index vector.
+	// Prepare result value and exit here if we discard it.
 
 	if (val == NULL) {
 		return 0;
@@ -78,15 +66,62 @@ static int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) 
 
 	assert(*val == NULL);
 
-	if (index >= 0) {
-		*val = indexed_elems[index];
-		val_incref(*val);
+	// Do the indexing operation per indexed type.
+
+	if (is_vec) {
+		size_t const indexed_count = indexed_val->vec.count;
+		flamingo_val_t** const indexed_elems = indexed_val->vec.elems;
+		int64_t const index = index_val->integer.integer;
+
+		// Check bounds.
+
+		if (index >= 0 && (size_t) index >= indexed_count) {
+			return error(flamingo, "index %" PRId64 " is out of bounds for vector of size %zu", index, indexed_count);
+		}
+
+		if (index < 0 && (size_t) -index > indexed_count) {
+			return error(flamingo, "index %" PRId64 " is out of bounds for vector of size %zu", index, indexed_count);
+		}
+
+		// Actually index vector.
+
+		if (index >= 0) {
+			*val = indexed_elems[index];
+			val_incref(*val);
+		}
+
+		else {
+			*val = indexed_elems[indexed_count + index];
+			val_incref(*val);
+		}
+
+		return 0;
 	}
 
-	else {
-		*val = indexed_elems[indexed_count + index];
-		val_incref(*val);
+	else if (is_map) {
+		size_t const indexed_count = indexed_val->map.count;
+		flamingo_val_t** const indexed_keys = indexed_val->map.keys;
+		flamingo_val_t** const indexed_vals = indexed_val->map.vals;
+
+		// Look for key.
+
+		for (size_t i = 0; i < indexed_count; i++) {
+			flamingo_val_t* const key = indexed_keys[i];
+
+			if (val_eq(key, index_val)) {
+				*val = indexed_vals[i];
+				val_incref(*val);
+
+				return 0;
+			}
+		}
+
+		*val = val_alloc();
+		(*val)->kind = FLAMINGO_VAL_KIND_NONE;
+
+		return 0;
 	}
 
+	assert(false);
 	return 0;
 }
