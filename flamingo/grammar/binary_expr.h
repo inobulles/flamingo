@@ -298,8 +298,8 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 			// Copy all key-value pairs from the right vector.
 
 			for (size_t i = left_val->map.count; i < (*val)->map.count; i++) {
-				(*val)->map.keys[i] = val_copy(left_val->map.keys[i - left_val->map.count]);
-				(*val)->map.vals[i] = val_copy(left_val->map.vals[i - left_val->map.count]);
+				(*val)->map.keys[i] = val_copy(right_val->map.keys[i - left_val->map.count]);
+				(*val)->map.vals[i] = val_copy(right_val->map.vals[i - left_val->map.count]);
 			}
 
 			goto done;
