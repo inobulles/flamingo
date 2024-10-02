@@ -276,6 +276,7 @@ static int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t**
 
 	if (kind == FLAMINGO_VAL_KIND_MAP) {
 		// Map concatenation.
+		// TODO There's a small issue here: how to handle different values for the same key when adding? Should there be a preference to keep either the left or the right side? Is that too much of a "quirk" to be something I wanna do? Should this ability just be removed entirely?
 
 		if (strncmp(op, "+", op_size) == 0) {
 			(*val)->kind = FLAMINGO_VAL_KIND_MAP;
