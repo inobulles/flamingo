@@ -38,7 +38,7 @@ static int parse_map(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 		vals = realloc(vals, count * sizeof *vals);
 		assert(vals != NULL);
 
-		// Parse key and value expressions.
+		// Parse key expression.
 
 		flamingo_val_t* k = NULL;
 
@@ -48,6 +48,19 @@ static int parse_map(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 			return -1;
 		}
+
+		// Make sure key doesn't already exist in map.
+
+		for (size_t j = 0; j < count - 1; j++) {
+			if (val_eq(keys[j], k)) {
+				free(keys);
+				free(vals);
+
+				return error(flamingo, "duplicate key in map");
+			}
+		}
+
+		// Parse value expression.
 
 		flamingo_val_t* v = NULL;
 
