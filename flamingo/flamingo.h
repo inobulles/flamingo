@@ -92,6 +92,11 @@ struct flamingo_val_t {
 			// Only used for primitive type members.
 
 			flamingo_ptm_cb_t ptm_cb;
+
+			// The class' static environment.
+			// This works quite similarly to instances.
+
+			flamingo_scope_t* scope;
 		} fn;
 
 		struct {

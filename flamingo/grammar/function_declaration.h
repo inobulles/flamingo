@@ -4,94 +4,13 @@
 #pragma once
 
 #include "params.h"
+#include "static.h"
 #include "var_decl.h"
 #include <common.h>
 #include <env.h>
 #include <scope.h>
 #include <val.h>
 #include <var.h>
-
-static int find_static_members_in_class(flamingo_t* flamingo, TSNode body) {
-	assert(strcmp(ts_node_type(body), "block") == 0);
-
-	size_t const n = ts_node_named_child_count(body);
-
-	for (size_t i = 0; i < n; i++) {
-		TSNode const node = ts_node_named_child(body, i);
-		char const* const type = ts_node_type(node);
-
-		bool const is_var_decl = strcmp(type, "var_decl") == 0;
-		bool const is_fn_decl = strcmp(type, "function_declaration") == 0;
-		bool const is_class_decl = strcmp(type, "class_declaration") == 0;
-
-		if (!is_var_decl && !is_fn_decl && !is_class_decl) {
-			continue;
-		}
-
-		// Check for static in qualifier list.
-
-		TSNode const qualifiers = ts_node_child_by_field_name(node, "qualifiers", 10);
-		bool const has_qualifiers = !ts_node_is_null(qualifiers);
-
-		if (!has_qualifiers) {
-			continue;
-		}
-
-		assert(strcmp(ts_node_type(qualifiers), "qualifier_list") == 0);
-
-		size_t const qualifier_count = ts_node_child_count(qualifiers);
-		bool is_static = false;
-
-		for (size_t j = 0; j < qualifier_count; j++) {
-			TSNode const qualifier = ts_node_child(qualifiers, j);
-
-			size_t const start = ts_node_start_byte(qualifier);
-			size_t const end = ts_node_end_byte(qualifier);
-
-			char const* const qualifier_name = flamingo->src + start;
-			size_t const size = end - start;
-
-			if (strncmp(qualifier_name, "static", size) == 0) {
-				is_static = true;
-				break;
-			}
-		}
-
-		if (!is_static) {
-			continue;
-		}
-
-		// Parse static member.
-
-		if (is_fn_decl) {
-			if (parse_function_declaration(flamingo, node, FLAMINGO_FN_KIND_FUNCTION) < 0) {
-				return -1;
-			}
-
-			return 0;
-		}
-
-		if (is_var_decl) {
-			if (parse_var_decl(flamingo, node) < 0) {
-				return -1;
-			}
-
-			return 0;
-		}
-
-		if (is_class_decl) {
-			if (parse_function_declaration(flamingo, node, FLAMINGO_FN_KIND_CLASS) < 0) {
-				return -1;
-			}
-
-			return 0;
-		}
-
-		assert(false);
-	}
-
-	return 0;
-}
 
 static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flamingo_fn_kind_t kind) {
 	size_t const child_count = ts_node_child_count(node);
@@ -207,10 +126,13 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 		memcpy(var->val->fn.body, &body, sizeof body);
 	}
 
-	// If class, look for any static members.
+	// If class, create static environment and look for any static members.
 
 	if (kind == FLAMINGO_FN_KIND_CLASS) {
-		if (find_static_members_in_class(flamingo, body) < 0) {
+		flamingo_scope_t* const scope = scope_alloc();
+		var->val->fn.scope = scope;
+
+		if (find_static_members_in_class(flamingo, scope, body) < 0) {
 			return -1;
 		}
 	}

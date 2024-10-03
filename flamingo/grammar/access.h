@@ -45,13 +45,15 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 	}
 
 	// Actually access.
-	// XXX For now only instances and things with PTM's are accessible, but in the future I'm going to want to be able to access static members on classes directly too.
 
 	*var = NULL;
 	flamingo_val_kind_t const kind = (*accessed_val)->kind;
 
-	if (kind == FLAMINGO_VAL_KIND_INST) {
-		flamingo_scope_t* const scope = (*accessed_val)->inst.scope;
+	bool const is_inst = kind == FLAMINGO_VAL_KIND_INST;
+	bool const is_static = kind == FLAMINGO_VAL_KIND_FN && (*accessed_val)->fn.kind == FLAMINGO_FN_KIND_CLASS;
+
+	if (is_inst || is_static) {
+		flamingo_scope_t* const scope = is_inst ? (*accessed_val)->inst.scope : (*accessed_val)->fn.scope;
 		*var = scope_shallow_find_var(scope, accessor, size);
 
 		if (*var == NULL) {
@@ -59,10 +61,6 @@ static int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** v
 		}
 
 		return 0;
-	}
-
-	if (kind == FLAMINGO_VAL_KIND_FN && (*accessed_val)->fn.kind == FLAMINGO_FN_KIND_CLASS) {
-		return error(flamingo, "static access");
 	}
 
 	// Is PTM access.
