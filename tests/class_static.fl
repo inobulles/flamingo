@@ -1,0 +1,13 @@
+class Test {
+	static let x = 1
+
+	static fn return2() {
+		return 2
+	}
+}
+
+assert Test.x == 1
+Test.x = 5
+assert Test.x == 5
+
+assert Test.return2() == 2
