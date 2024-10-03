@@ -140,7 +140,6 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(ts_node_child_count(node) == 3 || ts_node_child_count(node) == 4);
 
 	// Get callable expression.
-	// TODO Evaluate this motherfucker.
 
 	TSNode const callable_node = ts_node_child_by_field_name(node, "callable", 8);
 	char const* const callable_type = ts_node_type(callable_node);
