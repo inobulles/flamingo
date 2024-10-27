@@ -3,7 +3,7 @@ set -e
 
 mkdir -p bin
 
-cc_flags="-std=c11 -g -Wall -Wextra -Werror -Iflamingo/runtime -Iflamingo -Wno-unused-parameter"
+cc_flags="-std=c11 -g -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unused-parameter"
 
 # XXX With the default error limit, clangd tells us that there are too many errors and it's stopping here.
 #     When the error limit is disabled like I'm doing here, it says there are no errors.

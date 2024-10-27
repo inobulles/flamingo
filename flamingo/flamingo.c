@@ -10,11 +10,11 @@
 
 #include "runtime/lib.c"
 
-#include <common.h>
-#include <env.h>
-#include <grammar/statement.h>
-#include <primitive_type_member.h>
-#include <scope.h>
+#include "common.h"
+#include "env.h"
+#include "grammar/statement.h"
+#include "primitive_type_member.h"
+#include "scope.h"
 
 typedef struct {
 	TSParser* parser;
