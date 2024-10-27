@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+if [ -z "$CC" ]; then
+	CC=cc
+fi
+
 mkdir -p bin
 
 cc_flags="-std=c11 -g -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unused-parameter"
@@ -9,7 +13,7 @@ cc_flags="-std=c11 -g -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unused-param
 #     When the error limit is disabled like I'm doing here, it says there are no errors.
 #     Could this be a clangd bug?
 
-cc $cc_flags -D_DEFAULT_SOURCE -D_GNU_SOURCE -ferror-limit=0 -c flamingo/flamingo.c -o bin/flamingo.o
-cc $cc_flags -D_DEFAULT_SOURCE -c main.c -o bin/main.o
+$CC $cc_flags -D_DEFAULT_SOURCE -D_GNU_SOURCE -ferror-limit=0 -c flamingo/flamingo.c -o bin/flamingo.o
+$CC $cc_flags -D_DEFAULT_SOURCE -c main.c -o bin/main.o
 
-cc $(find bin -name "*.o") -lm $cc_flags -o bin/flamingo
+$CC $(find bin -name "*.o") -lm $cc_flags -o bin/flamingo

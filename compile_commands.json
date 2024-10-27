@@ -9,14 +9,15 @@
             "-Wextra",
             "-Werror",
             "-Iflamingo/runtime",
-            "-Iflamingo",
             "-Wno-unused-parameter",
+            "-D_DEFAULT_SOURCE",
+            "-D_GNU_SOURCE",
             "-ferror-limit=0",
             "-o",
             "bin/flamingo.o",
             "flamingo/flamingo.c"
         ],
-        "directory": "/home/obiwac/flamingo/flamingo",
+        "directory": "/Users/aymeric/flamingo/flamingo",
         "file": "flamingo/flamingo.c"
     },
     {
@@ -29,13 +30,13 @@
             "-Wextra",
             "-Werror",
             "-Iflamingo/runtime",
-            "-Iflamingo",
             "-Wno-unused-parameter",
+            "-D_DEFAULT_SOURCE",
             "-o",
             "bin/main.o",
             "main.c"
         ],
-        "directory": "/home/obiwac/flamingo/flamingo",
+        "directory": "/Users/aymeric/flamingo/flamingo",
         "file": "main.c"
     }
 ]
