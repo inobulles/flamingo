@@ -83,7 +83,7 @@ static inline int find_static_members_in_class(flamingo_t* flamingo, flamingo_sc
 			continue;
 		}
 
-		if (strcmp(type, "extern_declaration") == 0) {
+		if (strcmp(type, "proto") == 0) {
 			if (parse_function_declaration(flamingo, node, FLAMINGO_FN_KIND_EXTERN) < 0) {
 				return -1;
 			}
