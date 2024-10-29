@@ -24,7 +24,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	struct stat sb;
 
 	if (stat(path, &sb) < 0) {
-		rv = error(flamingo, "failed to import '%s': stat: %s\n", path, strerror(errno));
+		rv = error(flamingo, "failed to import '%s': stat: %s", path, strerror(errno));
 		goto err_stat;
 	}
 
@@ -33,7 +33,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	FILE* const f = fopen(path, "r");
 
 	if (f == NULL) {
-		rv = error(flamingo, "failed to import '%s': fopen: %s\n", path, strerror(errno));
+		rv = error(flamingo, "failed to import '%s': fopen: %s", path, strerror(errno));
 		goto err_fopen;
 	}
 
@@ -41,7 +41,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	assert(src != NULL);
 
 	if (fread(src, 1, src_size, f) != src_size) {
-		rv = error(flamingo, "failed to import '%s': fread: %s\n", path, strerror(errno));
+		rv = error(flamingo, "failed to import '%s': fread: %s", path, strerror(errno));
 		goto err_fread;
 	}
 
@@ -61,7 +61,7 @@ static int import(flamingo_t* flamingo, char* path) {
 	// Create new flamingo engine.
 
 	if (flamingo_create(imported_flamingo, flamingo->progname, src, src_size) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_create: %s\n", path, strerror(errno));
+		rv = error(flamingo, "failed to import '%s': flamingo_create: %s", path, strerror(errno));
 		goto err_flamingo_create;
 	}
 
@@ -70,14 +70,14 @@ static int import(flamingo_t* flamingo, char* path) {
 	// Set the scope stack for the imported flamingo instance to be the same as ours.
 
 	if (flamingo_inherit_env(imported_flamingo, flamingo->env) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_inherit_env: %s\n", path, flamingo_err(imported_flamingo));
+		rv = error(flamingo, "failed to import '%s': flamingo_inherit_env: %s", path, flamingo_err(imported_flamingo));
 		goto err_flamingo_inherit_scope_stack;
 	}
 
 	// Run the imported program.
 
 	if (flamingo_run(imported_flamingo) < 0) {
-		rv = error(flamingo, "failed to import '%s': flamingo_run: %s\n", path, flamingo_err(imported_flamingo));
+		rv = error(flamingo, "failed to import '%s': flamingo_run: %s", path, flamingo_err(imported_flamingo));
 		goto err_flamingo_run;
 	}
 
