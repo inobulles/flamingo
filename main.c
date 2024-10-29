@@ -5,6 +5,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,6 +102,26 @@ static int class_decl_cb(flamingo_t* flamingo, flamingo_val_t* class, void* data
 	return 0;
 }
 
+static int class_inst_cb(flamingo_t* flamingo, flamingo_val_t* inst, void* data, flamingo_arg_list_t* args) {
+	flamingo_val_t* const class = inst->inst.class;
+
+	if (flamingo_cstrcmp(class->name, "ExternalClass", class->name_size) == 0) {
+		if (args->count != 1) {
+			return flamingo_raise_error(flamingo, "ExternalClass: expected 1 argument, got %zu", args->count);
+		}
+
+		if (args->args[0]->kind != FLAMINGO_VAL_KIND_INT) {
+			return flamingo_raise_error(flamingo, "ExternalClass: expected argument to be an integer");
+		}
+
+		if (args->args[0]->integer.integer != 420) {
+			return flamingo_raise_error(flamingo, "ExternalClass: expected argument to be 420, got %" PRId64, args->args[0]->integer.integer);
+		}
+	}
+
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	init_name = *argv;
 
@@ -157,6 +178,8 @@ int main(int argc, char* argv[]) {
 
 	flamingo_register_external_fn_cb(&flamingo, external_fn_cb, NULL);
 	flamingo_register_class_decl_cb(&flamingo, class_decl_cb, NULL);
+	flamingo_register_class_inst_cb(&flamingo, class_inst_cb, NULL);
+
 	flamingo_add_import_path(&flamingo, "tests/import_path");
 
 	// run program
