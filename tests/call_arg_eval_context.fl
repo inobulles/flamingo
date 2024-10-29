@@ -1,0 +1,9 @@
+# Regression test.
+# When calling a function that is defined in a different source file, the context's source could be switched to the source file of the function being called before the argument expressions are evaluated.
+# This would cause these evaluations to use the wrong source file.
+
+# TODO rename this
+
+import .tests.call_arg_eval_context_helper
+
+assert function("zonnebloemgranen") == "zonnebloemgranen"
