@@ -46,6 +46,8 @@ struct flamingo_val_t {
 	flamingo_val_kind_t kind;
 	size_t ref_count;
 
+	// All the type-specific data.
+
 	union {
 		struct {
 			bool boolean;
@@ -113,8 +115,11 @@ struct flamingo_val_t {
 
 struct flamingo_var_t {
 	bool anonymous;
+	bool is_static;
+
 	char* key;
 	size_t key_size;
+
 	flamingo_val_t* val;
 };
 
