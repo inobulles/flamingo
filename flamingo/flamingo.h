@@ -15,7 +15,7 @@ typedef struct flamingo_scope_t flamingo_scope_t;
 typedef struct flamingo_env_t flamingo_env_t;
 typedef struct flamingo_arg_list_t flamingo_arg_list_t;
 
-typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv);
+typedef int (*flamingo_external_fn_cb_t)(flamingo_t* flamingo, flamingo_val_t* callable, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv);
 typedef int (*flamingo_ptm_cb_t)(flamingo_t* flamingo, flamingo_val_t* self, flamingo_arg_list_t* args, flamingo_val_t** rv);
 
 typedef enum {

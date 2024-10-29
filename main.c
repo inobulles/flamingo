@@ -36,7 +36,10 @@ static void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
-static int external_fn_cb(flamingo_t* flamingo, size_t name_size, char* name, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+static int external_fn_cb(flamingo_t* flamingo, flamingo_val_t* callable, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv) {
+	char* const name = callable->name;
+	size_t const name_size = callable->name_size;
+
 	if (flamingo_cstrcmp(name, "test_return_number", name_size) == 0) {
 		*rv = flamingo_val_make_int(420);
 	}
