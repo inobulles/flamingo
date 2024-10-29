@@ -9,6 +9,7 @@
 
 #include <errno.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 static int import(flamingo_t* flamingo, char* path) {
 	// TODO This is really relative to the caller, not the current file.
@@ -200,11 +201,27 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 		return error(flamingo, "failed to allocate memory for import path");
 	}
 
-	// We don't support global imports yet.
+	// If is a global import, go through the import paths until we find the file.
 
 	if (!is_relative) {
-		return error(flamingo, "global imports are not supported yet (trying to import '%s')", import_path);
+		for (size_t i = 0; i < flamingo->import_path_count; i++) {
+			char* full_path = NULL;
+			asprintf(&full_path, "%s/%s", flamingo->import_paths[i], import_path);
+			assert(full_path != NULL);
+
+			if (access(full_path, F_OK) < 0) {
+				free(full_path);
+				continue;
+			}
+
+			free(import_path);
+			import_path = full_path;
+
+			break;
+		}
 	}
+
+	// Actually import.
 
 	rv = import(flamingo, import_path);
 	free(import_path);
