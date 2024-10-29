@@ -154,7 +154,9 @@ static int parse_import_path(flamingo_t* flamingo, TSNode node, char** path_ref,
 
 static int parse_import(flamingo_t* flamingo, TSNode node) {
 	assert(strcmp(ts_node_type(node), "import") == 0);
-	assert(ts_node_child_count(node) == 3);
+
+	size_t const child_count = ts_node_child_count(node);
+	assert(child_count == 2 || child_count == 3);
 
 	// Is the import relative to the current file?
 	// If so, it means we need to follow the import file relative to the current one.
@@ -173,8 +175,6 @@ static int parse_import(flamingo_t* flamingo, TSNode node) {
 	}
 
 	// Parse the import path into an actual string path we can use.
-
-	(void) is_relative;
 
 	char* path = NULL;
 	size_t path_len = 0;
