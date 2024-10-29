@@ -137,6 +137,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	flamingo_register_external_fn_cb(&flamingo, external_fn_cb, NULL);
+	flamingo_add_import_path(&flamingo, "tests/import_path");
 
 	// run program
 

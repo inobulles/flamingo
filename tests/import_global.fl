@@ -1,0 +1,3 @@
+import importable_anywhere
+
+assert super_secret_value == 69
