@@ -85,6 +85,22 @@ static int external_fn_cb(flamingo_t* flamingo, flamingo_val_t* callable, void* 
 	return 0;
 }
 
+static int class_decl_cb(flamingo_t* flamingo, flamingo_val_t* class, void* data) {
+	flamingo_scope_t* const scope = class->fn.scope;
+
+	if (flamingo_cstrcmp(class->name, "ExternalClass", class->name_size) == 0) {
+		for (size_t i = 0; i < scope->vars_size; i++) {
+			flamingo_var_t* const var = &scope->vars[i];
+
+			if (flamingo_cstrcmp(var->key, "will_be_modified", var->key_size) == 0) {
+				var->val->integer.integer = 420;
+			}
+		}
+	}
+
+	return 0;
+}
+
 int main(int argc, char* argv[]) {
 	init_name = *argv;
 
@@ -140,6 +156,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	flamingo_register_external_fn_cb(&flamingo, external_fn_cb, NULL);
+	flamingo_register_class_decl_cb(&flamingo, class_decl_cb, NULL);
 	flamingo_add_import_path(&flamingo, "tests/import_path");
 
 	// run program

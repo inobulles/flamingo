@@ -1,0 +1,5 @@
+class ExternalClass {
+	static let will_be_modified = 69
+}
+
+assert ExternalClass.will_be_modified == 420
