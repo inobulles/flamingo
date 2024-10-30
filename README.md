@@ -46,7 +46,7 @@ For the first first version of Flamingo, to be integrated into Bob the Builder (
 - [x] Check for existing key in map literals.
 - [x] Indexing setters.
 - [x] Static functions on classes (`static` qualifier) (should this be done with some kind of global singleton instance which always exists?).
-- [ ] External classes (I guess that's just gonna be a bunch of wrapper functions, I need to start working on Bob I think to figure out the requirements for this).
+- [x] External classes (I guess that's just gonna be a bunch of wrapper functions, I need to start working on Bob I think to figure out the requirements for this).
 
 For the first complete version of Flamingo (which I'll probably need for the full AQUA build system):
 
@@ -57,6 +57,7 @@ For the first complete version of Flamingo (which I'll probably need for the ful
 - [ ] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. prevent recursion in anonymous functions).
 - [ ] Make sure everything actually winds up getting freed (and figure out scope and value reference counting correctly).
+- [ ] Ensure that strings are null-terminated in the value so that it's less annoying to integrate Flamingo with C code.
 
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
 
