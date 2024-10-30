@@ -109,6 +109,7 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 	var_set_val(var, val_alloc());
 
 	var->val->kind = FLAMINGO_VAL_KIND_FN;
+	var->val->owner = cur_scope;
 
 	var->val->fn.kind = kind;
 	var->val->fn.env = env_close_over(flamingo->env);

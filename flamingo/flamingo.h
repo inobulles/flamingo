@@ -71,6 +71,10 @@ struct flamingo_val_t {
 	flamingo_val_kind_t kind;
 	size_t ref_count;
 
+	// The scope this value was created in.
+
+	flamingo_scope_t* owner;
+
 	// All the type-specific data.
 
 	union {
