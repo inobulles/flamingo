@@ -93,6 +93,9 @@ static int class_decl_cb(flamingo_t* flamingo, flamingo_val_t* class, void* data
 		for (size_t i = 0; i < scope->vars_size; i++) {
 			flamingo_var_t* const var = &scope->vars[i];
 
+			assert(var->val->owner == scope);
+			assert(var->val->owner->owner == class);
+
 			if (flamingo_cstrcmp(var->key, "will_be_modified", var->key_size) == 0) {
 				var->val->integer.integer = 420;
 			}
