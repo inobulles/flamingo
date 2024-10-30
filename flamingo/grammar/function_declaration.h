@@ -133,7 +133,9 @@ static int parse_function_declaration(flamingo_t* flamingo, TSNode node, flaming
 
 	if (kind == FLAMINGO_FN_KIND_CLASS) {
 		flamingo_scope_t* const scope = scope_alloc();
+
 		var->val->fn.scope = scope;
+		scope->owner = var->val;
 
 		if (find_static_members_in_class(flamingo, scope, body) < 0) {
 			return -1;

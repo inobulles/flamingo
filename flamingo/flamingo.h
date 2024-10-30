@@ -154,6 +154,10 @@ struct flamingo_scope_t {
 	size_t vars_size;
 	flamingo_var_t* vars;
 
+	// If scope is an instance's scope or a class' static scope, this will be set to that instance or class.
+
+	flamingo_val_t* owner;
+
 	// Used for return to know what it can and can't return.
 
 	bool class_scope;
