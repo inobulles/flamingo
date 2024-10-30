@@ -55,6 +55,7 @@ static int external_fn_cb(flamingo_t* flamingo, flamingo_val_t* callable, void* 
 		assert(args->count == 0);
 		assert(callable->owner != NULL);
 		assert(callable->owner->owner == last_external_class_instance);
+		assert(callable->owner == callable->owner->owner->inst.scope);
 
 		last_external_class_instance->inst.data = last_external_class_instance->inst.data - 1;
 		*rv = flamingo_val_make_int((int64_t) last_external_class_instance->inst.data);
