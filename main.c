@@ -37,11 +37,30 @@ static void usage(void) {
 	exit(EXIT_FAILURE);
 }
 
+static flamingo_val_t* external_class_static_external_function = NULL;
+static flamingo_val_t* last_external_class_instance = NULL;
+
 static int external_fn_cb(flamingo_t* flamingo, flamingo_val_t* callable, void* data, flamingo_arg_list_t* args, flamingo_val_t** rv) {
 	char* const name = callable->name;
 	size_t const name_size = callable->name_size;
 
-	if (flamingo_cstrcmp(name, "test_return_number", name_size) == 0) {
+	if (callable == external_class_static_external_function) {
+		assert(args->count == 1);
+		assert(args->args[0]->kind == FLAMINGO_VAL_KIND_INT);
+
+		*rv = flamingo_val_make_int(args->args[0]->integer.integer + 1);
+	}
+
+	else if (flamingo_cstrcmp(name, "external_function", name_size) == 0) {
+		assert(args->count == 0);
+		assert(callable->owner != NULL);
+		assert(callable->owner->owner == last_external_class_instance);
+
+		last_external_class_instance->inst.data = last_external_class_instance->inst.data - 1;
+		*rv = flamingo_val_make_int((int64_t) last_external_class_instance->inst.data);
+	}
+
+	else if (flamingo_cstrcmp(name, "test_return_number", name_size) == 0) {
 		*rv = flamingo_val_make_int(420);
 	}
 
@@ -99,6 +118,10 @@ static int class_decl_cb(flamingo_t* flamingo, flamingo_val_t* class, void* data
 			if (flamingo_cstrcmp(var->key, "will_be_modified", var->key_size) == 0) {
 				var->val->integer.integer = 420;
 			}
+
+			if (flamingo_cstrcmp(var->key, "static_external_function", var->key_size) == 0) {
+				external_class_static_external_function = var->val;
+			}
 		}
 	}
 
@@ -120,6 +143,9 @@ static int class_inst_cb(flamingo_t* flamingo, flamingo_val_t* inst, void* data,
 		if (args->args[0]->integer.integer != 420) {
 			return flamingo_raise_error(flamingo, "ExternalClass: expected argument to be 420, got %" PRId64, args->args[0]->integer.integer);
 		}
+
+		inst->inst.data = (void*) args->args[0]->integer.integer;
+		last_external_class_instance = inst;
 	}
 
 	return 0;

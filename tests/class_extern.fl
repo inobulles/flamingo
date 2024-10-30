@@ -1,7 +1,14 @@
 class ExternalClass(x: int) {
 	static let will_be_modified = 69
+	static proto static_external_function(x: int) -> int
+
+	proto external_function() -> int
 }
 
 assert ExternalClass.will_be_modified == 420
+assert ExternalClass.static_external_function(69) == 70
 
-let _ = ExternalClass(420) # XXX See comment above 'class_inst_cb' call in 'flamingo/call.h'.
+let last_inst = ExternalClass(420) # XXX See comment above 'class_inst_cb' call in 'flamingo/call.h'.
+
+assert last_inst.external_function() == 419
+assert last_inst.external_function() == 418
