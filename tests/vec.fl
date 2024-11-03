@@ -39,3 +39,7 @@ assert [
 	"header.h",
 	"util.c"
 ]
+
+# Regression tests.
+
+assert ["src/build_step.c", "src/bsys.c", "src/ncpu.c", "src/bsys/gmake/main.c", "src/bsys/go/main.c", "src/bsys/cmake/main.c", "src/bsys/configure/main.c", "src/bsys/bob/main.c", "src/bsys/cargo/main.c", "src/bsys/meson/main.c", "src/bsys/make_freebsd_port/main.c", "src/str.c", "src/cmd.c", "src/main.c", "src/class/linker.c", "src/class/fs.c", "src/class/cc.c", "src/pool.c", "src/logging.c"] + ["src/flamingo/flamingo.c"] == ["src/build_step.c", "src/bsys.c", "src/ncpu.c", "src/bsys/gmake/main.c", "src/bsys/go/main.c", "src/bsys/cmake/main.c", "src/bsys/configure/main.c", "src/bsys/bob/main.c", "src/bsys/cargo/main.c", "src/bsys/meson/main.c", "src/bsys/make_freebsd_port/main.c", "src/str.c", "src/cmd.c", "src/main.c", "src/class/linker.c", "src/class/fs.c", "src/class/cc.c", "src/pool.c", "src/logging.c", "src/flamingo/flamingo.c"]
