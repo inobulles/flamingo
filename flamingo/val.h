@@ -192,6 +192,8 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 	case FLAMINGO_VAL_KIND_COUNT:
 		return false;
 	}
+
+	return false; // XXX To make GCC happy.
 }
 
 static void val_free(flamingo_val_t* val) {
