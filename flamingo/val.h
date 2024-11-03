@@ -95,8 +95,10 @@ static flamingo_val_t* val_copy(flamingo_val_t* val) {
 	memcpy(copy, val, sizeof *val);
 	copy->ref_count = 1;
 
-	copy->name = strndup(val->name, val->name_size);
-	assert(copy->name != NULL);
+	if (val->name != NULL) {
+		copy->name = strndup(val->name, val->name_size);
+		assert(copy->name != NULL);
+	}
 
 	switch (copy->kind) {
 	case FLAMINGO_VAL_KIND_NONE:
