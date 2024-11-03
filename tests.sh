@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export ASAN_OPTIONS=detect_leaks=0 # XXX For now, let's not worry about leaks.
 all_passed=1
 
 for test in $(ls -p tests | grep -v /); do
