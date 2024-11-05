@@ -10,8 +10,6 @@
             "-Werror",
             "-Iflamingo/runtime",
             "-Wno-unused-parameter",
-            "-D_DEFAULT_SOURCE",
-            "-D_GNU_SOURCE",
             "-ferror-limit=0",
             "-o",
             "bin/flamingo.o",
@@ -31,7 +29,6 @@
             "-Werror",
             "-Iflamingo/runtime",
             "-Wno-unused-parameter",
-            "-D_DEFAULT_SOURCE",
             "-o",
             "bin/main.o",
             "main.c"
