@@ -14,7 +14,7 @@ cc_flags="$debugging -std=c11 -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unus
 #     When the error limit is disabled like I'm doing here, it says there are no errors.
 #     Could this be a clangd bug?
 
-$CC $cc_flags -D_DEFAULT_SOURCE -D_GNU_SOURCE -ferror-limit=0 -c flamingo/flamingo.c -o bin/flamingo.o
-$CC $cc_flags -D_DEFAULT_SOURCE -c main.c -o bin/main.o
+$CC $cc_flags -ferror-limit=0 -c flamingo/flamingo.c -o bin/flamingo.o
+$CC $cc_flags -c main.c -o bin/main.o
 
 $CC $(find bin -name "*.o") -lm $cc_flags -o bin/flamingo
