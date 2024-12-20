@@ -8,7 +8,7 @@ for test in $(ls -p tests | grep -v /); do
 		continue
 	fi
 
-	echo -n "Running test $test... "
+	printf "Running test $test... "
 	bin/flamingo tests/$test > /dev/null
 
 	if [ $? = 0 ]; then
