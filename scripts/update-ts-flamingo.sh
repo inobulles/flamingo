@@ -15,7 +15,7 @@ fi
 # Update tree-sitter-flamingo (i.e. src/parser.c and src/tree_sitter/parser.h).
 
 rm -rf tree-sitter-flamingo 2>/dev/null || true
-git clone $URL --depth 1 --branch main
+git clone $URL --depth 1
 
 mv tree-sitter-flamingo/src/parser.c flamingo/parser.c
 mv tree-sitter-flamingo/src/tree_sitter/parser.h flamingo/tree_sitter/parser.h
