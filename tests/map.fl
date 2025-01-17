@@ -27,3 +27,8 @@ assert a["e"]["i"][-1] == 6
 
 a["c"] = 2
 assert a["c"] == 2
+
+# Adding new entries.
+
+a["f"] = 69
+assert a["f"] == 69
