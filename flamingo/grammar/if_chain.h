@@ -4,6 +4,8 @@
 #pragma once
 
 #include "../common.h"
+#include "../grammar/expr.h"
+#include "../val.h"
 
 static int parse_if_chain(flamingo_t* flamingo, TSNode node) {
 	// Get if condition.
@@ -22,6 +24,28 @@ static int parse_if_chain(flamingo_t* flamingo, TSNode node) {
 
 	if (strcmp(if_body_type, "block") != 0) {
 		return error(flamingo, "expected block for if body, got %s", if_body_type);
+	}
+
+	// Evaluate condition.
+	// TODO Should this be pulled out with the assert condition test?
+
+	flamingo_val_t* val = NULL;
+
+	if (parse_expr(flamingo, if_condition_node, &val, NULL) < 0) {
+		return -1;
+	}
+
+	if (val->kind != FLAMINGO_VAL_KIND_BOOL) {
+		return error(flamingo, "expected boolean value for if condition, got %s", val_type_str(val));
+	}
+
+	bool const pass = val->boolean.boolean;
+	val_decref(val);
+
+	// If the condition passed, we can just execute the body and return.
+
+	if (pass) {
+		return parse_block(flamingo, if_body_node, NULL);
 	}
 
 	// Get elif conditions.
@@ -69,9 +93,28 @@ static int parse_if_chain(flamingo_t* flamingo, TSNode node) {
 			return error(flamingo, "expected block for elif body, got %s", elif_body_type);
 		}
 
-		printf("elif condition: %.*s\n", (int) ts_node_end_byte(elif_condition_node) - ts_node_start_byte(elif_condition_node), flamingo->src + ts_node_start_byte(elif_condition_node));
+		// Evaluate condition.
 
-		// Jump forward so we don't hit the elif body.
+		flamingo_val_t* val = NULL;
+
+		if (parse_expr(flamingo, elif_condition_node, &val, NULL) < 0) {
+			return -1;
+		}
+
+		if (val->kind != FLAMINGO_VAL_KIND_BOOL) {
+			return error(flamingo, "expected boolean value for elif condition, got %s", val_type_str(val));
+		}
+
+		bool const pass = val->boolean.boolean;
+		val_decref(val);
+
+		// If the condition passed, we can execute the body and return.
+
+		if (pass) {
+			return parse_block(flamingo, elif_body_node, NULL);
+		}
+
+		// Jump forward so we don't hit the elif body again.
 
 		i++;
 	}
@@ -88,6 +131,14 @@ static int parse_if_chain(flamingo_t* flamingo, TSNode node) {
 			return error(flamingo, "expected block for else body, got %s", else_body_type);
 		}
 	}
+
+	// Execute else body if there is one.
+
+	if (has_else_body) {
+		return parse_block(flamingo, else_body_node, NULL);
+	}
+
+	// In this path, nothing happened.
 
 	return 0;
 }
