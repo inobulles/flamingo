@@ -52,7 +52,7 @@ For the first complete version of Flamingo (which I'll probably need for the ful
 
 - [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector slicing setters.
-- [ ] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
+- [x] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
 - [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
 - [ ] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. prevent recursion in anonymous functions).
