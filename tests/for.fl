@@ -1,3 +1,5 @@
+# General for loop tests.
+
 let counter = 1
 
 for i in [1, 2, 3] {
@@ -21,6 +23,24 @@ let s = "hello world!"
 
 for i in [s] {
 	assert i == s
+}
+
+# Tests for maps.
+
+let map = {1: 2, 3: 4}
+
+for k in map {
+	if k == 1 {
+		assert map[k] == 2
+	}
+
+	elif k == 3 {
+		assert map[k] == 4
+	}
+
+	else {
+		assert false, "The key " + k " is not even in the map!"
+	}
 }
 
 # TODO Tests for break/continue.
