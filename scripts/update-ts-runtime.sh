@@ -6,7 +6,7 @@ set -xe
 rm -rf tree-sitter 2>/dev/null || true
 rm -r flamingo/runtime 2>/dev/null || true
 
-git clone https://github.com/tree-sitter/tree-sitter --depth 1 --branch master
+git clone https://github.com/tree-sitter/tree-sitter --depth 1 --branch v0.25.3
 mkdir -p flamingo/runtime
 
 mv tree-sitter/lib/include/tree_sitter flamingo/runtime/
