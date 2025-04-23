@@ -1,0 +1,22 @@
+let counter = 1
+
+for i in [1, 2, 3] {
+	assert i == counter
+	counter = counter + 1
+}
+
+let vec = [3, 2]
+vec = vec + [1]
+
+for i in vec {
+	counter = counter - 1
+	assert i == counter
+}
+
+let s = "hello world!"
+
+for i in [s] {
+	assert i == s
+}
+
+# TODO Tests for break/continue.
