@@ -43,4 +43,28 @@ for k in map {
 	}
 }
 
-# TODO Tests for break/continue.
+# Test for break.
+
+for i in [1, 2] {
+	counter = i
+	break
+}
+
+assert counter != 2, "For loop didn't break."
+assert counter == 1
+
+# Test for continue.
+
+counter = 0
+
+for i in [1, 2, 3] {
+	if i == 2 {
+		continue
+
+		break # Anything after a continue should not execute of course.
+	}
+
+	counter = counter + i
+}
+
+assert counter == 4
