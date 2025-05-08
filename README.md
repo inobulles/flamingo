@@ -53,8 +53,8 @@ For the first complete version of Flamingo (which I'll probably need for the ful
 - [ ] Vector slicing (i.e. `v[1:3]`).
 - [ ] Vector slicing setters.
 - [x] `if`/`else` and `elif` ([argument](https://langdev.stackexchange.com/questions/9/why-do-some-pl-choose-to-have-a-dedicated-keyword-for-elseif-instead-of-like-in) for why to have a dedicated `elif` keyword instead of `else if`).
-- [ ] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
-- [ ] `break` and `continue` in loops.
+- [x] `for` loops, but only on iterators (ranges, maps, and vectors, first copied to ensure non-Turing-completeness). No `while` loops, I don't want Turing completeness!
+- [x] `break` and `continue` in loops.
 - [ ] Ensure language is not Turing complete in other places (i.e. prevent recursion in anonymous functions).
 - [ ] Make sure everything actually winds up getting freed (and figure out scope and value reference counting correctly).
 - [ ] Ensure that strings are null-terminated in the value so that it's less annoying to integrate Flamingo with C code.
@@ -62,6 +62,7 @@ For the first complete version of Flamingo (which I'll probably need for the ful
 Next, I want to work on making the language enjoyable to use, and this involves hints to the LSP:
 
 - [ ] `pure` qualifier and pure function checking (pure checking is just are we assigning variable or calling impure function in a pure one, relatively easy).
+- [ ] Super duper nice error messages.
 - [ ] Type checking.
 - [ ] The LSP itself!
 - [ ] Comprehensive docs.
