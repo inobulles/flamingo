@@ -5,9 +5,7 @@
 
 #include "../call.h"
 #include "../common.h"
-#include "../scope.h"
 
-#include "block.h"
 #include "expr.h"
 
 static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
