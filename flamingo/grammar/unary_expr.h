@@ -8,8 +8,6 @@
 #include "../common.h"
 #include "../val.h"
 
-#include <math.h>
-
 static int parse_unary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 	assert(strcmp(ts_node_type(node), "unary_expression") == 0);
 	assert(ts_node_named_child_count(node) == 2);
