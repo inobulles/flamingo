@@ -228,6 +228,11 @@ static int call(
 			return -1;
 		}
 
+		// Add self variable to inner scope.
+
+		flamingo_var_t* const self = scope_add_var(inner_scope, "self", 4);
+		var_set_val(self, *rv);
+
 		goto done;
 	}
 
