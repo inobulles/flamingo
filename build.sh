@@ -7,7 +7,7 @@ fi
 
 mkdir -p bin
 
-debugging="-fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -g -O0"
+debugging="-fsanitize=address,undefined -fno-omit-frame-pointer -g -O0"
 cc_flags="$debugging -std=c11 -Wall -Wextra -Werror -Iflamingo/runtime -Wno-unused-parameter"
 
 # XXX With the default error limit, clangd tells us that there are too many errors and it's stopping here.
