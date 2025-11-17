@@ -1,0 +1,17 @@
+class Factory {
+	let x = 0
+
+	static fn new() {
+		let factory = Factory()
+		factory.x = 69
+		return factory
+	}
+
+	fn set_num(x: int) {
+		self.x = x
+		return self
+	}
+}
+
+let c = Factory.new().set_num(420)
+assert c.x == 420
