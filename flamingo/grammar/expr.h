@@ -11,6 +11,7 @@
 #include "lambda.h"
 #include "literal.h"
 #include "map.h"
+#include "self.h"
 #include "unary_expr.h"
 #include "vec.h"
 
@@ -36,7 +37,12 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 		return parse_lambda(flamingo, child, val);
 	}
 
+	if (val != NULL && strcmp(type, "self") == 0) {
+		return parse_self(flamingo, child, val);
+	}
+
 	// These expressions could have side-effects, so we need to parse them anyway, even if 'val != NULL'.
+	// A lot of these expressions don't directly produce side-effects, but could need to evaluate an expression which does.
 
 	if (strcmp(type, "vec") == 0) {
 		return parse_vec(flamingo, child, val);
