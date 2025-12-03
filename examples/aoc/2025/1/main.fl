@@ -1,0 +1,52 @@
+# AOC day 1
+
+let MOVES = [-68, -30, 48, -5, 60, -55, -1, -99, 14, -82] # Generate with [int(line[1:]) * (1 - 2 * (line[0] == "L")) for line in open("../challenge.in") if line.strip()]
+let OFFSET = 100000000 
+
+fn main() {
+    let pos = 50
+    let count1 = 0
+    let count2 = 0
+    
+    for move in MOVES {
+        let old_pos = pos
+        let new_pos = pos + move
+        
+        if move > 0 {
+            # Formula: floor(new / 100) - floor(old / 100)
+            # We add OFFSET to ensure we divide positive numbers
+            let n_idx = (new_pos + OFFSET) / 100
+            let o_idx = (old_pos + OFFSET) / 100
+            
+            let diff = n_idx - o_idx
+            count2 = count2 + diff
+        }
+
+        if move < 0 {
+            # Formula: floor((old - 1) / 100) - floor((new - 1) / 100)
+            # We subtract 1 so that starting on 0 doesn't count
+            let o_idx = (old_pos - 1 + OFFSET) / 100
+            let n_idx = (new_pos - 1 + OFFSET) / 100
+            
+            let diff = o_idx - n_idx
+            count2 = count2 + diff
+        }
+
+        let rem = new_pos % 100
+        
+        if rem < 0 {
+            rem = rem + 100
+        }
+        pos = rem
+
+        if pos == 0 {
+            count1 = count1 + 1
+        }
+    }
+
+    print count1
+    print count2
+}
+
+main()
+
