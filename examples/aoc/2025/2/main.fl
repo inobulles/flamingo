@@ -1,0 +1,126 @@
+# AOC day 2 by drakeerv
+
+let RANGES = [11, 22, 95, 115, 998, 1012, 1188511880, 1188511890, 222220, 222224, 1698522, 1698528, 446443, 446449, 38593856, 38593862, 565653, 565659, 824824821, 824824827, 2121212118, 2121212124] # Generate with [int(x) for s in open("../challenge.in").read().replace(',', ' ').split() for x in s.split('-')]
+
+let POW10 = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1000000000000, 10000000000000, 100000000000000, 1000000000000000, 10000000000000000, 100000000000000000, 1000000000000000000]
+let NEG_MU = [0, -1, 1, 1, 0, 1, -1, 1, 0, 0, -1, 1, 0, 1, -1, -1, 0, 1, 0, 1, 0]
+let ITER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+
+fn get_digit_count(n: int) -> int {
+    let d = 1
+    let skip = 1
+    for p in POW10 {
+        if skip == 0 {
+            if n > p { d = d + 1 }
+            if n == p { d = d + 1 }
+        }
+        skip = 0
+    }
+    if n < 10 { return 1 }
+    return d
+}
+
+fn get_pattern_multiplier(r: int, len: int) -> int {
+    let mult = 0
+    let shift = POW10[len]
+    let current_term = 1
+    for i in ITER {
+        if i <= r {
+            mult = mult + current_term
+            current_term = current_term * shift
+        }
+    }
+    return mult
+}
+
+fn calc_sum_below(limit: int, mode: int) -> int {
+    if limit < 10 { return 0 }
+    let limit_digits = get_digit_count(limit)
+    let total_sum = 0
+    
+    for d in ITER {
+        if d <= limit_digits {
+            for r in ITER {
+                let process_r = 0
+                if r > 1 {
+                    if r <= d {
+                         if (d % r) == 0 {
+                            if mode == 1 { if r == 2 { process_r = 1 } }
+                            if mode == 2 { process_r = 1 }
+                        }
+                    }
+                }
+
+                if process_r == 1 {
+                    let len = d / r
+                    let M = get_pattern_multiplier(r, len)
+                    let lower_P = POW10[len - 1]
+                    let upper_P = POW10[len] - 1
+                    
+                    let count = 0
+                    let P_max_valid = 0
+                    
+                    if d < limit_digits {
+                        count = upper_P - lower_P + 1
+                        P_max_valid = upper_P
+                    }
+                    if d == limit_digits {
+                        let max_possible_P = limit / M
+                        if (limit % M) == 0 { max_possible_P = max_possible_P - 1 }
+                        
+                        if max_possible_P >= lower_P {
+                            if max_possible_P > upper_P { max_possible_P = upper_P }
+                            count = max_possible_P - lower_P + 1
+                            P_max_valid = max_possible_P
+                        }
+                    }
+                    
+                    if count > 0 {
+                        let sum_P = (count * (lower_P + P_max_valid)) / 2
+                        let term_sum = M * sum_P
+                        
+                        if mode == 1 { total_sum = total_sum + term_sum }
+                        if mode == 2 {
+                            let weight = NEG_MU[r]
+                            if weight == 1 { total_sum = total_sum + term_sum }
+                            if weight == -1 { total_sum = total_sum - term_sum }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return total_sum
+}
+
+fn main() {
+    let grand_total_1 = 0
+    let grand_total_2 = 0
+    let step = 0
+    let start_val = 0
+    
+    for val in RANGES {
+        if step == 0 {
+            start_val = val
+            step = 1
+        } else {
+            let end_val = val
+            
+            let s1_end = calc_sum_below(end_val + 1, 1)
+            let s1_start = calc_sum_below(start_val, 1)
+            grand_total_1 = grand_total_1 + (s1_end - s1_start)
+            
+            let s2_end = calc_sum_below(end_val + 1, 2)
+            let s2_start = calc_sum_below(start_val, 2)
+            grand_total_2 = grand_total_2 + (s2_end - s2_start)
+            
+            step = 0
+        }
+    }
+
+    print grand_total_1
+    print grand_total_2
+}
+
+main()
+
