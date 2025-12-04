@@ -225,7 +225,7 @@ struct flamingo_t {
 
 	// Current loop stuff.
 
-	bool in_loop;
+	size_t in_loop;
 	bool breaking;
 	bool continuing;
 
