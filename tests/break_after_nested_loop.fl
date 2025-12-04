@@ -1,0 +1,22 @@
+# Regression test for #13 (break in nested loop).
+
+let s_outer = 0
+
+for i in [1, 2, 3] {
+	s_outer = s_outer + i
+	let s_inner = 0
+
+	for j in [4, 5, 6] {
+		s_inner = s_inner + j
+	}
+
+	assert s_inner == (4 + 5 + 6) # Just to make sure loop is actually being run.
+
+	# Previously, the previous loop would have set in_loop = false, so any other breaks wouldn't run.
+
+	if i == 2 {
+		break
+	}
+}
+
+assert s_outer == (1 + 2) # Make sure break actually worked.
