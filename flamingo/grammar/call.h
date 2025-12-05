@@ -55,7 +55,8 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	if (has_args) {
 		arg_list.count = ts_node_named_child_count(args);
-		flamingo_val_t** const arg_vals = alloca(arg_list.count * sizeof *arg_vals);
+		flamingo_val_t** const arg_vals = malloc(arg_list.count * sizeof *arg_vals);
+		assert(arg_vals != NULL);
 		arg_list.args = arg_vals;
 
 		for (size_t i = 0; i < arg_list.count; i++) {
@@ -82,5 +83,17 @@ static int parse_call(flamingo_t* flamingo, TSNode node, flamingo_val_t** val) {
 
 	// Actually call.
 
-	return call(flamingo, callable, accessed_val, val, &arg_list);
+	int const rv = call(flamingo, callable, accessed_val, val, &arg_list);
+
+	val_decref(callable);
+	val_decref(accessed_val);
+
+	if (has_args) {
+		for (size_t i = 0; i < arg_list.count; i++) {
+			val_decref(arg_list.args[i]);
+		}
+		free(arg_list.args);
+	}
+
+	return rv;
 }

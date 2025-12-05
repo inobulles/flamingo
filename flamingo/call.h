@@ -23,6 +23,7 @@ static int setup_args_no_param(flamingo_t* flamingo, flamingo_arg_list_t* args) 
 		flamingo_var_t* const var = scope_add_var(scope, "nothing to see here!", 0);
 
 		var_set_val(var, args->args[i]);
+		val_incref(args->args[i]);
 	}
 
 	return 0;
@@ -71,6 +72,7 @@ static int setup_args(flamingo_t* flamingo, TSNode* params, flamingo_arg_list_t*
 
 		flamingo_var_t* const var = scope_add_var(scope, name, size);
 		var_set_val(var, args->args[i]);
+		val_incref(args->args[i]);
 	}
 
 	return 0;

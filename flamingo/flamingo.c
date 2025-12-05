@@ -20,6 +20,105 @@
 #include "primitive_type_member.h"
 #include "scope.h"
 
+void val_free(flamingo_val_t* val) {
+	if (val->name != NULL) {
+		free(val->name);
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_STR) {
+		free(val->str.str);
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_VEC) {
+		for (size_t i = 0; i < val->vec.count; i++) {
+			val_decref(val->vec.elems[i]);
+		}
+		free(val->vec.elems);
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_MAP) {
+		for (size_t i = 0; i < val->map.count; i++) {
+			val_decref(val->map.keys[i]);
+			val_decref(val->map.vals[i]);
+		}
+		free(val->map.keys);
+		free(val->map.vals);
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_FN) {
+		free(val->fn.body);
+		free(val->fn.params);
+		if (val->fn.env != NULL) {
+			env_free(val->fn.env);
+		}
+	}
+
+	if (val->kind == FLAMINGO_VAL_KIND_INST) {
+		scope_decref(val->inst.scope);
+
+		if (val->inst.free_data != NULL) {
+			val->inst.free_data(val, val->inst.data);
+		}
+	}
+
+	free(val);
+}
+
+flamingo_val_t* val_copy(flamingo_val_t* val) {
+	flamingo_val_t* const copy = calloc(1, sizeof *copy);
+	assert(copy != NULL);
+
+	memcpy(copy, val, sizeof *val);
+	copy->ref_count = 1;
+
+	if (val->name != NULL) {
+		copy->name = strndup(val->name, val->name_size);
+		assert(copy->name != NULL);
+	}
+
+	switch (copy->kind) {
+	case FLAMINGO_VAL_KIND_NONE:
+	case FLAMINGO_VAL_KIND_BOOL:
+	case FLAMINGO_VAL_KIND_INT:
+		break;
+	case FLAMINGO_VAL_KIND_STR:
+		copy->str.str = strndup(val->str.str, val->str.size);
+		assert(copy->str.str != NULL);
+		break;
+	case FLAMINGO_VAL_KIND_VEC:
+		copy->vec.elems = malloc(val->vec.count * sizeof *copy->vec.elems);
+		assert(copy->vec.elems != NULL);
+		for (size_t i = 0; i < val->vec.count; i++) {
+			copy->vec.elems[i] = val_incref(val->vec.elems[i]);
+		}
+		break;
+	case FLAMINGO_VAL_KIND_MAP:
+		copy->map.keys = malloc(val->map.count * sizeof *copy->map.keys);
+		assert(copy->map.keys != NULL);
+		copy->map.vals = malloc(val->map.count * sizeof *copy->map.vals);
+		assert(copy->map.vals != NULL);
+		for (size_t i = 0; i < val->map.count; i++) {
+			copy->map.keys[i] = val_incref(val->map.keys[i]);
+			copy->map.vals[i] = val_incref(val->map.vals[i]);
+		}
+		break;
+	case FLAMINGO_VAL_KIND_FN:
+		if (val->fn.env != NULL) {
+			copy->fn.env = env_close_over(val->fn.env);
+		}
+		break;
+	case FLAMINGO_VAL_KIND_INST:
+		if (val->inst.scope != NULL) {
+			val->inst.scope->ref_count++;
+		}
+		break;
+	case FLAMINGO_VAL_KIND_COUNT:
+		break;
+	}
+
+	return copy;
+}
+
 typedef struct {
 	TSParser* parser;
 	TSTree* tree;
@@ -163,14 +262,12 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	// If we didn't inherit our scope stack, free it and all the scopes on it.
 
-	if (!flamingo->inherited_env) {
+	if (!flamingo->inherited_env && flamingo->env != NULL) {
 		for (size_t i = 0; i < flamingo->env->scope_stack_size; i++) {
-			scope_free(flamingo->env->scope_stack[i]);
+			scope_empty(flamingo->env->scope_stack[i]);
 		}
 
-		if (flamingo->env->scope_stack != NULL) {
-			free(flamingo->env->scope_stack);
-		}
+		env_free(flamingo->env);
 	}
 
 	// If we imported anything, free all the created flamingo instances and their sources.
@@ -274,7 +371,7 @@ int flamingo_run(flamingo_t* flamingo) {
 
 	if (!flamingo->inherited_env) {
 		if (flamingo->env != NULL) {
-			free(flamingo->env);
+			env_free(flamingo->env);
 		}
 
 		flamingo->env = env_alloc();

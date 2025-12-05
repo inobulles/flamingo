@@ -101,7 +101,6 @@ static int parse_for_loop(flamingo_t* flamingo, TSNode node) {
 
 		// Unwind.
 
-		val_decref(elem);
 		env_pop_scope(flamingo->env);
 
 		// Check that we're breaking and reset loop state otherwise.
