@@ -1,13 +1,20 @@
 // This Source Form is subject to the terms of the AQUA Software License, v. 1.0.
 // Copyright (c) 2024 Aymeric Wibo
+// Copyright (c) 2025 Drake Fletcher
 
 #pragma once
+
+#if __linux__
+# define _GNU_SOURCE
+#endif
 
 #include "flamingo.h"
 #include "runtime/tree_sitter/api.h"
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Grammar parsing prototypes.
 
@@ -18,7 +25,7 @@ static inline int parse_unary_expr(flamingo_t* flamingo, TSNode node, flamingo_v
 static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val);
 static inline int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val);
-static inline int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, bool lhs);
+static inline int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t*** slot, bool lhs);
 static inline int parse_statement(flamingo_t* flamingo, TSNode node);
 static inline int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inner_scope);
 static inline int parse_print(flamingo_t* flamingo, TSNode node);
@@ -44,6 +51,7 @@ static inline int find_static_members_in_class(flamingo_t* flamingo, flamingo_sc
 // Environment prototypes.
 
 static inline flamingo_env_t* env_alloc(void);
+static inline void env_free(flamingo_env_t* env);
 static inline flamingo_env_t* env_close_over(flamingo_env_t* env);
 static inline flamingo_scope_t* env_parent_scope(flamingo_env_t* env);
 static inline flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
@@ -57,6 +65,7 @@ static inline flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key,
 
 static inline flamingo_scope_t* scope_alloc(void);
 static inline void scope_free(flamingo_scope_t* scope);
+static inline void scope_decref(flamingo_scope_t* scope);
 static inline flamingo_var_t* scope_add_var(flamingo_scope_t* scope, char const* key, size_t key_size);
 static inline flamingo_var_t* scope_shallow_find_var(flamingo_scope_t* scope, char const* key, size_t key_size);
 

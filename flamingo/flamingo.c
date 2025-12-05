@@ -1,5 +1,6 @@
 // This Source Form is subject to the terms of the AQUA Software License, v. 1.0.
 // Copyright (c) 2024 Aymeric Wibo
+// Copyright (c) 2025 Drake Fletcher
 
 #if __linux__
 # define _GNU_SOURCE
@@ -19,6 +20,7 @@
 #include "grammar/statement.h"
 #include "primitive_type_member.h"
 #include "scope.h"
+#include "val.h"
 
 typedef struct {
 	TSParser* parser;
@@ -163,14 +165,12 @@ void flamingo_destroy(flamingo_t* flamingo) {
 
 	// If we didn't inherit our scope stack, free it and all the scopes on it.
 
-	if (!flamingo->inherited_env) {
+	if (!flamingo->inherited_env && flamingo->env != NULL) {
 		for (size_t i = 0; i < flamingo->env->scope_stack_size; i++) {
-			scope_free(flamingo->env->scope_stack[i]);
+			scope_empty(flamingo->env->scope_stack[i]);
 		}
 
-		if (flamingo->env->scope_stack != NULL) {
-			free(flamingo->env->scope_stack);
-		}
+		env_free(flamingo->env);
 	}
 
 	// If we imported anything, free all the created flamingo instances and their sources.
@@ -274,7 +274,7 @@ int flamingo_run(flamingo_t* flamingo) {
 
 	if (!flamingo->inherited_env) {
 		if (flamingo->env != NULL) {
-			free(flamingo->env);
+			env_free(flamingo->env);
 		}
 
 		flamingo->env = env_alloc();
