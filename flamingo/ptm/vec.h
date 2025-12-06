@@ -52,7 +52,7 @@ static inline int vec_map(flamingo_t* flamingo, flamingo_val_t* self, flamingo_a
 		};
 
 		if (call(flamingo, fn, NULL, &vec->vec.elems[i], &arg_list) < 0) {
-			val_free(vec);
+			flamingo_val_free(vec);
 			return -1;
 		}
 	}
@@ -96,22 +96,22 @@ static inline int vec_where(flamingo_t* flamingo, flamingo_val_t* self, flamingo
 		flamingo_val_t* keep = NULL;
 
 		if (call(flamingo, fn, NULL, &keep, &arg_list) < 0) {
-			val_free(vec);
+			flamingo_val_free(vec);
 			return -1;
 		}
 
 		if (keep->kind != FLAMINGO_VAL_KIND_BOOL) {
-			val_free(keep);
-			val_free(vec);
+			flamingo_val_free(keep);
+			flamingo_val_free(vec);
 			return error(flamingo, "'vec.where' expected 'fn' to return a boolean, got a %s", val_type_str(keep));
 		}
 
 		if (!keep->boolean.boolean) {
-			val_free(keep);
+			flamingo_val_free(keep);
 			continue;
 		}
 
-		val_free(keep);
+		flamingo_val_free(keep);
 
 		vec->vec.elems = realloc(vec->vec.elems, ++vec->vec.count * sizeof *vec->vec.elems);
 		assert(vec->vec.elems != NULL);

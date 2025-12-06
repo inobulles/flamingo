@@ -20,7 +20,7 @@
 #include "primitive_type_member.h"
 #include "scope.h"
 
-void val_free(flamingo_val_t* val) {
+void flamingo_val_free(flamingo_val_t* val) {
 	if (val->name != NULL) {
 		free(val->name);
 	}

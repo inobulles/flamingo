@@ -73,7 +73,7 @@ static inline char const* val_role_str(flamingo_val_t* val);
 static inline flamingo_val_t* val_alloc(void);
 flamingo_val_t* val_copy(flamingo_val_t* val);
 static inline bool val_eq(flamingo_val_t* x, flamingo_val_t* y);
-void val_free(flamingo_val_t* val);
+void flamingo_val_free(flamingo_val_t* val);
 static inline flamingo_val_t* val_decref(flamingo_val_t* val);
 
 // Primitive type member prototypes.

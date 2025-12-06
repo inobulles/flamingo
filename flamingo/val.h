@@ -166,7 +166,7 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 	return false; // XXX To make GCC happy.
 }
 
-void val_free(flamingo_val_t* val);
+void flamingo_val_free(flamingo_val_t* val);
 
 static flamingo_val_t* val_decref(flamingo_val_t* val) {
 	if (val == NULL) {
@@ -181,6 +181,6 @@ static flamingo_val_t* val_decref(flamingo_val_t* val) {
 
 	// if value is not referred to by anyone, free it
 
-	val_free(val);
+	flamingo_val_free(val);
 	return NULL;
 }
