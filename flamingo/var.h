@@ -6,15 +6,17 @@
 #include "../common.h"
 
 static void var_set_val(flamingo_var_t* var, flamingo_val_t* val) {
-	if (var->val != NULL && val != NULL) {
-		val->name = NULL;
-		val->name_size = 0;
-	}
-
 	var->val = val;
 
 	if (val != NULL) {
-		val->name = var->key;
+		if (val->name != NULL) {
+			free(val->name);
+		}
+
+		val->name = malloc(var->key_size + 1);
+		assert(val->name != NULL);
+		memcpy(val->name, var->key, var->key_size);
+		val->name[var->key_size] = '\0';
 		val->name_size = var->key_size;
 	}
 }

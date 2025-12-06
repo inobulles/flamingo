@@ -24,6 +24,7 @@ static void primitive_type_member_free(flamingo_t* flamingo) {
 
 		for (size_t i = 0; i < count; i++) {
 			flamingo_var_t* const var = &vars[i];
+			val_decref(var->val);
 			free(var->key);
 		}
 
@@ -62,6 +63,7 @@ static int primitive_type_member_add(flamingo_t* flamingo, flamingo_val_kind_t t
 	assert(vars != NULL);
 	flamingo_var_t* const var = &vars[count - 1];
 
+	var->val = NULL;
 	var->key_size = key_size;
 	var->key = malloc(key_size);
 	assert(var->key != NULL);

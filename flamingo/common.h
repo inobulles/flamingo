@@ -18,7 +18,7 @@ static inline int parse_unary_expr(flamingo_t* flamingo, TSNode node, flamingo_v
 static inline int parse_binary_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int access_find_var(flamingo_t* flamingo, TSNode node, flamingo_var_t** var, flamingo_val_t** accessed_val);
 static inline int parse_access(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t** accessed_val);
-static inline int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, bool lhs);
+static inline int parse_index(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, flamingo_val_t*** slot, bool lhs);
 static inline int parse_statement(flamingo_t* flamingo, TSNode node);
 static inline int parse_block(flamingo_t* flamingo, TSNode node, flamingo_scope_t** inner_scope);
 static inline int parse_print(flamingo_t* flamingo, TSNode node);
@@ -71,9 +71,9 @@ static inline flamingo_val_t* val_init(flamingo_val_t* val);
 static inline char const* val_type_str(flamingo_val_t const* val);
 static inline char const* val_role_str(flamingo_val_t* val);
 static inline flamingo_val_t* val_alloc(void);
-static inline flamingo_val_t* val_copy(flamingo_val_t* val);
+flamingo_val_t* val_copy(flamingo_val_t* val);
 static inline bool val_eq(flamingo_val_t* x, flamingo_val_t* y);
-static inline void val_free(flamingo_val_t* val);
+void flamingo_val_free(flamingo_val_t* val);
 static inline flamingo_val_t* val_decref(flamingo_val_t* val);
 
 // Primitive type member prototypes.

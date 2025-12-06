@@ -88,39 +88,7 @@ static flamingo_val_t* val_alloc(void) {
 	return val_init(val);
 }
 
-static flamingo_val_t* val_copy(flamingo_val_t* val) {
-	flamingo_val_t* const copy = calloc(1, sizeof *copy);
-	assert(copy != NULL);
-
-	memcpy(copy, val, sizeof *val);
-	copy->ref_count = 1;
-
-	if (val->name != NULL) {
-		copy->name = strndup(val->name, val->name_size);
-		assert(copy->name != NULL);
-	}
-
-	switch (copy->kind) {
-	case FLAMINGO_VAL_KIND_NONE:
-	case FLAMINGO_VAL_KIND_BOOL:
-	case FLAMINGO_VAL_KIND_INT:
-		break;
-	case FLAMINGO_VAL_KIND_STR:
-		copy->str.str = strndup(val->str.str, val->str.size);
-		assert(copy->str.str != NULL);
-		break;
-	case FLAMINGO_VAL_KIND_VEC:
-	case FLAMINGO_VAL_KIND_MAP:
-	case FLAMINGO_VAL_KIND_FN:
-	case FLAMINGO_VAL_KIND_INST:
-		// TODO
-		break;
-	case FLAMINGO_VAL_KIND_COUNT:
-		break;
-	}
-
-	return copy;
-}
+flamingo_val_t* val_copy(flamingo_val_t* val);
 
 static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 	if (x->kind != y->kind) {
@@ -198,25 +166,7 @@ static bool val_eq(flamingo_val_t* x, flamingo_val_t* y) {
 	return false; // XXX To make GCC happy.
 }
 
-static void val_free(flamingo_val_t* val) {
-	if (val->kind == FLAMINGO_VAL_KIND_STR) {
-		free(val->str.str);
-	}
-
-	if (val->kind == FLAMINGO_VAL_KIND_FN) {
-		free(val->fn.body);
-	}
-
-	if (val->kind == FLAMINGO_VAL_KIND_INST) {
-		scope_free(val->inst.scope);
-
-		if (val->inst.free_data != NULL) {
-			val->inst.free_data(val, val->inst.data);
-		}
-	}
-
-	// TODO when should the memory pointed to by val itself be freed?
-}
+void flamingo_val_free(flamingo_val_t* val);
 
 static flamingo_val_t* val_decref(flamingo_val_t* val) {
 	if (val == NULL) {
@@ -231,6 +181,6 @@ static flamingo_val_t* val_decref(flamingo_val_t* val) {
 
 	// if value is not referred to by anyone, free it
 
-	val_free(val);
+	flamingo_val_free(val);
 	return NULL;
 }

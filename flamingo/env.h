@@ -19,6 +19,15 @@ static flamingo_env_t* env_alloc(void) {
 	return env;
 }
 
+static void env_free(flamingo_env_t* env) {
+	for (size_t i = 0; i < env->scope_stack_size; i++) {
+		scope_decref(env->scope_stack[i]);
+	}
+
+	free(env->scope_stack);
+	free(env);
+}
+
 static flamingo_env_t* env_close_over(flamingo_env_t* env) {
 	flamingo_env_t* const closed_env = env_alloc();
 
@@ -74,8 +83,7 @@ static flamingo_scope_t* env_push_scope(flamingo_env_t* env) {
 }
 
 static void env_pop_scope(flamingo_env_t* env) {
-	// TODO Free containing variables.
-	/* scope_free( */ env_gently_detach_scope(env) /* ) */;
+	scope_decref(env_gently_detach_scope(env));
 }
 
 static flamingo_var_t* env_find_var(flamingo_env_t* env, char const* key, size_t key_size) {
