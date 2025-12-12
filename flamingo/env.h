@@ -2,6 +2,18 @@
 // Copyright (c) 2024 Aymeric Wibo
 // Copyright (c) 2025 Drake Fletcher
 
+/*
+ * Environments (env)
+ *
+ * An environment represents the execution context of a script, primarily
+ * consisting of a stack of scopes. This stack allows for lexical scoping and
+ * variable shadowing.
+ *
+ * When a new block or function is entered, a new scope is typically pushed
+ * onto the environment's stack. When the block or function exits, the scope
+ * is popped.
+ */
+
 #pragma once
 
 #include "common.h"
