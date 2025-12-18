@@ -3,11 +3,10 @@
 // Copyright (c) 2025 Drake Fletcher
 
 /*
- * Flamingo Interpreter Core
+ * Flamingo interpreter core.
  *
- * This file contains the main entry points for the Flamingo interpreter,
- * including instance creation, destruction, and script execution. It also
- * manages the integration with Tree-sitter for parsing.
+ * This file contains the main entry points for the Flamingo interpreter, including instance creation, destruction, and script execution.
+ * It also manages the integration with Tree-sitter for parsing.
  */
 
 #if __linux__

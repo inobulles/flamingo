@@ -18,9 +18,8 @@
 
 // Grammar parsing prototypes.
 //
-// These functions are used internally by the interpreter to parse and execute
-// various parts of the Flamingo grammar. They typically take a Tree-sitter
-// node and perform the corresponding action.
+// These functions are used internally by the interpreter to parse and execute various parts of the Flamingo grammar.
+// They typically take a Tree-sitter node and perform the corresponding action.
 
 static inline int parse_vec(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
 static inline int parse_map(flamingo_t* flamingo, TSNode node, flamingo_val_t** val);
@@ -100,8 +99,8 @@ static inline flamingo_scope_t* env_cur_scope(flamingo_env_t* env);
 /**
  * Attach a scope to the environment's stack.
  *
- * This pushes the scope onto the stack. Unlike {@link env_push_scope}, this does NOT
- * allocate a new scope or change the reference count of the provided scope.
+ * This pushes the scope onto the stack.
+ * Unlike {@link env_push_scope}, this does NOT allocate a new scope or change the reference count of the provided scope.
  *
  * This is useful when you want to restore a previously detached scope.
  *
@@ -113,11 +112,10 @@ static inline void env_gently_attach_scope(flamingo_env_t* env, flamingo_scope_t
 /**
  * Detach the current scope from the environment's stack.
  *
- * This pops the scope from the stack and returns it. Unlike {@link env_pop_scope},
- * this does NOT decrement the reference count of the scope or free it.
+ * This pops the scope from the stack and returns it.
+ * Unlike {@link env_pop_scope}, this does NOT decrement the reference count of the scope or free it.
  *
- * This is useful when you want to move a scope elsewhere, for example, when
- * creating a class instance and keeping its scope as the instance's scope.
+ * This is useful when you want to move a scope elsewhere, for example, when creating a class instance and keeping its scope as the instance's scope.
  *
  * @param env The environment.
  * @return The detached scope.
@@ -128,7 +126,7 @@ static inline flamingo_scope_t* env_gently_detach_scope(flamingo_env_t* env);
  * Push a new scope onto the environment's stack.
  *
  * This allocates a new scope and attaches it.
- * The new scope inherits the `class_scope` property from the parent.
+ * The new scope inherits the {@link flamingo_scope_t#class_scope} property from the parent.
  *
  * @param env The environment.
  * @return The new scope.
@@ -269,13 +267,7 @@ static inline flamingo_val_t* val_alloc(void);
 /**
  * Create a copy of a value.
  *
- * For primitive types (integers, booleans, strings), this is a deep copy.
- * For collections (vectors and maps) and instances, this is a shallow copy:
- * the container or instance itself is copied, but the elements or internal
- * state are not (their reference counts are simply incremented).
- *
- * For example, copying a vector of vectors will result in a new outer vector
- * containing the same inner vector instances.
+ * For collections (vectors and maps) and instances, this is a shallow copy.
  *
  * @param val The value to copy.
  * @return The new copy of the value.
@@ -285,8 +277,8 @@ static inline flamingo_val_t* val_copy(flamingo_val_t* val);
 /**
  * Check if two values are equal.
  *
- * This is a deep equality check. For collections, it recursively checks
- * the equality of all elements.
+ * This is a deep equality check.
+ * For collections, it recursively checks the equality of all elements.
  *
  * Note that this function does NOT check if the names of the values are equal.
  *
@@ -335,8 +327,7 @@ static inline void primitive_type_member_free(flamingo_t* flamingo);
 /**
  * Add a primitive type member.
  *
- * The provided callback is executed when the member is accessed on a value
- * of the specified type (e.g., `my_string.my_member()`).
+ * The provided callback is executed when the member is accessed on a value of the specified type (e.g., `my_string.my_member()`).
  *
  * @param flamingo The flamingo instance.
  * @param type The value type to add the member to.
@@ -362,11 +353,9 @@ static inline int primitive_type_member_std(flamingo_t* flamingo);
 /**
  * Call a callable value.
  *
- * This function handles setting up the environment for the call (switching to the
- * function's closure environment), pushing a new scope for arguments, and executing
- * the function body or callback.
+ * This function handles setting up the environment for the call (switching to the function's closure environment), pushing a new scope for arguments, and executing the function body or callback.
  *
- * For external functions, `flamingo->external_fn_cb` must be set.
+ * For external functions, {@link flamingo_t#external_fn_cb} must be set.
  *
  * @param flamingo The flamingo instance.
  * @param callable The value to call.
@@ -386,8 +375,8 @@ static inline int call(
 /**
  * Get the string representation of a value.
  *
- * This is used for printing values to the console. The returned string is
- * allocated with `malloc` and must be freed by the caller.
+ * This is used for printing values to the console.
+ * The returned string is allocated with {@link malloc} and must be freed by the caller.
  *
  * @param flamingo The flamingo instance.
  * @param val The value to get the representation of.

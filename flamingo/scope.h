@@ -3,15 +3,12 @@
 // Copyright (c) 2025 Drake Fletcher
 
 /*
- * Scopes
+ * Scopes.
  *
  * A scope is a container for variables within a specific lexical context.
- * Scopes are reference-counted, as they can be shared between environments
- * (e.g., in the case of closures).
+ * Scopes are reference-counted, as they can be shared between environments (e.g., in the case of closures).
  *
- * Each scope maintains a list of variables ({@link flamingo_var_t}) and can
- * optionally have an "owner" (an instance or class) and a `class_scope` flag
- * to indicate its role in the hierarchy.
+ * Each scope maintains a list of variables ({@link flamingo_var_t}) and can optionally have an "owner" (an instance or class) and a {@link flamingo_scope_t#class_scope} flag to indicate its role in the hierarchy.
  */
 
 #pragma once

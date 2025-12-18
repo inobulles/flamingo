@@ -3,14 +3,12 @@
 // Copyright (c) 2025 Drake Fletcher
 
 /*
- * Values (val)
+ * Values.
  *
- * Values are the fundamental data units in Flamingo. They are reference-counted
- * and can represent various types, including primitives (integers, strings,
- * booleans), collections (vectors, maps), and callables (functions, classes).
+ * Values are the fundamental data units in Flamingo.
+ * They are reference-counted and can represent various types, including primitives (integers, strings, booleans), collections (vectors, maps), and callables (functions, classes).
  *
- * Each value can have an optional name and an "owner" scope, which is used
- * for memory management and debugging.
+ * Each value can have an optional name and an "owner" scope, which is used for memory management and debugging.
  */
 
 #pragma once
