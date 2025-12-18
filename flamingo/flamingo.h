@@ -405,17 +405,20 @@ flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t 
  * This should be used when the external program needs to hold on to the value.
  *
  * @param val The value to increment the reference of.
+ * @return The value.
  */
-void flamingo_val_incref(flamingo_val_t* val);
+flamingo_val_t* flamingo_val_incref(flamingo_val_t* val);
 
 /**
  * Decrement the reference count of a value.
  *
- * This should be used when the external program needs to let go of a value it previously referenced with {@link flamingo_val_incref}.
+ * This should be used when the external program needs to let go of a value it previously referenced with {@link flamingo_val_incref} or any value it has created with the `flamingo_val_make_*` family of functions.
+ * It is okay to pass NULL to this function.
  *
- * @param val The value to decrement the reference of.
+ * @param val The value to decrement the reference of or NULL.
+ * @return The value or NULL if NULL was passed.
  */
-void flamingo_val_decref(flamingo_val_t* val);
+flamingo_val_t* flamingo_val_decref(flamingo_val_t* val);
 
 /**
  * Create a NONE value.
