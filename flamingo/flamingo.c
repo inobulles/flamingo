@@ -295,6 +295,14 @@ flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t 
 	return env_find_var(flamingo->env, key, key_size);
 }
 
+flamingo_val_t* flamingo_val_incref(flamingo_val_t* val) {
+	return val_incref(val);
+}
+
+flamingo_val_t* flamingo_val_decref(flamingo_val_t* val) {
+	return val_decref(val);
+}
+
 flamingo_val_t* flamingo_val_make_none(void) {
 	return val_alloc();
 }
