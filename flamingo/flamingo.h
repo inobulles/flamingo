@@ -265,7 +265,7 @@ struct flamingo_t {
 	bool breaking;
 	bool continuing;
 
-	// Variables on primitive types.
+	// Variables on built-in types.
 	// This is for stuff like e.g. '"zonnebloemgranen".endswith("granen")'.
 
 	struct {
@@ -292,10 +292,10 @@ __attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flami
  *
  * This initializes the flamingo instance and parses the source code.
  * Note that this does NOT set up the runtime environment (scopes), that happens in {@link flamingo_run} or {@link flamingo_inherit_env}.
- * Note the `src` buffer is NOT copied.
+ * Note the {@link flamingo_t#src} buffer is NOT copied.
  * It must remain valid for the lifetime of the flamingo instance.
  *
- * @param flamingo The {@link flamingo_t} instance to initialize.
+ * @param flamingo The flamingo instance to initialize.
  * @param progname The name of the program (used for error messages).
  * @param src The source code to parse.
  * @param src_size The size of the source code.
@@ -308,7 +308,7 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
  *
  * This frees all resources associated with the flamingo instance, including the AST, environment (if not inherited), and imported modules.
  *
- * @param flamingo The {@link flamingo_t} instance to destroy.
+ * @param flamingo The flamingo instance to destroy.
  */
 void flamingo_destroy(flamingo_t* flamingo);
 
@@ -317,7 +317,7 @@ void flamingo_destroy(flamingo_t* flamingo);
  *
  * This returns the error message stored in the flamingo instance and clears the error state.
  *
- * @param flamingo The {@link flamingo_t} instance.
+ * @param flamingo The flamingo instance.
  * @return The error message, or "no errors" if no error is outstanding.
  */
 char* flamingo_err(flamingo_t* flamingo);
@@ -327,8 +327,8 @@ char* flamingo_err(flamingo_t* flamingo);
  *
  * This callback is called when an external function is called in the script.
  *
- * @param flamingo The {@link flamingo_t} instance.
- * @param cb The {@link flamingo_external_fn_cb_t} callback function.
+ * @param flamingo The flamingo instance.
+ * @param cb The callback function.
  * @param data User data to pass to the callback.
  */
 void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn_cb_t cb, void* data);
@@ -338,8 +338,8 @@ void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn
  *
  * This callback is called when a class is declared in the script.
  *
- * @param flamingo The {@link flamingo_t} instance.
- * @param cb The {@link flamingo_class_decl_cb_t} callback function.
+ * @param flamingo The flamingo instance.
+ * @param cb The callback function.
  * @param data User data to pass to the callback.
  */
 void flamingo_register_class_decl_cb(flamingo_t* flamingo, flamingo_class_decl_cb_t cb, void* data);
@@ -349,8 +349,8 @@ void flamingo_register_class_decl_cb(flamingo_t* flamingo, flamingo_class_decl_c
  *
  * This callback is called when a class is instantiated in the script.
  *
- * @param flamingo The {@link flamingo_t} instance.
- * @param cb The {@link flamingo_class_inst_cb_t} callback function.
+ * @param flamingo The flamingo instance.
+ * @param cb The callback function.
  * @param data User data to pass to the callback.
  */
 void flamingo_register_class_inst_cb(flamingo_t* flamingo, flamingo_class_inst_cb_t cb, void* data);
@@ -361,7 +361,7 @@ void flamingo_register_class_inst_cb(flamingo_t* flamingo, flamingo_class_inst_c
  * This adds a path to the list of paths searched when importing modules.
  * The path string is duplicated, so the caller retains ownership of the original string.
  *
- * @param flamingo The {@link flamingo_t} instance.
+ * @param flamingo The flamingo instance.
  * @param path The path to add.
  */
 void flamingo_add_import_path(flamingo_t* flamingo, char* path);
@@ -371,8 +371,8 @@ void flamingo_add_import_path(flamingo_t* flamingo, char* path);
  *
  * This allows the flamingo instance to share the environment (variables, scopes) of another instance.
  *
- * @param flamingo The {@link flamingo_t} instance.
- * @param env The {@link flamingo_env_t} environment to inherit.
+ * @param flamingo The flamingo instance.
+ * @param env The environment to inherit.
  * @return 0 on success, -1 on error (e.g. if the instance already has an environment).
  */
 int flamingo_inherit_env(flamingo_t* flamingo, flamingo_env_t* env);
@@ -384,7 +384,7 @@ int flamingo_inherit_env(flamingo_t* flamingo, flamingo_env_t* env);
  * If the environment is not inherited, any existing environment is freed and a new one is created.
  * This means that subsequent calls to {@link flamingo_run} on the same instance will reset the state.
  *
- * @param flamingo The {@link flamingo_t} instance.
+ * @param flamingo The flamingo instance.
  * @return 0 on success, -1 on error.
  */
 int flamingo_run(flamingo_t* flamingo);
@@ -392,10 +392,10 @@ int flamingo_run(flamingo_t* flamingo);
 /**
  * Find a variable in the current environment.
  *
- * @param flamingo The {@link flamingo_t} instance.
+ * @param flamingo The flamingo instance.
  * @param key The name of the variable.
  * @param key_size The size of the variable name.
- * @return The {@link flamingo_var_t} variable if found, or NULL if not found.
+ * @return The variable if found, or NULL if not found.
  */
 flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t key_size);
 
@@ -404,7 +404,7 @@ flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t 
  *
  * The returned value has a reference count of 1.
  *
- * @return A new {@link flamingo_val_t} NONE value.
+ * @return A new NONE value.
  */
 flamingo_val_t* flamingo_val_make_none(void);
 
@@ -414,7 +414,7 @@ flamingo_val_t* flamingo_val_make_none(void);
  * The returned value has a reference count of 1.
  *
  * @param integer The integer value.
- * @return A new {@link flamingo_val_t} integer value.
+ * @return A new integer value.
  */
 flamingo_val_t* flamingo_val_make_int(int64_t integer);
 
@@ -427,7 +427,7 @@ flamingo_val_t* flamingo_val_make_int(int64_t integer);
  *
  * @param size The size of the string.
  * @param str The string data.
- * @return A new {@link flamingo_val_t} string value.
+ * @return A new string value.
  */
 flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
 
@@ -439,7 +439,7 @@ flamingo_val_t* flamingo_val_make_str(size_t size, char* str);
  * The returned value has a reference count of 1.
  *
  * @param str The C string.
- * @return A new {@link flamingo_val_t} string value.
+ * @return A new string value.
  */
 flamingo_val_t* flamingo_val_make_cstr(char* str);
 
@@ -449,7 +449,7 @@ flamingo_val_t* flamingo_val_make_cstr(char* str);
  * The returned value has a reference count of 1.
  *
  * @param boolean The boolean value.
- * @return A new {@link flamingo_val_t} boolean value.
+ * @return A new boolean value.
  */
 flamingo_val_t* flamingo_val_make_bool(bool boolean);
 

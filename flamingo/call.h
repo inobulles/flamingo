@@ -2,14 +2,11 @@
 // Copyright (c) 2024 Aymeric Wibo
 
 /*
- * Function Calling (call)
+ * Function calling.
  *
- * This file implements the logic for calling various types of callables in
- * Flamingo, including functions, classes, external functions, and primitive
- * type members (PTMs).
+ * This file implements the logic for calling various types of callables in Flamingo, including functions, classes, external functions, and primitive type members (PTMs).
  *
- * The `call` function handles environment switching, argument setup, and
- * execution of the callable's body or callback.
+ * The {@link call} function handles environment switching, argument setup, and execution of the callable's body or callback.
  */
 
 #pragma once

@@ -2,16 +2,13 @@
 // Copyright (c) 2024 Aymeric Wibo
 
 /*
- * Primitive Type Members (PTMs)
+ * Primitive type members (PTMs).
  *
- * PTMs provide a mechanism to attach methods and properties to the language's
- * built-in (primitive) data types, such as strings, vectors, and maps. This
- * allows for syntax like `my_string.len()` or `my_vec.push(item)`.
+ * PTMs provide a mechanism to attach methods and properties to the language's built-in data types, such as strings, vectors, and maps.
+ * This allows for syntax like `my_string.len()` or `my_vec.push(item)`.
  *
- * Internally, PTMs are implemented as a special kind of function
- * ({@link FLAMINGO_FN_KIND_PTM}) that is associated with a {@link flamingo_val_kind_t}.
- * When a member access is performed on a primitive value, the interpreter
- * looks up the corresponding PTM and executes its C callback.
+ * Internally, PTMs are implemented as a special kind of function ({@link FLAMINGO_FN_KIND_PTM}) that is associated with a {@link flamingo_val_kind_t}.
+ * When a member access is performed on a built-in value, the interpreter looks up the corresponding PTM and executes its C callback.
  */
 
 #pragma once

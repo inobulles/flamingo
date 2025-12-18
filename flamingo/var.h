@@ -2,14 +2,12 @@
 // Copyright (c) 2024 Aymeric Wibo
 
 /*
- * Variables (var)
+ * Variables.
  *
- * A variable is a named binding to a value within a scope. It consists of a
- * key (the variable name) and a pointer to a {@link flamingo_val_t}.
+ * A variable is a named binding to a value within a scope.
+ * It consists of a key (the variable name) and a pointer to a {@link flamingo_val_t}.
  *
- * When a value is assigned to a variable, the value's internal name is
- * updated to match the variable's key for better error reporting and
- * debugging.
+ * When a value is assigned to a variable, the value's internal name is updated to match the variable's key for better error reporting and debugging.
  */
 
 #pragma once
