@@ -400,6 +400,24 @@ int flamingo_run(flamingo_t* flamingo);
 flamingo_var_t* flamingo_find_var(flamingo_t* flamingo, char const* key, size_t key_size);
 
 /**
+ * Increment the reference count of a value.
+ *
+ * This should be used when the external program needs to hold on to the value.
+ *
+ * @param val The value to increment the reference of.
+ */
+void flamingo_val_incref(flamingo_val_t* val);
+
+/**
+ * Decrement the reference count of a value.
+ *
+ * This should be used when the external program needs to let go of a value it previously referenced with {@link flamingo_val_incref}.
+ *
+ * @param val The value to decrement the reference of.
+ */
+void flamingo_val_decref(flamingo_val_t* val);
+
+/**
  * Create a NONE value.
  *
  * The returned value has a reference count of 1.
