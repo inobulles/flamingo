@@ -483,6 +483,27 @@ flamingo_val_t* flamingo_val_make_bool(bool boolean);
 char const* flamingo_val_kind_str(flamingo_val_t const* val);
 
 /**
+ * Get a value on an instance by name.
+ *
+ * @param inst The instance to get the value on.
+ * @param name The name of the value to get.
+ * @return The value, or NULL if the name did not exist on the instance.
+ */
+flamingo_val_t* flamingo_inst_get(flamingo_val_t* inst, char const* name);
+
+/**
+ * Set a value on an instance by name.
+ *
+ * You can only set the value on a name that already exists on the instance.
+ *
+ * @param inst The instance to get the value on.
+ * @param name The name of the value to get.
+ * @param The value.
+ * @return 0 if the value existed on the instance, -1 if not.
+ */
+int flamingo_inst_set(flamingo_val_t* inst, char const* name, flamingo_val_t* val);
+
+/**
  * Compare two strings.
  *
  * Note that this function returns -1 if the sizes differ, regardless of the content.
