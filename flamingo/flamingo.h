@@ -509,6 +509,6 @@ static inline int flamingo_strcmp(char const* a, char const* b, size_t a_size, s
  * @param str_size The size of the string.
  * @return 0 if the strings are equal, non-zero otherwise.
  */
-static inline int flamingo_cstrcmp(char* str, char* cstr, size_t str_size) {
+static inline int flamingo_cstrcmp(char const* str, char const* cstr, size_t str_size) {
 	return flamingo_strcmp(str, cstr, str_size, strlen(cstr));
 }
