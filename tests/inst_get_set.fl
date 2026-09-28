@@ -1,0 +1,16 @@
+# Test flamingo_inst_{get,set}() C API functions.
+# The C side (main.c) uses these functions in the class_inst_cb callback to read and modify instance fields when InstGetSetClass is instantiated.
+
+class InstGetSetClass(a: int, b: str) {
+	let x = a
+	let y = b
+}
+
+let inst = InstGetSetClass(42, "hello")
+
+# After instantiation, the C callback should have:
+# - Read x (== 42) and y (== "hello") via flamingo_inst_get()
+# - Set x to 99 via flamingo_inst_set()
+
+assert inst.x == 99
+assert inst.y == "hello"

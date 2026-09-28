@@ -151,6 +151,43 @@ static int class_inst_cb(flamingo_t* flamingo, flamingo_val_t* inst, void* data,
 		last_external_class_instance = inst;
 	}
 
+	else if (flamingo_cstrcmp(class->name, "InstGetSetClass", class->name_size) == 0) {
+		// Test flamingo_inst_get(): read existing fields.
+
+		flamingo_val_t* x = flamingo_inst_get(inst, "x");
+		assert(x != NULL);
+		assert(x->kind == FLAMINGO_VAL_KIND_INT);
+		assert(x->integer.integer == 42);
+
+		flamingo_val_t* y = flamingo_inst_get(inst, "y");
+		assert(y != NULL);
+		assert(y->kind == FLAMINGO_VAL_KIND_STR);
+		assert(flamingo_cstrcmp(y->str.str, "hello", y->str.size) == 0);
+
+		// Test flamingo_inst_get() with nonexistent field returns NULL.
+
+		flamingo_val_t* nonexistent = flamingo_inst_get(inst, "nonexistent");
+		assert(nonexistent == NULL);
+
+		// Test flamingo_inst_set(): modify existing field.
+
+		flamingo_val_t* new_x = flamingo_val_make_int(99);
+		assert(flamingo_inst_set(inst, "x", new_x) == 0);
+
+		// Verify the set worked via get.
+
+		flamingo_val_t* x_after = flamingo_inst_get(inst, "x");
+		assert(x_after != NULL);
+		assert(x_after->kind == FLAMINGO_VAL_KIND_INT);
+		assert(x_after->integer.integer == 99);
+
+		// Test flamingo_inst_set() with nonexistent field returns -1.
+
+		flamingo_val_t* dummy = flamingo_val_make_int(0);
+		assert(flamingo_inst_set(inst, "nonexistent", dummy) == -1);
+		flamingo_val_decref(dummy);
+	}
+
 	return 0;
 }
 
