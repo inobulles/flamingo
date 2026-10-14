@@ -241,7 +241,7 @@ int main(int argc, char* argv[]) {
 	flamingo_t flamingo;
 
 	if (flamingo_create(&flamingo, basename(path), src, src_size) < 0) {
-		fprintf(stderr, "flamingo: %s\n", flamingo_err(&flamingo));
+		flamingo_print_error(&flamingo, stderr);
 		goto err_flamingo_create;
 	}
 
@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
 	// run program
 
 	if (flamingo_run(&flamingo) < 0) {
-		fprintf(stderr, "flamingo: %s\n", flamingo_err(&flamingo));
+		flamingo_print_error(&flamingo, stderr);
 		goto err_flamingo_run;
 	}
 

@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 typedef struct flamingo_t flamingo_t;
@@ -222,6 +223,17 @@ struct flamingo_t {
 	char err[256];
 	bool errors_outstanding;
 
+	// Source range of the node currently being parsed, kept up to date so that any raised error can point at the right place in the source.
+	// The 'err_*' fields snapshot this at the moment the first outstanding error is raised (see {@link flamingo_print_error}).
+
+	bool cur_node_has_loc;
+	size_t cur_node_start;
+	size_t cur_node_end;
+
+	bool err_has_loc;
+	size_t err_start;
+	size_t err_end;
+
 	// Callbacks.
 
 	flamingo_external_fn_cb_t external_fn_cb;
@@ -321,6 +333,23 @@ void flamingo_destroy(flamingo_t* flamingo);
  * @return The error message, or "no errors" if no error is outstanding.
  */
 char* flamingo_err(flamingo_t* flamingo);
+
+/**
+ * Print the last error, annotated with the offending source code.
+ *
+ * This prints the error message followed by the relevant source line with the range where the error occurred underlined, e.g.:
+ *
+ *     example.fl:3:9: could not find identifier: foo
+ *      3 | let x = foo + 1
+ *        |         ^^^
+ *
+ * If no source location was recorded for the error (e.g. it was raised before parsing), only the message is printed.
+ * Like {@link flamingo_err}, this clears the error state.
+ *
+ * @param flamingo The flamingo instance.
+ * @param f The stream to print to (e.g. stderr).
+ */
+void flamingo_print_error(flamingo_t* flamingo, FILE* f);
 
 /**
  * Register a callback for external functions.

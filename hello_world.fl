@@ -1,1 +1,2 @@
+assert "gdfg" == 6
 print "Hello, world!"
