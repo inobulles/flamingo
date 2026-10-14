@@ -4,3 +4,4 @@ flamingo/runtime/*
 flamingo/runtime/*/*
 flamingo/tree_sitter/parser.h
 flamingo/parser.c
+flamingo/highlights.h

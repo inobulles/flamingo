@@ -25,9 +25,12 @@
 #include "common.h"
 #include "env.h"
 #include "grammar/statement.h"
+#include "highlight.h"
 #include "primitive_type_member.h"
 #include "scope.h"
 #include "val.h"
+
+#include <unistd.h>
 
 typedef struct {
 	TSParser* parser;
@@ -146,9 +149,52 @@ static void render_snippet(flamingo_t* flamingo, FILE* f) {
 	size_t line, col;
 	compute_line_col(src, start, &line, &col);
 
+	// Syntax-highlight the line, but only when writing to a terminal (so piped or captured output stays plain).
+
+	ts_state_t* const ts_state = flamingo->ts_state;
+	size_t const line_len = line_end - line_start;
+
+	uint8_t* colors = NULL;
+
+	if (ts_state != NULL && isatty(fileno(f))) {
+		colors = malloc(line_len);
+	}
+
+	bool const colorize = colors != NULL;
+
+	if (colorize) {
+		highlight_range(ts_state->root, line_start, line_end, colors);
+	}
+
 	// Source line, with a line-number gutter.
 
-	fprintf(f, " %zu | %.*s\n", line, (int) (line_end - line_start), src + line_start);
+	fprintf(f, " %zu | ", line);
+
+	if (colorize) {
+		uint8_t cur = 0;
+
+		for (size_t i = line_start; i < line_end; i++) {
+			uint8_t const color = colors[i - line_start];
+
+			if (color != cur) {
+				fprintf(f, "\x1b[%um", color); // A code of 0 resets to the default colour.
+				cur = color;
+			}
+
+			fputc(src[i], f);
+		}
+
+		if (cur != 0) {
+			fputs("\x1b[0m", f);
+		}
+	}
+
+	else {
+		fprintf(f, "%.*s", (int) line_len, src + line_start);
+	}
+
+	fputc('\n', f);
+	free(colors);
 
 	// Underline, aligned under the source line.
 	// We reproduce leading tabs so that the carets line up when the source is indented with tabs.
@@ -160,6 +206,10 @@ static void render_snippet(flamingo_t* flamingo, FILE* f) {
 		fputc(src[i] == '\t' ? '\t' : ' ', f);
 	}
 
+	if (colorize) {
+		fputs("\x1b[1;31m", f); // Bold red.
+	}
+
 	if (end == start) {
 		fputc('^', f);
 	}
@@ -168,6 +218,10 @@ static void render_snippet(flamingo_t* flamingo, FILE* f) {
 		for (size_t i = start; i < end; i++) {
 			fputc(i == start ? '^' : '~', f);
 		}
+	}
+
+	if (colorize) {
+		fputs("\x1b[0m", f);
 	}
 
 	fputc('\n', f);
@@ -188,6 +242,8 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 	flamingo->err_has_loc = false;
 	flamingo->err_start = 0;
 	flamingo->err_end = 0;
+
+	flamingo->ts_state = NULL;
 
 	flamingo->src = src;
 	flamingo->src_size = src_size;
