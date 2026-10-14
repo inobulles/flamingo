@@ -19,6 +19,8 @@ static int parse_expr(flamingo_t* flamingo, TSNode node, flamingo_val_t** val, f
 	assert(strcmp(ts_node_type(node), "expression") == 0);
 	assert(ts_node_child_count(node) == 1);
 
+	flamingo_err_set_loc(flamingo, node);
+
 	TSNode const child = ts_node_child(node, 0);
 	char const* const type = ts_node_type(child);
 

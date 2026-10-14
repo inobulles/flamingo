@@ -37,6 +37,24 @@ typedef struct {
 
 extern TSLanguage const* tree_sitter_flamingo(void);
 
+// Compute the 1-based line and column of a byte offset into the source.
+
+static void compute_line_col(char const* src, size_t off, size_t* line, size_t* col) {
+	*line = 1;
+	*col = 1;
+
+	for (size_t i = 0; i < off; i++) {
+		if (src[i] == '\n') {
+			(*line)++;
+			*col = 1;
+		}
+
+		else {
+			(*col)++;
+		}
+	}
+}
+
 __attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flamingo, char const* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
@@ -49,24 +67,110 @@ __attribute__((format(printf, 2, 3))) int flamingo_raise_error(flamingo_t* flami
 	size_t res = vsnprintf(formatted, sizeof formatted, fmt, args);
 	assert(res < sizeof formatted);
 
+	va_end(args);
+
+	// Snapshot the current source location on the first outstanding error, so that it survives until the error is printed.
+
+	if (!flamingo->errors_outstanding) {
+		flamingo->err_has_loc = flamingo->cur_node_has_loc;
+		flamingo->err_start = flamingo->cur_node_start;
+		flamingo->err_end = flamingo->cur_node_end;
+	}
+
+	// Prefix the message with its source location, if we have one.
+
+	char located[sizeof flamingo->err];
+
+	if (flamingo->cur_node_has_loc) {
+		size_t line, col;
+		compute_line_col(flamingo->src, flamingo->cur_node_start, &line, &col);
+		res = snprintf(located, sizeof located, "%s:%zu:%zu: %s", flamingo->progname, line, col, formatted);
+	}
+
+	else {
+		res = snprintf(located, sizeof located, "%s: %s", flamingo->progname, formatted);
+	}
+
+	assert(res < sizeof located);
+
 	// format the new error message and concatenate to the previous one if there were still errors outstanding
 	// TODO truncate the number of errors that we show at once (just do this by seeing how much longer we have)
 
 	if (flamingo->errors_outstanding) {
 		size_t const prev_len = strlen(flamingo->err);
-		res = snprintf(flamingo->err + prev_len, sizeof flamingo->err - prev_len, ", %s:%d:%d: %s", flamingo->progname, 0, 0, formatted);
+		snprintf(flamingo->err + prev_len, sizeof flamingo->err - prev_len, ", %s", located);
 	}
 
 	else {
-		res = snprintf(flamingo->err, sizeof flamingo->err, "%s:%d:%d: %s", flamingo->progname, 0, 0, formatted);
+		snprintf(flamingo->err, sizeof flamingo->err, "%s", located);
 	}
 
-	assert(res < sizeof flamingo->err);
-
-	va_end(args);
 	flamingo->errors_outstanding = true;
 
 	return -1;
+}
+
+// Print the source line containing the error, with the offending range underlined.
+
+static void render_snippet(flamingo_t* flamingo, FILE* f) {
+	char const* const src = flamingo->src;
+	size_t const src_size = flamingo->src_size;
+
+	size_t start = flamingo->err_start > src_size ? src_size : flamingo->err_start;
+	size_t end = flamingo->err_end > src_size ? src_size : flamingo->err_end;
+
+	// Find the bounds of the line containing the start of the range.
+
+	size_t line_start = start;
+
+	while (line_start > 0 && src[line_start - 1] != '\n') {
+		line_start--;
+	}
+
+	size_t line_end = start;
+
+	while (line_end < src_size && src[line_end] != '\n') {
+		line_end++;
+	}
+
+	// Clamp the underlined range to this single line.
+
+	if (end > line_end) {
+		end = line_end;
+	}
+
+	if (end < start) {
+		end = start;
+	}
+
+	size_t line, col;
+	compute_line_col(src, start, &line, &col);
+
+	// Source line, with a line-number gutter.
+
+	fprintf(f, " %zu | %.*s\n", line, (int) (line_end - line_start), src + line_start);
+
+	// Underline, aligned under the source line.
+	// We reproduce leading tabs so that the carets line up when the source is indented with tabs.
+
+	int const gutter = snprintf(NULL, 0, " %zu ", line);
+	fprintf(f, "%*s| ", gutter, "");
+
+	for (size_t i = line_start; i < start; i++) {
+		fputc(src[i] == '\t' ? '\t' : ' ', f);
+	}
+
+	if (end == start) {
+		fputc('^', f);
+	}
+
+	else {
+		for (size_t i = start; i < end; i++) {
+			fputc(i == start ? '^' : '~', f);
+		}
+	}
+
+	fputc('\n', f);
 }
 
 int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_t src_size) {
@@ -76,6 +180,14 @@ int flamingo_create(flamingo_t* flamingo, char const* progname, char* src, size_
 
 	flamingo->progname = progname;
 	flamingo->errors_outstanding = false;
+
+	flamingo->cur_node_has_loc = false;
+	flamingo->cur_node_start = 0;
+	flamingo->cur_node_end = 0;
+
+	flamingo->err_has_loc = false;
+	flamingo->err_start = 0;
+	flamingo->err_end = 0;
 
 	flamingo->src = src;
 	flamingo->src_size = src_size;
@@ -222,6 +334,21 @@ char* flamingo_err(flamingo_t* flamingo) {
 
 	flamingo->errors_outstanding = false;
 	return flamingo->err;
+}
+
+void flamingo_print_error(flamingo_t* flamingo, FILE* f) {
+	if (!flamingo->errors_outstanding) {
+		fprintf(f, "no errors\n");
+		return;
+	}
+
+	fprintf(f, "%s\n", flamingo->err);
+
+	if (flamingo->err_has_loc && flamingo->src != NULL) {
+		render_snippet(flamingo, f);
+	}
+
+	flamingo->errors_outstanding = false;
 }
 
 void flamingo_register_external_fn_cb(flamingo_t* flamingo, flamingo_external_fn_cb_t cb, void* data) { // TODO Better name for this.

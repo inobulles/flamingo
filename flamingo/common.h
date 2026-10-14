@@ -378,3 +378,12 @@ static inline int call(
 static inline int repr(flamingo_t* flamingo, flamingo_val_t* val, char** res);
 
 #define error(...) (flamingo_raise_error(__VA_ARGS__))
+
+// Record the source range of the node we're about to parse, so that any error raised while parsing it can point at the right place in the source.
+// This is called at the central dispatch points (statements and expressions), which is enough to give virtually every error a sensible location.
+
+static inline void flamingo_err_set_loc(flamingo_t* flamingo, TSNode node) {
+	flamingo->cur_node_has_loc = true;
+	flamingo->cur_node_start = ts_node_start_byte(node);
+	flamingo->cur_node_end = ts_node_end_byte(node);
+}

@@ -32,6 +32,8 @@ static int parse_statement(flamingo_t* flamingo, TSNode node) {
 		return 0;
 	}
 
+	flamingo_err_set_loc(flamingo, node);
+
 	// Line insensitive statements, which are only wrapped by a hidden node.
 
 	char const* const type = ts_node_type(node);
